@@ -1,38 +1,80 @@
 {
   "expo": {
-    "name": "my-expo-app",
-    "slug": "my-expo-app",
+    "name": "SkyMarshal",
+    "slug": "skymarshal",
     "version": "1.0.0",
-
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-
+    "scheme": "skymarshal",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
     "experiments": {
       "tsconfigPaths": true
     },
-
-    "plugins": [],
-
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-
-    "userInterfaceStyle": "light",
-
+    "extra": {
+      "router": {
+        "origin": false
+      }
+    },
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#F59E0B"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.skymarshal.patrol",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "SkyMarshal needs your location to track patrol routes.",
+        "NSLocationAlwaysUsageDescription": "SkyMarshal needs your location to track patrol routes in the background.",
+        "NSFaceIDUsageDescription": "Use Face ID to unlock the app.",
+        "NSCameraUsageDescription": "Take photos for violation evidence.",
+        "NSMicrophoneUsageDescription": "Record audio for SOS emergencies."
+      }
     },
     "android": {
+      "package": "com.skymarshal.patrol",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
-    }
+        "backgroundColor": "#F59E0B"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow SkyMarshal to use Face ID for quick login."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#F59E0B"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow SkyMarshal to access your photos.",
+          "cameraPermission": "Allow SkyMarshal to use the camera."
+        }
+      ]
+    ]
   }
 }
