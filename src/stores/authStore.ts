@@ -18,6 +18,7 @@ export interface AuthState {
   setRequiresPasswordChange: (requires: boolean) => void;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  clearAuthState: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -121,5 +122,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       console.error('Failed to refresh user:', error);
     }
+  },
+
+  clearAuthState: () => {
+    set({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      requires2FA: false,
+      tempToken: null,
+      requiresPasswordChange: false,
+    });
   },
 }));
