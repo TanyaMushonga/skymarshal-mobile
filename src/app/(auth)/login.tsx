@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -21,9 +22,12 @@ import { authApi } from '@/api';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useToast } from '@/hooks/useToast';
+import ToastModal from '@/components/common/ToastModal';
+import { getErrorMessage } from '@/utils/errorHelper';
 
 const loginSchema = z.object({
-  identifier: z.string().min(1, 'Email or Force Number is required'),
+  force_number: z.string().min(1, 'Force Number is required'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
@@ -34,6 +38,7 @@ export default function LoginScreen() {
   const { colors, isDark } = useTheme();
   const { setUser, setRequires2FA, setRequiresPasswordChange } = useAuthStore();
   const { biometricEnabled } = useSettingsStore();
+  const { toasts, showToast, hideToast, isVisible } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [biometricType, setBiometricType] = useState<string | null>(null);
 
@@ -44,7 +49,7 @@ export default function LoginScreen() {
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      identifier: '',
+      force_number: '',
       password: '',
     },
   });
@@ -81,12 +86,14 @@ export default function LoginScreen() {
     try {
       setIsLoading(true);
 
-      const isEmail = data.identifier.includes('@');
-      const credentials = isEmail
-        ? { email: data.identifier, password: data.password }
-        : { force_number: data.identifier, password: data.password };
+      const credentials = {
+        force_number: data.force_number,
+        password: data.password,
+      };
 
+      console.log('Attempting login with:', credentials);
       const response = await authApi.login(credentials);
+      console.log('Login response:', response);
 
       if (response.requires_2fa) {
         setRequires2FA(true, response.tokens?.access);
@@ -102,10 +109,22 @@ export default function LoginScreen() {
       }
 
       setUser(response.user);
+      showToast(
+        'success',
+        'Welcome Back',
+        `Logged in as ${response.user.first_name} ${response.user.last_name}`
+      );
       router.replace('/(tabs)');
     } catch (error: any) {
-      const message = error.response?.data?.detail || 'Login failed. Please try again.';
-      Alert.alert('Login Failed', message);
+      console.error('Login error details:', {
+        message: error.message,
+        code: error.code,
+        response: error.response?.data,
+        status: error.response?.status,
+        config: error.config?.url,
+      });
+      const message = getErrorMessage(error);
+      showToast('error', 'Login Failed', message);
     } finally {
       setIsLoading(false);
     }
@@ -116,23 +135,21 @@ export default function LoginScreen() {
       className="flex-1"
       style={{ backgroundColor: isDark ? colors.background : '#FFFFFF' }}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         className="flex-1">
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled">
-          <View className="flex-1 justify-center px-6 py-8">
+          <View className="flex-1 px-6 py-12">
             {/* Logo Section */}
-            <View className="mb-12 items-center">
-              <View className="bg-primary-500 mb-4 h-24 w-24 items-center justify-center rounded-3xl">
-                <Ionicons name="airplane" size={48} color="#FFFFFF" />
-              </View>
-              <Text className="text-3xl font-bold" style={{ color: colors.text }}>
-                SkyMarshal
-              </Text>
-              <Text className="mt-2 text-base" style={{ color: colors.textSecondary }}>
-                Patrol Officer Portal
+            <View className="mb-12 items-sta">
+              <Text className="text-3xl font-bold text-black dark:text-white">SkyMarshal</Text>
+              <Text className="text-primary-500 text-xl font-semibold">Patrol Officer Portal</Text>
+              <Text className="mt-2 text-lg leading-6" style={{ color: colors.textSecondary }}>
+                Secure access for authorized personnel to manage deployments, monitor live
+                telemetry, and record field observations.
               </Text>
             </View>
 
@@ -140,19 +157,18 @@ export default function LoginScreen() {
             <View className="mb-6">
               <Controller
                 control={control}
-                name="identifier"
+                name="force_number"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input
-                    label="Force Number or Email"
-                    placeholder="Enter your force number or email"
-                    leftIcon="person-outline"
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    keyboardType="email-address"
+                    label="Force Number"
+                    placeholder="e.g. SN-123456"
+                    leftIcon="card-outline"
+                    autoCapitalize="characters"
+                    autoComplete="off"
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
-                    error={errors.identifier?.message}
+                    error={errors.force_number?.message}
                   />
                 )}
               />
@@ -179,7 +195,7 @@ export default function LoginScreen() {
             <TouchableOpacity
               className="mb-6 self-end"
               onPress={() => router.push('/(auth)/forgot-password')}>
-              <Text className="text-primary-500 font-medium">Forgot Password?</Text>
+              <Text className="text-primary-500 text-lg font-medium">Forgot Password?</Text>
             </TouchableOpacity>
 
             {/* Login Button */}
@@ -187,6 +203,7 @@ export default function LoginScreen() {
               title="Sign In"
               onPress={handleSubmit(onSubmit)}
               loading={isLoading}
+              size="lg"
               className="mb-4"
             />
 
@@ -200,7 +217,7 @@ export default function LoginScreen() {
                   size={24}
                   color={colors.primary}
                 />
-                <Text className="ml-2 font-medium" style={{ color: colors.text }}>
+                <Text className="ml-2 text-lg font-medium" style={{ color: colors.text }}>
                   Login with {biometricType}
                 </Text>
               </TouchableOpacity>
@@ -208,6 +225,8 @@ export default function LoginScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <ToastModal visible={isVisible} toasts={toasts} onClose={hideToast} />
     </SafeAreaView>
   );
 }
