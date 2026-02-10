@@ -33,7 +33,7 @@ export function Input({
   return (
     <View className={`mb-4 ${containerClassName}`}>
       {label && (
-        <Text className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">{label}</Text>
+        <Text className="mb-2 text-xl font-medium text-gray-700 dark:text-gray-300">{label}</Text>
       )}
       <View
         className={`flex-row items-center rounded-xl border-2 bg-white px-4 dark:bg-gray-800 ${
@@ -46,13 +46,13 @@ export function Input({
         {leftIcon && (
           <Ionicons
             name={leftIcon}
-            size={20}
+            size={24}
             color={error ? '#EF4444' : isFocused ? '#F59E0B' : '#9CA3AF'}
             style={{ marginRight: 12 }}
           />
         )}
         <TextInput
-          className={`flex-1 py-3 text-base text-gray-900 dark:text-white ${className}`}
+          className={`flex-1 py-4 text-xl text-gray-900 dark:text-white ${className}`}
           placeholderTextColor="#9CA3AF"
           secureTextEntry={isPassword && !showPassword}
           onFocus={() => setIsFocused(true)}
@@ -65,7 +65,7 @@ export function Input({
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
             <Ionicons
               name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-              size={20}
+              size={24}
               color="#9CA3AF"
             />
           </TouchableOpacity>
@@ -75,7 +75,7 @@ export function Input({
             onPress={onRightIconPress}
             disabled={!onRightIconPress}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Ionicons name={rightIcon} size={20} color={error ? '#EF4444' : '#9CA3AF'} />
+            <Ionicons name={rightIcon} size={24} color={error ? '#EF4444' : '#9CA3AF'} />
           </TouchableOpacity>
         )}
       </View>
