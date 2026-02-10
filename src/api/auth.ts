@@ -42,14 +42,32 @@ export const authApi = {
    * Login with email/force_number and password
    */
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
+    console.log(`[AuthAPI] POST to ${endpoints.LOGIN}`);
     const response = await api.post<LoginResponse>(endpoints.LOGIN, credentials);
     const data = response.data;
 
+    if (__DEV__) {
+      console.log('[AuthAPI] Login raw response data:', JSON.stringify(data, null, 2));
+    }
+
+    // Extract tokens robustly (they might be in data.tokens or directly in data)
+    const access = data.tokens?.access || (data as any).access;
+    const refresh = data.tokens?.refresh || (data as any).refresh;
+
+    if (__DEV__) {
+      console.log('[AuthAPI] Extracted tokens:', {
+        hasAccess: !!access,
+        hasRefresh: !!refresh,
+        requires2FA: data.requires_2fa,
+      });
+    }
+
     // Store tokens if login successful and no 2FA required
-    if (data.tokens && !data.requires_2fa) {
-      await setAccessToken(data.tokens.access);
-      await setRefreshToken(data.tokens.refresh);
-      await setUserData(data.user);
+    if (access && !data.requires_2fa) {
+      await setAccessToken(access);
+      if (refresh) await setRefreshToken(refresh);
+      if (data.user) await setUserData(data.user);
+      console.log('[AuthAPI] Tokens and user data saved successfully');
     }
 
     return data;
@@ -59,13 +77,23 @@ export const authApi = {
    * Verify 2FA code
    */
   async verify2FA(payload: Verify2FAPayload): Promise<LoginResponse> {
+    console.log(`[AuthAPI] POST to ${endpoints.VERIFY_2FA}`);
     const response = await api.post<LoginResponse>(endpoints.VERIFY_2FA, payload);
     const data = response.data;
 
-    if (data.tokens) {
-      await setAccessToken(data.tokens.access);
-      await setRefreshToken(data.tokens.refresh);
-      await setUserData(data.user);
+    if (__DEV__) {
+      console.log('[AuthAPI] Verify2FA raw response data:', JSON.stringify(data, null, 2));
+    }
+
+    // Extract tokens robustly
+    const access = data.tokens?.access || (data as any).access;
+    const refresh = data.tokens?.refresh || (data as any).refresh;
+
+    if (access) {
+      await setAccessToken(access);
+      if (refresh) await setRefreshToken(refresh);
+      if (data.user) await setUserData(data.user);
+      console.log('[AuthAPI] 2FA Verification successful, tokens saved');
     }
 
     return data;
