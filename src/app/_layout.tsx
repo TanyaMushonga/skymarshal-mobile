@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { useAuthStore } from '@/stores/authStore';
+import { setAuthFailureListener } from '@/api/client';
 
 import '../../global.css';
 
@@ -19,13 +20,16 @@ const queryClient = new QueryClient({
 });
 
 function RootLayoutNav() {
-  const { isAuthenticated, isLoading, initialize } = useAuthStore();
+  const { isAuthenticated, isLoading, initialize, clearAuthState } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     initialize();
-  }, [initialize]);
+    setAuthFailureListener(() => {
+      clearAuthState();
+    });
+  }, [initialize, clearAuthState]);
 
   useEffect(() => {
     if (isLoading) return;
