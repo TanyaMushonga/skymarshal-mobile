@@ -1,7 +1,13 @@
 import api from './client';
 import { endpoints } from '@/constants/config';
 import type { User, LoginResponse, AuthTokens } from '@/types/api';
-import { setAccessToken, setRefreshToken, setUserData, clearTokens } from '@/lib/secureStorage';
+import {
+  setAccessToken,
+  setRefreshToken,
+  setUserData,
+  clearTokens,
+  getRefreshToken,
+} from '@/lib/secureStorage';
 
 export interface LoginCredentials {
   email?: string;
@@ -114,10 +120,11 @@ export const authApi = {
    */
   async logout(): Promise<void> {
     try {
-      await api.post(endpoints.LOGOUT);
+      const refreshToken = await getRefreshToken();
+      await api.post(endpoints.LOGOUT, { refresh: refreshToken });
     } catch (error) {
       // Continue with local logout even if server request fails
-      console.warn('Logout request failed:', error);
+      console.warn('[AuthAPI] Logout request failed:', error);
     } finally {
       await clearTokens();
     }
