@@ -1,5 +1,5 @@
 export const config = {
-  API_BASE_URL: process.env.EXPO_PUBLIC_API_URL || 'https://api.skymarshal.com/api',
+  API_BASE_URL: process.env.EXPO_PUBLIC_API_URL!,
   APP_NAME: 'SkyMarshal',
   APP_VERSION: '1.0.0',
 
@@ -26,40 +26,45 @@ export const config = {
 } as const;
 
 export const endpoints = {
-  // Auth
-  LOGIN: '/auth/login/officer/',
-  VERIFY_2FA: '/auth/verify-2fa/',
-  REFRESH_TOKEN: '/auth/refresh/',
-  LOGOUT: '/auth/logout/',
-  PASSWORD_RESET_REQUEST: '/auth/password-reset/officer/request/',
-  PASSWORD_RESET_VERIFY: '/auth/password-reset/officer/verify/',
-  PASSWORD_RESET_CONFIRM: '/auth/password-reset/confirm/',
-  CHANGE_PASSWORD: '/change-password/',
+  // Authentication (Namespace: api/v1/auth/)
+  LOGIN: '/v1/auth/login/officer/',
+  VERIFY_2FA: '/v1/auth/verify-2fa/',
+  REFRESH_TOKEN: '/v1/auth/refresh/',
+  LOGOUT: '/v1/auth/logout/',
+  PASSWORD_RESET_REQUEST: '/v1/auth/password-reset/officer/request/',
+  PASSWORD_RESET_VERIFY: '/v1/auth/password-reset/officer/verify/',
+  PASSWORD_RESET_CONFIRM: '/v1/auth/password-reset/confirm/',
 
-  // User
-  ME: '/users/me/',
+  // User (Specific actions on UserViewSet)
+  CHANGE_PASSWORD: '/v1/users/change-password/',
+  ME: '/v1/users/me/',
 
-  // Patrols
-  PATROLS: '/patrols/',
-  PATROL_START: '/patrols/start/',
-  PATROL_END: (id: string) => `/patrols/${id}/end/`,
+  // Patrols (apps.patrols.urls)
+  PATROLS: '/v1/patrols/',
+  PATROL_START: '/v1/patrols/start/',
+  PATROL_END: (id: string) => `/v1/patrols/${id}/end/`,
 
-  // Drones
-  DRONES: '/drones/',
-  DRONE_GPS: (id: string) => `/drones/${id}/gps/`,
+  // Drones (apps.drones.urls - uses drone_id like "DR-001" as lookup)
+  DRONES: '/v1/drones/',
+  DRONE_DETAIL: (droneId: string) => `/v1/drones/${droneId}/`,
+  DRONE_STATUS: (droneId: string) => `/v1/drones/${droneId}/status/`,
+  DRONE_HISTORY: (droneId: string) => `/v1/drones/${droneId}/history/`,
+  GPS_LOCATIONS: '/v1/gps-locations/',
 
-  // Detections
-  DETECTIONS: '/detections/',
+  // Detections & Violations (Note: registered as 'events' in their respective urls.py)
+  DETECTIONS: '/v1/detections/events/',
+  VIOLATIONS: '/v1/violations/events/',
 
-  // Violations
-  VIOLATIONS: '/violations/',
+  // Notifications (api/v1/notifications/)
+  NOTIFICATIONS: '/v1/notifications/',
+  NOTIFICATION_MARK_READ: (id: string) => `/v1/notifications/${id}/mark_read/`,
+  NOTIFICATIONS_MARK_ALL_READ: '/v1/notifications/mark_all_read/',
+  NOTIFICATIONS_BULK_DELETE: '/v1/notifications/bulk_delete/',
 
-  // Notifications
-  NOTIFICATIONS: '/notifications/',
-  NOTIFICATION_MARK_READ: (id: string) => `/notifications/${id}/mark_read/`,
-  NOTIFICATIONS_MARK_ALL_READ: '/notifications/mark_all_read/',
-  NOTIFICATIONS_BULK_DELETE: '/notifications/bulk_delete/',
+  // Analytics (Namespace: api/v1/analytics/)
+  OFFICER_STATS: '/v1/analytics/officer/my_stats/',
+  ADMIN_DASHBOARD: '/v1/analytics/admin/dashboard/',
 
-  // Analytics
-  DASHBOARD: '/analytics/dashboard/',
+  // Compliance (Namespace: api/v1/compliance/)
+  LOTTERIES: '/v1/compliance/lotteries/',
 } as const;
