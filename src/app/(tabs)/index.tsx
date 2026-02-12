@@ -1,7 +1,6 @@
-import React, { useRef, useCallback, useEffect } from 'react';
+import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { ScrollView, RefreshControl, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { BottomSheetModal } from '@gorhom/bottom-sheet';
 
 import {
   MissionControlHero,
@@ -10,8 +9,8 @@ import {
   MyAnalytics,
   StartPatrolCTA,
 } from '@/components/dashboard';
-import { StartPatrolSheet } from '@/components/sheets/StartPatrolSheet';
-import { EndPatrolSheet } from '@/components/sheets/EndPatrolSheet';
+import { StartPatrolModal } from '@/components/modals/StartPatrolModal';
+import { EndPatrolModal } from '@/components/modals/EndPatrolModal';
 import { analyticsApi } from '@/api';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -19,8 +18,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 export default function HomeScreen() {
   const { colors, isDark } = useTheme();
   const { user } = useAuthStore();
-  const startPatrolRef = useRef<BottomSheetModal>(null);
-  const endPatrolRef = useRef<BottomSheetModal>(null);
+  const [isStartModalVisible, setIsStartModalVisible] = useState(false);
+  const [isEndModalVisible, setIsEndModalVisible] = useState(false);
 
   const {
     data: dashboard,
@@ -55,11 +54,11 @@ export default function HomeScreen() {
   }, [dashboard?.today_stats?.violations]);
 
   const handleEndPatrol = useCallback(() => {
-    endPatrolRef.current?.present();
+    setIsEndModalVisible(true);
   }, []);
 
   const handleStartPatrol = useCallback(() => {
-    startPatrolRef.current?.present();
+    setIsStartModalVisible(true);
   }, []);
 
   return (
@@ -96,9 +95,16 @@ export default function HomeScreen() {
         {dashboard?.recent_alerts && <IncidentFeed alerts={dashboard.recent_alerts} />}
       </ScrollView>
 
-      {/* Bottom Sheets */}
-      <StartPatrolSheet ref={startPatrolRef} />
-      <EndPatrolSheet ref={endPatrolRef} patrol={dashboard?.active_patrol as any} />
+      {/* Modals */}
+      <StartPatrolModal
+        visible={isStartModalVisible}
+        onClose={() => setIsStartModalVisible(false)}
+      />
+      <EndPatrolModal
+        visible={isEndModalVisible}
+        onClose={() => setIsEndModalVisible(false)}
+        patrol={dashboard?.active_patrol}
+      />
     </View>
   );
 }
