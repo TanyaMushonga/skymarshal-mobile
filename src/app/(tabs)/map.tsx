@@ -48,17 +48,32 @@ export default function MapScreen() {
   };
 
   const filters = [
-    { key: 'drones' as MarkerType, label: '🛸 Drones', color: '#F59E0B' },
-    { key: 'violations' as MarkerType, label: '🚨 Violations', color: '#EF4444' },
-    { key: 'detections' as MarkerType, label: '👁 Detections', color: '#3B82F6' },
+    {
+      key: 'drones' as MarkerType,
+      label: 'Drones',
+      color: colors.primary,
+      icon: 'airplane-outline',
+    },
+    {
+      key: 'violations' as MarkerType,
+      label: 'Violations',
+      color: '#EF4444',
+      icon: 'alert-circle-outline',
+    },
+    {
+      key: 'detections' as MarkerType,
+      label: 'Detections',
+      color: colors.primary,
+      icon: 'layers-outline',
+    },
   ];
 
   const darkMapStyle = [
-    { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
+    { elementType: 'geometry', stylers: [{ color: '#000000' }] },
     { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
-    { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
-    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#38414e' }] },
-    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#17263c' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#000000' }] },
+    { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1A1A1A' }] },
+    { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#050505' }] },
   ];
 
   return (
@@ -79,7 +94,17 @@ export default function MapScreen() {
                 backgroundColor: activeFilters.has(f.key) ? f.color + '20' : 'transparent',
               }}
               onPress={() => toggleFilter(f.key)}>
-              <Text style={{ color: activeFilters.has(f.key) ? f.color : colors.textSecondary }}>
+              <Ionicons
+                name={f.icon as any}
+                size={16}
+                color={activeFilters.has(f.key) ? f.color : colors.textSecondary}
+                style={{ marginRight: 6 }}
+              />
+              <Text
+                style={{
+                  color: activeFilters.has(f.key) ? f.color : colors.textSecondary,
+                  fontWeight: '700',
+                }}>
                 {f.label}
               </Text>
             </TouchableOpacity>
@@ -111,10 +136,12 @@ export default function MapScreen() {
               }}
               onPress={() => setSelectedItem({ type: 'drone', data: drone })}>
               <View className="items-center">
-                <View className="bg-primary-500 rounded-full p-2">
-                  <Ionicons name="airplane" size={20} color="#FFFFFF" />
+                <View className="rounded-full p-2" style={{ backgroundColor: colors.primary }}>
+                  <Ionicons name="airplane-outline" size={20} color="#000000" />
                 </View>
-                <Text className="text-primary-600 mt-1 text-xs font-bold">{drone.name}</Text>
+                <Text style={{ color: colors.primary }} className="mt-1 text-xs font-black">
+                  {drone.name}
+                </Text>
               </View>
             </Marker>
           ))}
@@ -131,7 +158,7 @@ export default function MapScreen() {
               onPress={() => setSelectedItem({ type: 'violation', data: violation })}>
               <View className="items-center">
                 <View className="rounded-full bg-red-500 p-2">
-                  <Ionicons name="warning" size={16} color="#FFFFFF" />
+                  <Ionicons name="alert-circle-outline" size={16} color="#FFFFFF" />
                 </View>
               </View>
             </Marker>
@@ -147,7 +174,10 @@ export default function MapScreen() {
                 longitude: detection.gps?.longitude || 31.0335,
               }}
               onPress={() => setSelectedItem({ type: 'detection', data: detection })}>
-              <View className="h-3 w-3 rounded-full border-2 border-white bg-blue-500" />
+              <View
+                className="h-3 w-3 rounded-full border-2 border-white"
+                style={{ backgroundColor: colors.primary }}
+              />
             </Marker>
           ))}
       </MapView>
@@ -189,7 +219,7 @@ export default function MapScreen() {
             </TouchableOpacity>
             {selectedItem.type === 'drone' && (
               <View className="flex-row items-center">
-                <View className="bg-primary-100 mr-3 h-12 w-12 items-center justify-center rounded-full">
+                <View className="mr-3 h-12 w-12 items-center justify-center rounded-full bg-primary-100">
                   <Ionicons name="airplane" size={24} color="#F59E0B" />
                 </View>
                 <View>

@@ -66,13 +66,13 @@ export default function AlertsScreen() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'VIOLATION':
-        return { name: 'warning', color: '#EF4444' };
+        return { name: 'alert-circle-outline', color: '#EF4444' };
       case 'PATROL':
-        return { name: 'car', color: '#3B82F6' };
+        return { name: 'car-outline', color: colors.primary };
       case 'SYSTEM':
-        return { name: 'settings', color: '#6B7280' };
+        return { name: 'construct-outline', color: '#6B7280' };
       default:
-        return { name: 'notifications', color: '#F59E0B' };
+        return { name: 'notifications-outline', color: colors.primary };
     }
   };
 
@@ -102,7 +102,9 @@ export default function AlertsScreen() {
                 {safeFormatDistanceToNow(item.created_at)}
               </Text>
             </View>
-            {!item.is_read && <View className="h-3 w-3 rounded-full bg-primary-500" />}
+            {!item.is_read && (
+              <View className="h-3 w-3 rounded-full" style={{ backgroundColor: colors.primary }} />
+            )}
           </View>
         </Card>
       </TouchableOpacity>
@@ -111,10 +113,14 @@ export default function AlertsScreen() {
 
   const renderViolation = ({ item }: { item: any }) => (
     <TouchableOpacity className="mb-3" onPress={() => router.push(`/violations/${item.id}`)}>
-      <Card variant="elevated">
+      <Card
+        variant="elevated"
+        style={
+          isDark ? { backgroundColor: '#0A0A0A', borderColor: '#1A1A1A', borderWidth: 1 } : {}
+        }>
         <View className="flex-row items-center">
-          <View className="mr-3 h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-            <Ionicons name="warning" size={24} color="#EF4444" />
+          <View className="mr-3 h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/10">
+            <Ionicons name="alert-circle-outline" size={24} color="#EF4444" />
           </View>
           <View className="flex-1">
             <View className="flex-row items-center">
@@ -150,17 +156,18 @@ export default function AlertsScreen() {
       <View className="mb-4 flex-row px-4">
         <TouchableOpacity
           className={`flex-1 items-center rounded-l-xl py-3 ${
-            activeTab === 'notifications' ? 'bg-primary-500' : 'bg-gray-100 dark:bg-gray-800'
+            activeTab === 'notifications' ? '' : 'bg-gray-100 dark:bg-gray-900'
           }`}
+          style={activeTab === 'notifications' ? { backgroundColor: colors.primary } : {}}
           onPress={() => setActiveTab('notifications')}>
           <View className="flex-row items-center">
             <Ionicons
-              name="notifications"
+              name="notifications-outline"
               size={20}
-              color={activeTab === 'notifications' ? '#FFFFFF' : colors.text}
+              color={activeTab === 'notifications' ? '#000000' : colors.text}
             />
             <Text
-              className={`ml-2 font-medium ${activeTab === 'notifications' ? 'text-white' : ''}`}
+              className={`ml-2 font-bold ${activeTab === 'notifications' ? 'text-black' : ''}`}
               style={activeTab !== 'notifications' ? { color: colors.text } : undefined}>
               Notifications
             </Text>
@@ -173,17 +180,18 @@ export default function AlertsScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           className={`flex-1 items-center rounded-r-xl py-3 ${
-            activeTab === 'violations' ? 'bg-primary-500' : 'bg-gray-100 dark:bg-gray-800'
+            activeTab === 'violations' ? '' : 'bg-gray-100 dark:bg-gray-900'
           }`}
+          style={activeTab === 'violations' ? { backgroundColor: colors.primary } : {}}
           onPress={() => setActiveTab('violations')}>
           <View className="flex-row items-center">
             <Ionicons
-              name="warning"
+              name="alert-circle-outline"
               size={20}
-              color={activeTab === 'violations' ? '#FFFFFF' : colors.text}
+              color={activeTab === 'violations' ? '#000000' : colors.text}
             />
             <Text
-              className={`ml-2 font-medium ${activeTab === 'violations' ? 'text-white' : ''}`}
+              className={`ml-2 font-bold ${activeTab === 'violations' ? 'text-black' : ''}`}
               style={activeTab !== 'violations' ? { color: colors.text } : undefined}>
               Violations
             </Text>
@@ -196,8 +204,10 @@ export default function AlertsScreen() {
         <TouchableOpacity
           className="mx-4 mb-3 flex-row items-center justify-end"
           onPress={() => markAllReadMutation.mutate()}>
-          <Ionicons name="checkmark-done" size={18} color={colors.primary} />
-          <Text className="ml-1 text-primary-500">Mark all as read</Text>
+          <Ionicons name="checkmark-done-outline" size={18} color={colors.primary} />
+          <Text className="ml-1 font-bold" style={{ color: colors.primary }}>
+            Mark all as read
+          </Text>
         </TouchableOpacity>
       )}
 

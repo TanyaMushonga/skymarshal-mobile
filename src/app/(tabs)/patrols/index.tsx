@@ -14,7 +14,7 @@ import type { Patrol, PatrolStatus } from '@/types/api';
 
 const statusColors: Record<PatrolStatus, string> = {
   ACTIVE: 'success',
-  COMPLETED: 'primary',
+  COMPLETED: 'warning',
   CANCELLED: 'error',
 };
 
@@ -61,11 +61,17 @@ export default function PatrolsScreen() {
           ? router.push('/(tabs)/patrols/active')
           : router.push(`/(tabs)/patrols/${item.id}`)
       }>
-      <Card variant="elevated">
+      <Card
+        variant="elevated"
+        style={
+          isDark ? { backgroundColor: '#0A0A0A', borderColor: '#1A1A1A', borderWidth: 1 } : {}
+        }>
         <View className="mb-3 flex-row items-center justify-between">
           <View className="flex-row items-center">
-            <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
-              <Ionicons name="car" size={20} color="#F59E0B" />
+            <View
+              className="dark:bg-gold-900/10 mr-3 h-10 w-10 items-center justify-center rounded-full bg-primary-100"
+              style={{ backgroundColor: isDark ? '#F59E0B10' : '#FEF3C7' }}>
+              <Ionicons name="car-outline" size={20} color={colors.primary} />
             </View>
             <View>
               <Text className="font-bold" style={{ color: colors.text }}>
@@ -123,11 +129,12 @@ export default function PatrolsScreen() {
           <TouchableOpacity
             key={f.value}
             className={`mr-2 rounded-full px-4 py-2 ${
-              filter === f.value ? 'bg-primary-500' : 'bg-gray-100 dark:bg-gray-800'
+              filter === f.value ? '' : 'bg-gray-100 dark:bg-gray-900'
             }`}
+            style={filter === f.value ? { backgroundColor: colors.primary } : {}}
             onPress={() => setFilter(f.value)}>
             <Text
-              className={`font-medium ${filter === f.value ? 'text-white' : ''}`}
+              className={`font-bold ${filter === f.value ? 'text-black' : ''}`}
               style={filter !== f.value ? { color: colors.text } : undefined}>
               {f.label}
             </Text>

@@ -89,10 +89,10 @@ export default function HomeScreen() {
         {/* Today's Performance Grid */}
         {dashboard?.today_stats && <TodayPerformanceGrid stats={dashboard.today_stats} />}
 
-        {/* My Analytics Section */}
+        {/* Analytics */}
         <MyAnalytics stats={myStats} />
 
-        {/* Smart Incident Feed */}
+        {/* Incident Feed */}
         {dashboard?.recent_alerts && <IncidentFeed alerts={dashboard.recent_alerts} />}
       </ScrollView>
 

@@ -25,8 +25,9 @@ export const TodayPerformanceGrid = ({ stats }: Props) => {
     <View
       style={[
         styles.card,
-        { backgroundColor: isDark ? '#1E293B' : '#FFFFFF' },
+        { backgroundColor: isDark ? '#0A0A0A' : '#FFFFFF' },
         !isDark && styles.shadow,
+        isDark && { borderColor: '#1A1A1A', borderWidth: 1 },
       ]}
       className="flex-1 items-center justify-center rounded-3xl p-4">
       <View style={{ backgroundColor: color + '20' }} className="mb-2 rounded-full p-2">
@@ -49,9 +50,19 @@ export const TodayPerformanceGrid = ({ stats }: Props) => {
         Today&apos;s Impact
       </Text>
       <View className="flex-row gap-3">
-        <StatCard label="Patrols" value={stats.patrols} icon="map" color={colors.primary} />
-        <StatCard label="Detections" value={stats.detections} icon="search" color="#6366F1" />
-        <StatCard label="Violations" value={stats.violations} icon="warning" color="#EF4444" />
+        <StatCard label="Patrols" value={stats.patrols} icon="map-outline" color={colors.primary} />
+        <StatCard
+          label="Detections"
+          value={stats.detections}
+          icon="layers-outline"
+          color={colors.primary}
+        />
+        <StatCard
+          label="Violations"
+          value={stats.violations}
+          icon="alert-circle-outline"
+          color="#EF4444"
+        />
       </View>
     </View>
   );

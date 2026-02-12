@@ -114,7 +114,12 @@ export default function ProfileScreen() {
       style={{ backgroundColor: isDark ? colors.background : '#F9FAFB' }}>
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>
         {/* Profile Header */}
-        <Card variant="elevated" className="mb-4">
+        <Card
+          variant="elevated"
+          className="mb-4"
+          style={
+            isDark ? { backgroundColor: '#0A0A0A', borderColor: '#1A1A1A', borderWidth: 1 } : {}
+          }>
           <View className="flex-row items-center">
             <View className="mr-4">
               {user?.avatar ? (
@@ -123,8 +128,10 @@ export default function ProfileScreen() {
                   style={{ width: 72, height: 72, borderRadius: 36 }}
                 />
               ) : (
-                <View className="h-18 w-18 bg-primary-100 dark:bg-primary-900/30 items-center justify-center rounded-full">
-                  <Text className="text-primary-600 text-3xl font-bold">
+                <View
+                  className="h-20 w-20 items-center justify-center rounded-full"
+                  style={{ backgroundColor: isDark ? '#F59E0B10' : '#FEF3C7' }}>
+                  <Text className="text-3xl font-black" style={{ color: colors.primary }}>
                     {user?.first_name?.[0]}
                     {user?.last_name?.[0]}
                   </Text>
@@ -146,21 +153,21 @@ export default function ProfileScreen() {
           </View>
 
           <View className="mt-4 flex-row">
-            <View className="flex-1 items-center rounded-xl bg-gray-50 p-3 dark:bg-gray-800">
+            <View className="flex-1 items-center rounded-xl bg-gray-50 p-3 dark:bg-[#1A1A1A]">
               <Text className="text-2xl font-bold" style={{ color: colors.text }}>
                 24
               </Text>
               <Text style={{ color: colors.textSecondary }}>Patrols</Text>
             </View>
             <View className="w-3" />
-            <View className="flex-1 items-center rounded-xl bg-gray-50 p-3 dark:bg-gray-800">
-              <Text className="text-2xl font-bold" style={{ color: colors.text }}>
+            <View className="flex-1 items-center rounded-xl bg-gray-50 p-3 dark:bg-[#1A1A1A]">
+              <Text className="text-2xl font-bold" style={{ color: colors.primary }}>
                 156
               </Text>
               <Text style={{ color: colors.textSecondary }}>Detections</Text>
             </View>
             <View className="w-3" />
-            <View className="flex-1 items-center rounded-xl bg-gray-50 p-3 dark:bg-gray-800">
+            <View className="flex-1 items-center rounded-xl bg-gray-50 p-3 dark:bg-[#1A1A1A]">
               <Text className="text-2xl font-bold text-red-500">12</Text>
               <Text style={{ color: colors.textSecondary }}>Violations</Text>
             </View>
@@ -199,7 +206,11 @@ export default function ProfileScreen() {
               style={{ color: colors.textSecondary }}>
               {section.title}
             </Text>
-            <Card variant="elevated">
+            <Card
+              variant="elevated"
+              style={
+                isDark ? { backgroundColor: '#0A0A0A', borderColor: '#1A1A1A', borderWidth: 1 } : {}
+              }>
               {section.items.map((item, index) => (
                 <TouchableOpacity
                   key={item.label}
@@ -227,8 +238,8 @@ export default function ProfileScreen() {
                       <Switch
                         value={Boolean(item.value)}
                         onValueChange={item.onToggle}
-                        trackColor={{ false: '#D1D5DB', true: '#FCD34D' }}
-                        thumbColor={item.value ? '#F59E0B' : '#F9FAFB'}
+                        trackColor={{ false: '#333333', true: colors.primary + '80' }}
+                        thumbColor={item.value ? colors.primary : '#F9FAFB'}
                       />
                     )}
                     {item.type === 'link' && (

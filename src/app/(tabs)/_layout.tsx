@@ -13,19 +13,20 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
-          backgroundColor: isDark ? colors.surface : '#FFFFFF',
-          borderTopWidth: 0,
-          height: 90,
-          paddingBottom: Platform.OS === 'ios' ? 30 : 15,
-          paddingTop: 10,
+          backgroundColor: isDark ? '#080808' : '#FFFFFF',
+          borderTopWidth: 1,
+          borderTopColor: isDark ? '#1A1A1A' : '#EEEEEE',
+          height: Platform.OS === 'ios' ? 95 : 75,
+          paddingBottom: Platform.OS === 'ios' ? 30 : 12,
+          paddingTop: 12,
           position: 'absolute',
-          borderTopLeftRadius: 25,
-          borderTopRightRadius: 25,
-          elevation: 20,
+          borderTopLeftRadius: 32,
+          borderTopRightRadius: 32,
+          elevation: 25,
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.1,
-          shadowRadius: 12,
+          shadowOffset: { width: 0, height: -10 },
+          shadowOpacity: isDark ? 0.3 : 0.1,
+          shadowRadius: 20,
         },
         tabBarLabelStyle: {
           fontSize: 14,
@@ -53,7 +54,7 @@ export default function TabLayout() {
           title: 'Home',
           tabBarIcon: ({ color }) => (
             <View style={[styles.elevatedButton, { backgroundColor: colors.primary }]}>
-              <Ionicons name="home" size={32} color="#FFFFFF" />
+              <Ionicons name="home" size={28} color="#000000" />
             </View>
           ),
           tabBarLabelStyle: {
@@ -86,18 +87,18 @@ export default function TabLayout() {
 
 const styles = StyleSheet.create({
   elevatedButton: {
-    width: 65,
-    height: 65,
-    borderRadius: 33,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 35,
-    elevation: 8,
+    marginBottom: Platform.OS === 'ios' ? 40 : 30,
+    elevation: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    borderWidth: 4,
-    borderColor: '#FFFFFF',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    borderWidth: 3,
+    borderColor: '#000000',
   },
 });

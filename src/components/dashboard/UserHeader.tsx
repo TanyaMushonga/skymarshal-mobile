@@ -7,7 +7,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 
 export const UserHeader = () => {
   const { user, setUser } = useAuthStore();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -47,7 +47,8 @@ export const UserHeader = () => {
       <View className="flex-row items-center gap-3">
         <Image
           source={user?.profile_picture || 'https://via.placeholder.com/150'}
-          className="h-14 w-14 rounded-full border-2 border-white dark:border-gray-800"
+          className="h-14 w-14 rounded-full border-2 border-[#1A1A1A]"
+          style={{ borderColor: isDark ? '#1A1A1A' : '#EEEEEE' }}
           contentFit="cover"
         />
         <View>
@@ -62,7 +63,7 @@ export const UserHeader = () => {
               <Animated.View
                 style={{
                   transform: [{ scale: pulseAnim }],
-                  backgroundColor: user?.is_on_duty ? '#10B981' : '#9CA3AF',
+                  backgroundColor: user?.is_on_duty ? '#10B981' : '#666666',
                 }}
                 className="h-2 w-2 rounded-full"
               />
@@ -70,7 +71,7 @@ export const UserHeader = () => {
             <Text
               style={{ color: colors.textSecondary }}
               className="text-xs uppercase tracking-wider">
-              {user?.is_on_duty ? 'On Duty' : 'Off Duty'}
+              {user?.is_on_duty ? 'Active Duty' : 'Off Duty'}
             </Text>
           </View>
         </View>

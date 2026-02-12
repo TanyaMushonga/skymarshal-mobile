@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, forwardRef } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
@@ -83,6 +83,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     paddingHorizontal: 20,
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100, // Space for absolute tab bar
   },
   header: {
     paddingBottom: 16,

@@ -59,7 +59,12 @@ export default function PatrolDetailScreen() {
         style={{ backgroundColor: isDark ? colors.background : '#F9FAFB' }}
         contentContainerStyle={{ padding: 16 }}>
         {/* Status Header */}
-        <Card variant="elevated" className="mb-4">
+        <Card
+          variant="elevated"
+          className="mb-4"
+          style={
+            isDark ? { backgroundColor: '#0A0A0A', borderColor: '#1A1A1A', borderWidth: 1 } : {}
+          }>
           <View className="mb-4 flex-row items-center justify-between">
             <View>
               <Text className="text-lg font-bold" style={{ color: colors.text }}>
@@ -90,15 +95,13 @@ export default function PatrolDetailScreen() {
             </View>
             <View className="w-1/2">
               <Text style={{ color: colors.textSecondary }}>Detections</Text>
-              <Text className="text-lg font-semibold text-blue-500">
+              <Text className="text-lg font-bold" style={{ color: colors.primary }}>
                 {patrol?.detection_count || 0}
               </Text>
             </View>
             <View className="w-1/2">
               <Text style={{ color: colors.textSecondary }}>Violations</Text>
-              <Text className="text-lg font-semibold text-red-500">
-                {patrol?.violation_count || 0}
-              </Text>
+              <Text className="text-lg font-bold text-red-500">{patrol?.violation_count || 0}</Text>
             </View>
           </View>
         </Card>
@@ -112,10 +115,15 @@ export default function PatrolDetailScreen() {
           <TouchableOpacity
             key={violation.id}
             onPress={() => router.push(`/violations/${violation.id}`)}>
-            <Card variant="outlined" className="mb-3">
+            <Card
+              variant="outlined"
+              className="mb-3"
+              style={
+                isDark ? { backgroundColor: '#0A0A0A', borderColor: '#1A1A1A', borderWidth: 1 } : {}
+              }>
               <View className="flex-row items-center">
-                <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-                  <Ionicons name="warning" size={20} color="#EF4444" />
+                <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/10">
+                  <Ionicons name="alert-circle-outline" size={20} color="#EF4444" />
                 </View>
                 <View className="flex-1">
                   <Text className="font-semibold" style={{ color: colors.text }}>

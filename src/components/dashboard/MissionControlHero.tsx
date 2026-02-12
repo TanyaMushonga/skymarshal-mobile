@@ -7,7 +7,7 @@ import { DashboardStats } from '@/types/api';
 
 // Fallback if expo-linear-gradient is missing
 const LinearGradient = ({ children, style }: any) => (
-  <View style={[{ backgroundColor: '#0F172A' }, style]}>{children}</View>
+  <View style={[{ backgroundColor: '#000000' }, style]}>{children}</View>
 );
 
 interface Props {
@@ -47,11 +47,13 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
         <View className="p-5">
           <View className="mb-4 flex-row items-center justify-between">
             <View className="flex-row items-center gap-2">
-              <View className="rounded-full bg-blue-500/20 p-2">
-                <Ionicons name="airplane" size={20} color="#60A5FA" />
+              <View
+                className="bg-gold-500/10 rounded-full p-2"
+                style={{ backgroundColor: '#F59E0B20' }}>
+                <Ionicons name="airplane-outline" size={20} color="#F59E0B" />
               </View>
               <View>
-                <Text className="text-xs font-semibold uppercase tracking-widest text-blue-400">
+                <Text className="text-xs font-semibold uppercase tracking-widest text-[#F59E0B]">
                   Mission Control
                 </Text>
                 <Text className="text-lg font-bold text-white">
@@ -72,14 +74,18 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
           </View>
 
           <View className="mb-6 flex-row justify-between gap-4">
-            <View className="flex-1 rounded-2xl bg-slate-800/50 p-3">
+            <View
+              className="flex-1 rounded-2xl bg-white/5 p-3"
+              style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
               <View className="mb-1 flex-row items-center justify-between">
-                <Text className="text-[10px] font-bold uppercase text-slate-400">Battery</Text>
+                <Text className="text-[10px] font-bold uppercase text-slate-500">Battery</Text>
                 <Text className="text-xs font-bold text-white">
                   {activePatrol.battery_level || 0}%
                 </Text>
               </View>
-              <View className="h-1.5 w-full overflow-hidden rounded-full bg-slate-700">
+              <View
+                className="h-1.5 w-full overflow-hidden rounded-full bg-white/10"
+                style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
                 <View
                   style={{
                     width: `${activePatrol.battery_level || 0}%`,
@@ -90,18 +96,22 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
               </View>
             </View>
 
-            <View className="flex-1 items-center justify-center rounded-2xl bg-slate-800/50 p-3">
+            <View
+              className="flex-1 items-center justify-center rounded-2xl bg-white/5 p-3"
+              style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
               <Text className="text-lg font-bold text-white">
                 {activePatrol.detection_count || 0}
               </Text>
-              <Text className="text-[10px] font-bold uppercase text-slate-400">Detections</Text>
+              <Text className="text-[10px] font-bold uppercase text-slate-500">Detections</Text>
             </View>
 
-            <View className="flex-1 items-center justify-center rounded-2xl bg-slate-800/50 p-3">
-              <Text className="text-lg font-bold text-red-400">
+            <View
+              className="flex-1 items-center justify-center rounded-2xl bg-white/5 p-3"
+              style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+              <Text className="text-lg font-bold text-red-500">
                 {activePatrol.violation_count || 0}
               </Text>
-              <Text className="text-[10px] font-bold uppercase text-slate-400">Violations</Text>
+              <Text className="text-[10px] font-bold uppercase text-slate-500">Violations</Text>
             </View>
           </View>
 
@@ -113,8 +123,8 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => router.push('/(tabs)/patrols/active')}
-              className="flex-1 items-center justify-center rounded-xl bg-blue-500 py-3">
-              <Text className="font-bold text-white">Full Telementry</Text>
+              className="flex-1 items-center justify-center rounded-xl bg-[#F59E0B] py-3">
+              <Text className="font-bold text-black">Full Telemetry</Text>
             </TouchableOpacity>
           </View>
         </View>

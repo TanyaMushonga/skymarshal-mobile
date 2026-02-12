@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Image } from 'expo-image';
 import { safeFormatDistanceToNow } from '@/lib/dateUtils';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Violation } from '@/types/api';
@@ -25,7 +24,6 @@ export const IncidentFeed = ({ alerts }: Props) => {
     const onPressOut = () => {
       Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start();
     };
-
     return (
       <TouchableOpacity
         activeOpacity={1}
@@ -36,15 +34,19 @@ export const IncidentFeed = ({ alerts }: Props) => {
         <Animated.View
           style={[
             { transform: [{ scale }] },
-            { backgroundColor: isDark ? '#1E293B' : '#FFFFFF', elevation: 1 },
+            {
+              backgroundColor: isDark ? '#0A0A0A' : '#FFFFFF',
+              borderColor: isDark ? '#1A1A1A' : '#EEEEEE',
+              borderWidth: 1,
+            },
           ]}
-          className="flex-row items-center rounded-2xl p-3">
-          <Image
-            source={item.evidence_url || 'https://via.placeholder.com/100'}
-            className="h-14 w-14 rounded-xl"
-            contentFit="cover"
-          />
-          <View className="ml-3 flex-1">
+          className="flex-row items-center rounded-2xl p-3 shadow-sm">
+          <View
+            style={{ backgroundColor: isDark ? '#1A1A1A' : '#F3F4F6' }}
+            className="mr-3 h-10 w-10 items-center justify-center rounded-full">
+            <Ionicons name="notifications-outline" size={20} color={colors.primary} />
+          </View>
+          <View className="ml-1 flex-1">
             <View className="flex-row items-center justify-between">
               <Text className="text-sm font-bold" style={{ color: colors.text }}>
                 {item.violation_type}

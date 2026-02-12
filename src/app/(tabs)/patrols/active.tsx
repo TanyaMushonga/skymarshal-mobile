@@ -80,7 +80,20 @@ export default function ActivePatrolScreen() {
         style={{ backgroundColor: isDark ? colors.background : '#F9FAFB' }}
         contentContainerStyle={{ padding: 16 }}>
         {/* Live Stats */}
-        <Card variant="elevated" className="mb-4 border-l-4 border-l-green-500">
+        <Card
+          variant="elevated"
+          className="mb-4"
+          style={
+            isDark
+              ? {
+                  borderLeftWidth: 4,
+                  borderLeftColor: '#10B981',
+                  backgroundColor: '#0A0A0A',
+                  borderColor: '#1A1A1A',
+                  borderWidth: 1,
+                }
+              : { borderLeftWidth: 4, borderLeftColor: '#10B981' }
+          }>
           <View className="mb-4 flex-row items-center">
             <View className="mr-3 h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
               <Ionicons name="radio" size={24} color="#10B981" />
@@ -102,28 +115,35 @@ export default function ActivePatrolScreen() {
           </View>
 
           <View className="flex-row">
-            <View className="flex-1 items-center rounded-xl bg-blue-50 p-4 dark:bg-blue-900/20">
-              <Ionicons name="eye" size={24} color="#3B82F6" />
-              <Text className="mt-1 text-3xl font-bold text-blue-600">
+            <View
+              className="flex-1 items-center rounded-xl p-4"
+              style={{ backgroundColor: isDark ? '#F59E0B10' : '#FEF3C7' }}>
+              <Ionicons name="eye-outline" size={24} color={colors.primary} />
+              <Text className="mt-1 text-3xl font-black" style={{ color: colors.primary }}>
                 {patrol.detection_count || 0}
               </Text>
-              <Text style={{ color: colors.textSecondary }}>Detections</Text>
+              <Text style={{ color: colors.textSecondary, fontWeight: '600' }}>Detections</Text>
             </View>
             <View className="w-4" />
-            <View className="flex-1 items-center rounded-xl bg-red-50 p-4 dark:bg-red-900/20">
-              <Ionicons name="warning" size={24} color="#EF4444" />
-              <Text className="mt-1 text-3xl font-bold text-red-600">
+            <View className="flex-1 items-center rounded-xl bg-red-50 p-4 dark:bg-red-900/10">
+              <Ionicons name="alert-circle-outline" size={24} color="#EF4444" />
+              <Text className="mt-1 text-3xl font-black text-red-600">
                 {patrol.violation_count || 0}
               </Text>
-              <Text style={{ color: colors.textSecondary }}>Violations</Text>
+              <Text style={{ color: colors.textSecondary, fontWeight: '600' }}>Violations</Text>
             </View>
           </View>
         </Card>
 
         {/* Drone Telemetry */}
-        <Card variant="elevated" className="mb-4">
+        <Card
+          variant="elevated"
+          className="mb-4"
+          style={
+            isDark ? { backgroundColor: '#0A0A0A', borderColor: '#1A1A1A', borderWidth: 1 } : {}
+          }>
           <Text className="mb-3 text-lg font-bold" style={{ color: colors.text }}>
-            🛸 Drone Status
+            Drone Status
           </Text>
           <View className="flex-row flex-wrap">
             <View className="mb-4 w-1/2">
@@ -132,13 +152,13 @@ export default function ActivePatrolScreen() {
                 <Ionicons
                   name={
                     (patrol.drone?.status?.battery_level || 0) > 50
-                      ? 'battery-full'
-                      : 'battery-half'
+                      ? 'battery-full-outline'
+                      : 'battery-dead-outline'
                   }
                   size={20}
                   color={(patrol.drone?.status?.battery_level || 0) > 20 ? '#10B981' : '#EF4444'}
                 />
-                <Text className="ml-2 text-lg font-semibold" style={{ color: colors.text }}>
+                <Text className="ml-2 text-lg font-bold" style={{ color: colors.text }}>
                   {patrol.drone?.status?.battery_level || '--'}%
                 </Text>
               </View>
@@ -168,7 +188,13 @@ export default function ActivePatrolScreen() {
         </Card>
 
         {/* End Patrol Button */}
-        <Button title="🛑 End Patrol" variant="danger" size="lg" onPress={handleEndPatrol} />
+        <Button
+          title="End Patrol"
+          variant="danger"
+          size="lg"
+          onPress={handleEndPatrol}
+          icon={<Ionicons name="stop-circle-outline" size={24} color="#FFFFFF" />}
+        />
       </ScrollView>
 
       <EndPatrolSheet ref={endPatrolRef} patrol={patrol} />

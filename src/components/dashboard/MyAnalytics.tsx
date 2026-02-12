@@ -16,7 +16,11 @@ export const MyAnalytics = ({ stats }: Props) => {
   return (
     <View
       className="mb-8 rounded-3xl p-6"
-      style={{ backgroundColor: isDark ? '#1E293B' : '#F8FAFC' }}>
+      style={{
+        backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
+        borderColor: isDark ? '#1A1A1A' : 'transparent',
+        borderWidth: isDark ? 1 : 0,
+      }}>
       <Text className="mb-4 text-xs font-black uppercase tracking-[2px] text-slate-500">
         Officer Performance
       </Text>
