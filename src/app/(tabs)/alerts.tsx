@@ -4,11 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-import { formatDistanceToNow } from 'date-fns';
-
 import { Card, Badge } from '@/components/ui';
 import { notificationsApi, violationsApi } from '@/api';
 import { useTheme } from '@/contexts/ThemeContext';
+import { safeFormatDistanceToNow } from '@/lib/dateUtils';
 import type { Notification } from '@/types/api';
 
 type AlertTab = 'notifications' | 'violations';
@@ -83,7 +82,7 @@ export default function AlertsScreen() {
       <TouchableOpacity className="mb-3" onPress={() => handleNotificationPress(item)}>
         <Card
           variant={item.is_read ? 'outlined' : 'elevated'}
-          className={!item.is_read ? 'border-l-primary-500 border-l-4' : ''}>
+          className={!item.is_read ? 'border-l-4 border-l-primary-500' : ''}>
           <View className="flex-row items-start">
             <View
               className="mr-3 h-10 w-10 items-center justify-center rounded-full"
@@ -100,10 +99,10 @@ export default function AlertsScreen() {
                 {item.body}
               </Text>
               <Text className="mt-1 text-xs" style={{ color: colors.textSecondary }}>
-                {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                {safeFormatDistanceToNow(item.created_at)}
               </Text>
             </View>
-            {!item.is_read && <View className="bg-primary-500 h-3 w-3 rounded-full" />}
+            {!item.is_read && <View className="h-3 w-3 rounded-full bg-primary-500" />}
           </View>
         </Card>
       </TouchableOpacity>
@@ -126,7 +125,7 @@ export default function AlertsScreen() {
             </View>
             <Text style={{ color: colors.textSecondary }}>
               {item.recorded_speed && `${item.recorded_speed} km/h • `}
-              {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true })}
+              {safeFormatDistanceToNow(item.timestamp)}
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
@@ -198,7 +197,7 @@ export default function AlertsScreen() {
           className="mx-4 mb-3 flex-row items-center justify-end"
           onPress={() => markAllReadMutation.mutate()}>
           <Ionicons name="checkmark-done" size={18} color={colors.primary} />
-          <Text className="text-primary-500 ml-1">Mark all as read</Text>
+          <Text className="ml-1 text-primary-500">Mark all as read</Text>
         </TouchableOpacity>
       )}
 

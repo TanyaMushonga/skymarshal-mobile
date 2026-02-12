@@ -25,6 +25,7 @@ export interface User {
   avatar?: string;
   unit?: string;
   is_on_duty: boolean;
+  profile_picture?: string;
   created_at: string;
   updated_at: string;
 }
@@ -185,9 +186,26 @@ export interface Notification {
 }
 
 // Dashboard Types
+export interface TodayStats {
+  patrols: number;
+  detections: number;
+  violations: number;
+}
+
 export interface DashboardStats {
-  today_patrols: number;
-  today_detections: number;
-  today_violations: number;
-  active_patrol?: Patrol;
+  today_stats: TodayStats;
+  active_patrol?: Patrol & {
+    battery_level?: number;
+    flight_duration_seconds?: number;
+  };
+  recent_alerts: Violation[];
+  // Deprecated fields (will keep for backward compatibility during migration)
+  today_patrols?: number;
+  today_detections?: number;
+  today_violations?: number;
+}
+
+export interface OfficerStats {
+  hours_patrolled_this_week: number;
+  performance_rating: number;
 }

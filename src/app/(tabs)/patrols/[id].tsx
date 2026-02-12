@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, ScrollView, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-import { format } from 'date-fns';
+import { safeFormatSnapshot } from '@/lib/dateUtils';
 
 import { Card, Badge } from '@/components/ui';
 import { patrolsApi, violationsApi } from '@/api';
@@ -66,7 +66,7 @@ export default function PatrolDetailScreen() {
                 Patrol Details
               </Text>
               <Text style={{ color: colors.textSecondary }}>
-                {patrol?.started_at && format(new Date(patrol.started_at), 'PPpp')}
+                {safeFormatSnapshot(patrol?.started_at)}
               </Text>
             </View>
             <Badge
@@ -122,7 +122,7 @@ export default function PatrolDetailScreen() {
                     {violation.detection?.license_plate} - {violation.violation_type}
                   </Text>
                   <Text style={{ color: colors.textSecondary }}>
-                    {format(new Date(violation.timestamp), 'HH:mm:ss')}
+                    {safeFormatSnapshot(violation.timestamp, 'HH:mm:ss')}
                     {violation.recorded_speed && ` • ${violation.recorded_speed} km/h`}
                   </Text>
                 </View>

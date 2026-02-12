@@ -38,6 +38,7 @@ export const endpoints = {
   // User (Specific actions on UserViewSet)
   CHANGE_PASSWORD: '/v1/users/change-password/',
   ME: '/v1/users/me/',
+  TOGGLE_DUTY: '/v1/users/toggle-duty/',
 
   // Patrols (apps.patrols.urls)
   PATROLS: '/v1/patrols/',
@@ -64,6 +65,7 @@ export const endpoints = {
   // Analytics (Namespace: api/v1/analytics/)
   OFFICER_STATS: '/v1/analytics/officer/my_stats/',
   ADMIN_DASHBOARD: '/v1/analytics/admin/dashboard/',
+  DASHBOARD_SUMMARY: '/v1/analytics/dashboard/summary/',
 
   // Compliance (Namespace: api/v1/compliance/)
   LOTTERIES: '/v1/compliance/lotteries/',

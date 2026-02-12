@@ -1,4 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { config } from '@/constants/config';
 
 export async function getAccessToken(): Promise<string | null> {
@@ -37,9 +38,12 @@ export async function setRefreshToken(token: string): Promise<void> {
 
 export async function clearTokens(): Promise<void> {
   try {
-    await SecureStore.deleteItemAsync(config.ACCESS_TOKEN_KEY);
-    await SecureStore.deleteItemAsync(config.REFRESH_TOKEN_KEY);
-    await SecureStore.deleteItemAsync(config.USER_DATA_KEY);
+    await Promise.all([
+      SecureStore.deleteItemAsync(config.ACCESS_TOKEN_KEY),
+      SecureStore.deleteItemAsync(config.REFRESH_TOKEN_KEY),
+      AsyncStorage.removeItem(config.USER_DATA_KEY),
+    ]);
+    console.log('[Storage] All auth data cleared');
   } catch (error) {
     console.error('Error clearing tokens:', error);
   }
@@ -47,7 +51,7 @@ export async function clearTokens(): Promise<void> {
 
 export async function getUserData<T>(): Promise<T | null> {
   try {
-    const data = await SecureStore.getItemAsync(config.USER_DATA_KEY);
+    const data = await AsyncStorage.getItem(config.USER_DATA_KEY);
     return data ? JSON.parse(data) : null;
   } catch (error) {
     console.error('Error getting user data:', error);
@@ -57,7 +61,7 @@ export async function getUserData<T>(): Promise<T | null> {
 
 export async function setUserData<T>(data: T): Promise<void> {
   try {
-    await SecureStore.setItemAsync(config.USER_DATA_KEY, JSON.stringify(data));
+    await AsyncStorage.setItem(config.USER_DATA_KEY, JSON.stringify(data));
   } catch (error) {
     console.error('Error setting user data:', error);
   }

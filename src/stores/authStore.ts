@@ -31,20 +31,33 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   initialize: async () => {
     try {
+      if (__DEV__) console.log('[AuthStore] Initializing...');
       set({ isLoading: true });
+
       const token = await getAccessToken();
+      if (__DEV__) console.log('[AuthStore] Access token found:', !!token);
+
       if (token) {
         const userData = await getUserData<User>();
+        if (__DEV__) console.log('[AuthStore] Local user data found:', !!userData);
+
         if (userData) {
           set({
             user: userData,
             isAuthenticated: true,
             isLoading: false,
           });
-          // Optionally refresh user data from server
-          get().refreshUser();
+
+          // Optionally refresh user data from server in background
+          // We don't wait for this to avoid blocking the UI
+          get()
+            .refreshUser()
+            .catch((err) => {
+              if (__DEV__) console.warn('[AuthStore] Background refresh failed:', err);
+            });
         } else {
           // Token exists but no user data, fetch from server
+          if (__DEV__) console.log('[AuthStore] No local user data, fetching from /me...');
           try {
             const user = await authApi.getMe();
             await setUserData(user);
@@ -53,8 +66,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
               isAuthenticated: true,
               isLoading: false,
             });
-          } catch {
-            // Token likely invalid
+          } catch (error) {
+            if (__DEV__) console.error('[AuthStore] Init fetch failed:', error);
+            // Only clear tokens if it's explicitly an auth error (401)
+            // If it's a network error, we might want to keep the session
             await clearTokens();
             set({
               user: null,
@@ -71,7 +86,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
       }
     } catch (error) {
-      console.error('Auth initialization error:', error);
+      console.error('[AuthStore] Critical initialization error:', error);
       set({
         user: null,
         isAuthenticated: false,

@@ -3,7 +3,7 @@ import { View, Text, ScrollView } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Image } from 'expo-image';
-import { format } from 'date-fns';
+import { safeFormatSnapshot } from '@/lib/dateUtils';
 
 import { Card, Badge } from '@/components/ui';
 import { detectionsApi } from '@/api';
@@ -62,7 +62,7 @@ export default function DetectionDetailScreen() {
                 {detection?.license_plate}
               </Text>
               <Text style={{ color: colors.textSecondary }}>
-                {detection?.timestamp && format(new Date(detection.timestamp), 'PPpp')}
+                {safeFormatSnapshot(detection?.timestamp)}
               </Text>
             </View>
             <Badge label={detection?.vehicle_type || 'Vehicle'} variant="info" />

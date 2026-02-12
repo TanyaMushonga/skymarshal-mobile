@@ -4,9 +4,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-import { format } from 'date-fns';
+import { safeFormatSnapshot } from '@/lib/dateUtils';
 
-import { Card, Badge, Button } from '@/components/ui';
+import { Card, Badge } from '@/components/ui';
 import { patrolsApi } from '@/api';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -64,7 +64,7 @@ export default function PatrolsScreen() {
       <Card variant="elevated">
         <View className="mb-3 flex-row items-center justify-between">
           <View className="flex-row items-center">
-            <View className="bg-primary-100 dark:bg-primary-900/30 mr-3 h-10 w-10 items-center justify-center rounded-full">
+            <View className="mr-3 h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
               <Ionicons name="car" size={20} color="#F59E0B" />
             </View>
             <View>
@@ -72,7 +72,7 @@ export default function PatrolsScreen() {
                 Patrol #{item.id.slice(0, 8)}
               </Text>
               <Text style={{ color: colors.textSecondary }}>
-                {format(new Date(item.started_at), 'MMM d, yyyy • HH:mm')}
+                {safeFormatSnapshot(item.started_at, 'MMM d, yyyy • HH:mm')}
               </Text>
             </View>
           </View>

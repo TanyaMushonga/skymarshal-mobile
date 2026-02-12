@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { format } from 'date-fns';
+import { safeFormatSnapshot } from '@/lib/dateUtils';
 
 import { Card, Badge, Button } from '@/components/ui';
 import { violationsApi } from '@/api';
@@ -64,7 +64,7 @@ export default function ViolationDetailScreen() {
                 {violation?.detection?.license_plate}
               </Text>
               <Text style={{ color: colors.textSecondary }}>
-                {violation?.timestamp && format(new Date(violation.timestamp), 'PPpp')}
+                {safeFormatSnapshot(violation?.timestamp)}
               </Text>
             </View>
             <Badge label={violation?.violation_type || 'SPEEDING'} variant="error" />
@@ -152,7 +152,7 @@ export default function ViolationDetailScreen() {
             <View className="mb-4 w-1/2">
               <Text style={{ color: colors.textSecondary }}>Patrol ID</Text>
               <TouchableOpacity onPress={() => router.push(`/(tabs)/patrols/${violation?.patrol}`)}>
-                <Text className="text-primary-500 text-lg font-semibold">
+                <Text className="text-lg font-semibold text-primary-500">
                   #{violation?.patrol?.slice(0, 8)}
                 </Text>
               </TouchableOpacity>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, ScrollView, Alert } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +10,7 @@ import { EndPatrolSheet } from '@/components/sheets/EndPatrolSheet';
 import { patrolsApi } from '@/api';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
+import { safeParseDate } from '@/lib/dateUtils';
 
 export default function ActivePatrolScreen() {
   const router = useRouter();
@@ -26,9 +27,10 @@ export default function ActivePatrolScreen() {
   });
 
   useEffect(() => {
-    if (!patrol?.started_at) return;
-
-    const startTime = new Date(patrol.started_at).getTime();
+    if (!patrol) return;
+    const parsedStart = safeParseDate(patrol.started_at);
+    if (!parsedStart) return;
+    const startTime = parsedStart.getTime();
     const updateElapsed = () => {
       setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
     };
@@ -36,7 +38,7 @@ export default function ActivePatrolScreen() {
     updateElapsed();
     const interval = setInterval(updateElapsed, 1000);
     return () => clearInterval(interval);
-  }, [patrol?.started_at]);
+  }, [patrol]);
 
   const formatDuration = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
