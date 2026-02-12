@@ -1,7 +1,9 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, StyleSheet, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
+import { UserHeader } from '@/components/dashboard/UserHeader';
 
 export default function TabLayout() {
   const { colors, isDark } = useTheme();
@@ -52,6 +54,16 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
+          headerShown: true,
+          header: () => (
+            <SafeAreaView
+              edges={['top']}
+              style={{ backgroundColor: isDark ? colors.background : '#F9FAFB' }}>
+              <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+                <UserHeader />
+              </View>
+            </SafeAreaView>
+          ),
           tabBarIcon: ({ color }) => (
             <View style={[styles.elevatedButton, { backgroundColor: colors.primary }]}>
               <Ionicons name="home" size={28} color="#000000" />

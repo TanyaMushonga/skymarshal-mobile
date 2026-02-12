@@ -1,11 +1,9 @@
 import React, { useRef, useCallback, useEffect } from 'react';
-import { ScrollView, RefreshControl } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScrollView, RefreshControl, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import BottomSheet from '@gorhom/bottom-sheet';
 
 import {
-  UserHeader,
   MissionControlHero,
   TodayPerformanceGrid,
   IncidentFeed,
@@ -60,9 +58,7 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <SafeAreaView
-      className="flex-1"
-      style={{ backgroundColor: isDark ? colors.background : '#F9FAFB' }}>
+    <View className="flex-1" style={{ backgroundColor: isDark ? colors.background : '#F9FAFB' }}>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
@@ -75,9 +71,6 @@ export default function HomeScreen() {
             tintColor={colors.primary}
           />
         }>
-        {/* User Header & Duty Toggle */}
-        <UserHeader />
-
         {/* Mission Control Hero (Active Patrol) */}
         {dashboard?.active_patrol && (
           <MissionControlHero
@@ -99,6 +92,6 @@ export default function HomeScreen() {
       {/* Bottom Sheets */}
       <StartPatrolSheet ref={startPatrolRef} />
       <EndPatrolSheet ref={endPatrolRef} patrol={dashboard?.active_patrol as any} />
-    </SafeAreaView>
+    </View>
   );
 }
