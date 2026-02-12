@@ -130,7 +130,7 @@ export default function TwoFactorScreen() {
 
         {/* Resend Code */}
         <View className="items-center">
-          <Text style={{ color: colors.textSecondary }}>Didn't receive the code?</Text>
+          <Text style={{ color: colors.textSecondary }}>Didn&apos;t receive the code?</Text>
           <Button
             title={countdown > 0 ? `Resend in ${countdown}s` : 'Resend Code'}
             variant="ghost"
