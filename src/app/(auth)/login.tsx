@@ -91,9 +91,7 @@ export default function LoginScreen() {
         password: data.password,
       };
 
-      console.log('Attempting login with:', credentials);
       const response = await authApi.login(credentials);
-      console.log('Login response:', response);
 
       if (response.requires_2fa) {
         setRequires2FA(true, response.tokens?.access);
@@ -146,7 +144,6 @@ export default function LoginScreen() {
             {/* Logo Section */}
             <View className="mb-12 items-sta">
               <Text className="text-3xl font-bold text-black dark:text-white">SkyMarshal</Text>
-              <Text className="text-primary-500 text-xl font-semibold">Patrol Officer Portal</Text>
               <Text className="mt-2 text-lg leading-6" style={{ color: colors.textSecondary }}>
                 Secure access for authorized personnel to manage deployments, monitor live
                 telemetry, and record field observations.
