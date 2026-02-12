@@ -13,38 +13,85 @@ export const MyAnalytics = ({ stats }: Props) => {
 
   if (!stats) return null;
 
+  const dividerColor = isDark ? '#1F1F1F' : '#E8E8E8';
+
   return (
-    <View
-      className="mb-8 rounded-3xl p-6"
-      style={{
-        backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC',
-        borderColor: isDark ? '#1A1A1A' : 'transparent',
-        borderWidth: isDark ? 1 : 0,
-      }}>
-      <Text className="mb-4 text-xs font-black uppercase tracking-[2px] text-slate-500">
+    <View className="mb-8">
+      {/* Section header */}
+      <Text
+        style={{
+          color: colors.textSecondary,
+          fontSize: 12,
+          fontWeight: '600',
+          letterSpacing: 0.8,
+          textTransform: 'uppercase',
+          marginBottom: 12,
+          paddingHorizontal: 4,
+        }}>
         Officer Performance
       </Text>
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-4">
-          <View className="rounded-2xl bg-blue-500/10 p-3">
-            <Ionicons name="time" size={24} color="#3B82F6" />
-          </View>
-          <View>
-            <Text className="text-lg font-bold" style={{ color: colors.text }}>
-              {stats.hours_patrolled_this_week}h
-            </Text>
-            <Text className="text-xs text-slate-500">Patrolled this week</Text>
-          </View>
+
+      {/* Row: Hours patrolled */}
+      <View
+        style={{ borderTopWidth: 1, borderTopColor: dividerColor }}
+        className="flex-row items-center px-1 py-4">
+        <View
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 8,
+            backgroundColor: isDark ? '#1A2A3A' : '#EFF6FF',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: 14,
+          }}>
+          <Ionicons name="time-outline" size={20} color="#3B82F6" />
         </View>
-        <View className="items-end">
-          <View className="flex-row items-center gap-1">
-            <Ionicons name="star" size={16} color="#F59E0B" />
-            <Text className="text-lg font-bold" style={{ color: colors.text }}>
-              {stats.performance_rating.toFixed(1)}
-            </Text>
-          </View>
-          <Text className="text-xs text-slate-500">Rating</Text>
+        <View className="flex-1">
+          <Text style={{ color: colors.text, fontSize: 16, fontWeight: '500', lineHeight: 22 }}>
+            Hours Patrolled
+          </Text>
+          <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 1 }}>This week</Text>
         </View>
+        <Text style={{ color: colors.text, fontSize: 22, fontWeight: '700', letterSpacing: -0.5 }}>
+          {stats.hours_patrolled_this_week}
+          <Text style={{ fontSize: 14, fontWeight: '500', color: colors.textSecondary }}>h</Text>
+        </Text>
+      </View>
+
+      {/* Row: Performance rating */}
+      <View
+        style={{
+          borderTopWidth: 1,
+          borderTopColor: dividerColor,
+          borderBottomWidth: 1,
+          borderBottomColor: dividerColor,
+        }}
+        className="flex-row items-center px-1 py-4">
+        <View
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 8,
+            backgroundColor: isDark ? '#2A2010' : '#FFFBEB',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: 14,
+          }}>
+          <Ionicons name="star-outline" size={20} color="#F59E0B" />
+        </View>
+        <View className="flex-1">
+          <Text style={{ color: colors.text, fontSize: 16, fontWeight: '500', lineHeight: 22 }}>
+            Performance Rating
+          </Text>
+          <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 1 }}>
+            Overall score
+          </Text>
+        </View>
+        <Text style={{ color: colors.text, fontSize: 22, fontWeight: '700', letterSpacing: -0.5 }}>
+          {stats.performance_rating.toFixed(1)}
+          <Text style={{ fontSize: 14, fontWeight: '500', color: colors.textSecondary }}>/5</Text>
+        </Text>
       </View>
     </View>
   );

@@ -160,6 +160,7 @@ export interface Violation {
   timestamp: string;
   created_at: string;
   updated_at: string;
+  severity?: 'HIGH' | 'MEDIUM' | 'LOW';
 }
 
 // Notification Types

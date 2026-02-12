@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, type ViewProps } from 'react-native';
+import { View, Text, StyleSheet, type ViewProps } from 'react-native';
+import { useTheme } from '@/contexts/ThemeContext';
 
 type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info';
 type BadgeSize = 'sm' | 'md' | 'lg';
@@ -8,64 +9,90 @@ interface BadgeProps extends ViewProps {
   label: string;
   variant?: BadgeVariant;
   size?: BadgeSize;
+  /** Show a small filled dot before the label */
   dot?: boolean;
 }
+
+// Per-variant: text colour, light bg, dark bg, dot colour
+const VARIANT_CONFIG: Record<BadgeVariant, { color: string; lightBg: string; darkBg: string }> = {
+  default: { color: '#6B7280', lightBg: '#F3F4F6', darkBg: '#1F1F1F' },
+  primary: { color: '#3B82F6', lightBg: '#EFF6FF', darkBg: '#0D1525' },
+  success: { color: '#10B981', lightBg: '#ECFDF5', darkBg: '#0D2A1A' },
+  warning: { color: '#F59E0B', lightBg: '#FFFBEB', darkBg: '#2A1A08' },
+  error: { color: '#EF4444', lightBg: '#FEF2F2', darkBg: '#2A0F0F' },
+  info: { color: '#6366F1', lightBg: '#EEF2FF', darkBg: '#12122A' },
+};
+
+const SIZE_CONFIG: Record<
+  BadgeSize,
+  { px: number; py: number; fontSize: number; dotSize: number }
+> = {
+  sm: { px: 6, py: 2, fontSize: 10, dotSize: 5 },
+  md: { px: 8, py: 3, fontSize: 11, dotSize: 6 },
+  lg: { px: 10, py: 4, fontSize: 13, dotSize: 7 },
+};
 
 export function Badge({
   label,
   variant = 'default',
   size = 'md',
   dot = false,
-  className = '',
+  style,
   ...props
 }: BadgeProps) {
-  const variantStyles = {
-    default: 'bg-gray-100 dark:bg-gray-700',
-    primary: 'bg-primary-100 dark:bg-primary-900/30',
-    success: 'bg-green-100 dark:bg-green-900/30',
-    warning: 'bg-amber-100 dark:bg-amber-900/30',
-    error: 'bg-red-100 dark:bg-red-900/30',
-    info: 'bg-blue-100 dark:bg-blue-900/30',
-  };
+  const { isDark } = useTheme();
 
-  const textVariantStyles = {
-    default: 'text-gray-700 dark:text-gray-300',
-    primary: 'text-primary-700 dark:text-primary-300',
-    success: 'text-green-700 dark:text-green-300',
-    warning: 'text-amber-700 dark:text-amber-300',
-    error: 'text-red-700 dark:text-red-300',
-    info: 'text-blue-700 dark:text-blue-300',
-  };
-
-  const dotVariantStyles = {
-    default: 'bg-gray-500',
-    primary: 'bg-primary-500',
-    success: 'bg-green-500',
-    warning: 'bg-amber-500',
-    error: 'bg-red-500',
-    info: 'bg-blue-500',
-  };
-
-  const sizeStyles = {
-    sm: 'px-2 py-0.5',
-    md: 'px-2.5 py-1',
-    lg: 'px-3 py-1.5',
-  };
-
-  const textSizeStyles = {
-    sm: 'text-xs',
-    md: 'text-sm',
-    lg: 'text-base',
-  };
+  const cfg = VARIANT_CONFIG[variant];
+  const sz = SIZE_CONFIG[size];
+  const bg = isDark ? cfg.darkBg : cfg.lightBg;
 
   return (
     <View
-      className={`flex-row items-center rounded-full ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+      style={[
+        styles.base,
+        {
+          backgroundColor: bg,
+          paddingHorizontal: sz.px,
+          paddingVertical: sz.py,
+        },
+        style,
+      ]}
       {...props}>
-      {dot && <View className={`mr-1.5 h-2 w-2 rounded-full ${dotVariantStyles[variant]}`} />}
-      <Text className={`font-medium ${textVariantStyles[variant]} ${textSizeStyles[size]}`}>
+      {dot && (
+        <View
+          style={[
+            styles.dot,
+            {
+              width: sz.dotSize,
+              height: sz.dotSize,
+              borderRadius: sz.dotSize / 2,
+              backgroundColor: cfg.color,
+            },
+          ]}
+        />
+      )}
+      <Text
+        style={{
+          color: cfg.color,
+          fontSize: sz.fontSize,
+          fontWeight: '600',
+          letterSpacing: 0.3,
+          textTransform: 'uppercase',
+        }}>
         {label}
       </Text>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  base: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+  },
+  dot: {
+    marginRight: 5,
+  },
+});

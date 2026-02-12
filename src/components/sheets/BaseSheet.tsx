@@ -9,6 +9,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 
 interface BaseSheetProps extends Partial<BottomSheetProps> {
   title?: string;
+  subtitle?: string;
   children: React.ReactNode;
   snapPoints?: (string | number)[];
   enablePanDownToClose?: boolean;
@@ -16,7 +17,14 @@ interface BaseSheetProps extends Partial<BottomSheetProps> {
 
 export const BaseSheet = forwardRef<BottomSheet, BaseSheetProps>(
   (
-    { title, children, snapPoints: customSnapPoints, enablePanDownToClose = true, ...props },
+    {
+      title,
+      subtitle,
+      children,
+      snapPoints: customSnapPoints,
+      enablePanDownToClose = true,
+      ...props
+    },
     ref
   ) => {
     const { colors, isDark } = useTheme();
@@ -29,7 +37,7 @@ export const BaseSheet = forwardRef<BottomSheet, BaseSheetProps>(
           {...backdropProps}
           disappearsOnIndex={-1}
           appearsOnIndex={0}
-          opacity={0.5}
+          opacity={0.45}
         />
       ),
       []
@@ -37,8 +45,9 @@ export const BaseSheet = forwardRef<BottomSheet, BaseSheetProps>(
 
     const handleIndicatorStyle = useMemo(
       () => ({
-        backgroundColor: isDark ? '#4B5563' : '#D1D5DB',
-        width: 40,
+        backgroundColor: isDark ? '#333333' : '#DDDDE0',
+        width: 36,
+        height: 4,
       }),
       [isDark]
     );
@@ -46,8 +55,8 @@ export const BaseSheet = forwardRef<BottomSheet, BaseSheetProps>(
     const backgroundStyle = useMemo(
       () => ({
         backgroundColor: colors.surface,
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
       }),
       [colors.surface]
     );
@@ -65,9 +74,27 @@ export const BaseSheet = forwardRef<BottomSheet, BaseSheetProps>(
         <BottomSheetView style={styles.contentContainer}>
           {title && (
             <View style={styles.header}>
-              <Text style={[styles.title, { color: colors.text }]} className="text-xl font-bold">
+              <Text
+                style={{
+                  color: colors.text,
+                  fontSize: 18,
+                  fontWeight: '700',
+                  letterSpacing: -0.3,
+                  lineHeight: 24,
+                }}>
                 {title}
               </Text>
+              {subtitle && (
+                <Text
+                  style={{
+                    color: colors.textSecondary,
+                    fontSize: 13,
+                    marginTop: 2,
+                    lineHeight: 18,
+                  }}>
+                  {subtitle}
+                </Text>
+              )}
             </View>
           )}
           {children}
@@ -83,16 +110,12 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingBottom: Platform.OS === 'ios' ? 120 : 100, // Space for absolute tab bar
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
   },
   header: {
     paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(0,0,0,0.08)',
     marginBottom: 16,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
   },
 });

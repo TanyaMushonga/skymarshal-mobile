@@ -1,5 +1,5 @@
-import React, { forwardRef, useMemo, useCallback } from 'react';
-import { View, Text, Alert } from 'react-native';
+import React, { forwardRef, useMemo, useState } from 'react';
+import { View, Text, TextInput, Alert, StyleSheet } from 'react-native';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,86 +12,119 @@ import { useTheme } from '@/contexts/ThemeContext';
 import type { Patrol } from '@/types/api';
 
 interface EndPatrolSheetProps {
-  patrol?: Patrol | null;
+  patrol: Patrol | undefined;
 }
 
 export const EndPatrolSheet = forwardRef<BottomSheet, EndPatrolSheetProps>(({ patrol }, ref) => {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const queryClient = useQueryClient();
-  const { endPatrol: endPatrolStore } = usePatrolStore();
+  const { endPatrol } = usePatrolStore();
+  const [notes, setNotes] = useState('');
 
   const endMutation = useMutation({
-    mutationFn: () => patrolsApi.end(patrol?.id || ''),
+    mutationFn: (data: { id: string; notes?: string }) => patrolsApi.end(data.id, data.notes),
     onSuccess: () => {
-      endPatrolStore();
+      endPatrol();
       queryClient.invalidateQueries({ queryKey: ['activePatrol'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['patrols'] });
       (ref as React.RefObject<BottomSheet>)?.current?.close();
-      Alert.alert('Patrol Ended', 'Your patrol has been completed successfully.');
+      Alert.alert('Patrol Completed', 'The patrol session has been summarized and closed.');
     },
     onError: (error: any) => {
       Alert.alert('Error', error.response?.data?.detail || 'Failed to end patrol');
     },
   });
 
-  const handleEndPatrol = useCallback(() => {
-    endMutation.mutate();
-  }, [endMutation]);
-
-  const snapPoints = useMemo(() => ['40%'], []);
-
-  const formatDuration = (seconds: number) => {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const handleEndPatrol = () => {
+    if (!patrol?.id) return;
+    endMutation.mutate({ id: patrol.id, notes });
   };
 
+  const snapPoints = useMemo(() => ['65%'], []);
+  const dividerColor = isDark ? '#1F1F1F' : '#E8E8E8';
+
+  if (!patrol) return null;
+
   return (
-    <BaseSheet ref={ref} title="⚠️ End Patrol" snapPoints={snapPoints}>
-      <View className="flex-1">
-        <Text className="mb-6 text-center text-lg" style={{ color: colors.textSecondary }}>
-          Are you sure you want to end this patrol?
+    <BaseSheet ref={ref} title="Complete Mission" snapPoints={snapPoints}>
+      <View style={{ flex: 1 }}>
+        <Text
+          style={{
+            color: colors.textSecondary,
+            fontSize: 14,
+            marginBottom: 24,
+            lineHeight: 20,
+          }}>
+          Please review the patrol summary before finalizing the mission.
         </Text>
 
-        <View className="mb-6 flex-row justify-around rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
-          <View className="items-center">
-            <Ionicons name="time" size={24} color={colors.primary} />
-            <Text className="mt-1 text-xl font-bold" style={{ color: colors.text }}>
-              {formatDuration(patrol?.duration || 0)}
+        {/* Stats Grid */}
+        <View style={[styles.statsGrid, { borderColor: dividerColor }]}>
+          <View style={[styles.statItem, { borderRightWidth: 1, borderRightColor: dividerColor }]}>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Detections</Text>
+            <Text style={[styles.statValue, { color: colors.text }]}>
+              {patrol.detection_count || 0}
             </Text>
-            <Text style={{ color: colors.textSecondary }}>Duration</Text>
           </View>
-          <View className="items-center">
-            <Ionicons name="eye" size={24} color="#3B82F6" />
-            <Text className="mt-1 text-xl font-bold" style={{ color: colors.text }}>
-              {patrol?.detection_count || 0}
+          <View style={styles.statItem}>
+            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Violations</Text>
+            <Text style={[styles.statValue, { color: '#EF4444' }]}>
+              {patrol.violation_count || 0}
             </Text>
-            <Text style={{ color: colors.textSecondary }}>Detections</Text>
-          </View>
-          <View className="items-center">
-            <Ionicons name="warning" size={24} color="#EF4444" />
-            <Text className="mt-1 text-xl font-bold" style={{ color: colors.text }}>
-              {patrol?.violation_count || 0}
-            </Text>
-            <Text style={{ color: colors.textSecondary }}>Violations</Text>
           </View>
         </View>
 
-        <View className="flex-row gap-3">
+        {/* Drone Info */}
+        <View style={styles.infoRow}>
+          <View style={[styles.iconContainer, { backgroundColor: isDark ? '#1A1A1A' : '#F3F4F6' }]}>
+            <Ionicons name="airplane-outline" size={20} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>
+              {patrol.drone?.name || 'Patrol Drone'}
+            </Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 13 }}>
+              {patrol.drone?.model} · {patrol.drone?.serial_number}
+            </Text>
+          </View>
+        </View>
+
+        {/* Notes Input */}
+        <Text
+          style={{
+            color: colors.text,
+            fontSize: 14,
+            fontWeight: '600',
+            marginBottom: 10,
+            marginTop: 20,
+          }}>
+          Mission Notes
+        </Text>
+        <TextInput
+          style={[
+            styles.input,
+            {
+              backgroundColor: isDark ? '#0A0A0A' : '#F9FAFB',
+              color: colors.text,
+              borderColor: dividerColor,
+            },
+          ]}
+          placeholder="Add any observations or issues encountered..."
+          placeholderTextColor={colors.textSecondary}
+          multiline
+          numberOfLines={4}
+          value={notes}
+          onChangeText={setNotes}
+          textAlignVertical="top"
+        />
+
+        <View style={{ marginTop: 'auto', paddingBottom: 20 }}>
           <Button
-            title="Cancel"
-            variant="outline"
-            className="flex-1"
-            onPress={() => (ref as React.RefObject<BottomSheet>)?.current?.close()}
-          />
-          <Button
-            title="🛑 End Patrol"
-            variant="danger"
-            className="flex-1"
+            title="Complete Mission"
             onPress={handleEndPatrol}
             loading={endMutation.isPending}
+            variant="primary"
           />
         </View>
       </View>
@@ -100,3 +133,48 @@ export const EndPatrolSheet = forwardRef<BottomSheet, EndPatrolSheetProps>(({ pa
 });
 
 EndPatrolSheet.displayName = 'EndPatrolSheet';
+
+const styles = StyleSheet.create({
+  statsGrid: {
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderRadius: 12,
+    marginBottom: 24,
+    overflow: 'hidden',
+  },
+  statItem: {
+    flex: 1,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  statLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  statValue: {
+    fontSize: 28,
+    fontWeight: '700',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 14,
+    minHeight: 100,
+    fontSize: 15,
+  },
+});

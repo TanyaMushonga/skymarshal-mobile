@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { TodayStats } from '@/types/api';
@@ -8,75 +8,110 @@ interface Props {
   stats: TodayStats;
 }
 
+type StatItemProps = {
+  label: string;
+  value: number;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
+  iconColor: string;
+  iconBg: string;
+  isLast?: boolean;
+};
+
 export const TodayPerformanceGrid = ({ stats }: Props) => {
   const { colors, isDark } = useTheme();
 
-  const StatCard = ({
-    label,
-    value,
-    icon,
-    color,
-  }: {
-    label: string;
-    value: number;
-    icon: any;
-    color: string;
-  }) => (
+  const dividerColor = isDark ? '#1F1F1F' : '#E8E8E8';
+
+  const StatItem = ({ label, value, icon, iconColor, iconBg, isLast }: StatItemProps) => (
     <View
-      style={[
-        styles.card,
-        { backgroundColor: isDark ? '#0A0A0A' : '#FFFFFF' },
-        !isDark && styles.shadow,
-        isDark && { borderColor: '#1A1A1A', borderWidth: 1 },
-      ]}
-      className="flex-1 items-center justify-center rounded-3xl p-4">
-      <View style={{ backgroundColor: color + '20' }} className="mb-2 rounded-full p-2">
-        <Ionicons name={icon} size={20} color={color} />
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        paddingVertical: 16,
+        borderRightWidth: isLast ? 0 : 1,
+        borderRightColor: dividerColor,
+      }}>
+      <View
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: 8,
+          backgroundColor: iconBg,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 8,
+        }}>
+        <Ionicons name={icon} size={17} color={iconColor} />
       </View>
-      <Text className="text-2xl font-black" style={{ color: colors.text }}>
+      <Text
+        style={{
+          color: colors.text,
+          fontSize: 26,
+          fontWeight: '700',
+          letterSpacing: -1,
+          lineHeight: 30,
+        }}>
         {value}
       </Text>
       <Text
-        className="text-[10px] font-bold uppercase tracking-wider text-slate-500"
-        style={{ color: colors.textSecondary }}>
+        style={{
+          color: colors.textSecondary,
+          fontSize: 11,
+          fontWeight: '500',
+          letterSpacing: 0.4,
+          marginTop: 4,
+          textTransform: 'uppercase',
+        }}>
         {label}
       </Text>
     </View>
   );
 
   return (
-    <View className="mb-6">
-      <Text className="mb-4 text-xs font-black uppercase tracking-[2px] text-slate-500">
+    <View className="mb-8">
+      <Text
+        style={{
+          color: colors.textSecondary,
+          fontSize: 12,
+          fontWeight: '600',
+          letterSpacing: 0.8,
+          textTransform: 'uppercase',
+          marginBottom: 12,
+          paddingHorizontal: 4,
+        }}>
         Today&apos;s Impact
       </Text>
-      <View className="flex-row gap-3">
-        <StatCard label="Patrols" value={stats.patrols} icon="map-outline" color={colors.primary} />
-        <StatCard
+
+      <View
+        style={{
+          flexDirection: 'row',
+          borderTopWidth: 1,
+          borderBottomWidth: 1,
+          borderColor: dividerColor,
+        }}>
+        <StatItem
+          label="Patrols"
+          value={stats.patrols}
+          icon="map-outline"
+          iconColor={colors.primary}
+          iconBg={isDark ? '#0D1F2D' : '#EFF6FF'}
+        />
+        <StatItem
           label="Detections"
           value={stats.detections}
           icon="layers-outline"
-          color={colors.primary}
+          iconColor={colors.primary}
+          iconBg={isDark ? '#0D1F2D' : '#EFF6FF'}
         />
-        <StatCard
+        <StatItem
           label="Violations"
           value={stats.violations}
           icon="alert-circle-outline"
-          color="#EF4444"
+          iconColor="#EF4444"
+          iconBg={isDark ? '#2A0F0F' : '#FEF2F2'}
+          isLast
         />
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    minHeight: 120,
-  },
-  shadow: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-});

@@ -1,67 +1,67 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, ScrollView } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import React from 'react';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-import BottomSheet from '@gorhom/bottom-sheet';
-
-import { Card, Badge, Button } from '@/components/ui';
-import { EndPatrolSheet } from '@/components/sheets/EndPatrolSheet';
-import { patrolsApi } from '@/api';
-import { useAuthStore } from '@/stores/authStore';
+import { safeFormatSnapshot } from '@/lib/dateUtils';
+import { patrolsApi, violationsApi } from '@/api';
 import { useTheme } from '@/contexts/ThemeContext';
-import { safeParseDate } from '@/lib/dateUtils';
 
-export default function ActivePatrolScreen() {
+const formatDuration = (seconds?: number) => {
+  if (!seconds) return '—';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+};
+
+const STATUS_CONFIG: Record<string, { color: string; darkBg: string; lightBg: string }> = {
+  COMPLETED: { color: '#3B82F6', darkBg: '#0D1525', lightBg: '#EFF6FF' },
+  ACTIVE: { color: '#10B981', darkBg: '#0D2A1A', lightBg: '#ECFDF5' },
+  CANCELLED: { color: '#6B7280', darkBg: '#1A1A1A', lightBg: '#F3F4F6' },
+};
+
+export default function PatrolDetailScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { colors, isDark } = useTheme();
-  const { user } = useAuthStore();
-  const endPatrolRef = useRef<BottomSheet>(null);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
-  const { data: patrol } = useQuery({
-    queryKey: ['activePatrol', user?.email],
-    queryFn: () => patrolsApi.getActive(user?.email || ''),
-    enabled: !!user?.email,
-    refetchInterval: 10000,
+  const { data: patrol, isLoading } = useQuery({
+    queryKey: ['patrol', id],
+    queryFn: () => patrolsApi.get(id),
+    enabled: !!id,
   });
 
-  useEffect(() => {
-    if (!patrol) return;
-    const parsedStart = safeParseDate(patrol.started_at);
-    if (!parsedStart) return;
-    const startTime = parsedStart.getTime();
-    const updateElapsed = () => {
-      setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
-    };
+  const { data: violations } = useQuery({
+    queryKey: ['violations', 'patrol', id],
+    queryFn: () => violationsApi.list({ patrol: id, limit: 20 }),
+    enabled: !!id,
+  });
 
-    updateElapsed();
-    const interval = setInterval(updateElapsed, 1000);
-    return () => clearInterval(interval);
-  }, [patrol]);
+  const divider = isDark ? '#1F1F1F' : '#E8E8E8';
+  const bg = isDark ? colors.background : '#FFFFFF';
 
-  const formatDuration = (seconds: number) => {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
+  const statusCfg = STATUS_CONFIG[patrol?.status ?? ''] ?? STATUS_CONFIG.CANCELLED;
 
-  const handleEndPatrol = useCallback(() => {
-    endPatrolRef.current?.expand();
-  }, []);
-
-  if (!patrol) {
+  // ─── Loading ───────────────────────────────────────────────────────────────
+  if (isLoading) {
     return (
-      <View
-        className="flex-1 items-center justify-center"
-        style={{ backgroundColor: colors.background }}>
-        <Ionicons name="car-outline" size={64} color={colors.textSecondary} />
-        <Text className="mt-4 text-lg" style={{ color: colors.textSecondary }}>
-          No active patrol
-        </Text>
-        <Button title="Go Back" variant="outline" className="mt-4" onPress={() => router.back()} />
-      </View>
+      <>
+        <Stack.Screen
+          options={{
+            headerShown: true,
+            headerStyle: { backgroundColor: bg },
+            headerShadowVisible: false,
+            headerTintColor: colors.text,
+            title: 'Patrol Details',
+            headerTitleStyle: { fontSize: 17, fontWeight: '600' },
+          }}
+        />
+        <View
+          style={{ flex: 1, backgroundColor: bg, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ color: colors.textSecondary, fontSize: 14 }}>Loading…</Text>
+        </View>
+      </>
     );
   }
 
@@ -70,134 +70,278 @@ export default function ActivePatrolScreen() {
       <Stack.Screen
         options={{
           headerShown: true,
-          headerStyle: { backgroundColor: isDark ? colors.surface : '#FFFFFF' },
+          headerStyle: { backgroundColor: bg },
+          headerShadowVisible: false,
           headerTintColor: colors.text,
-          title: 'Active Patrol',
+          title: `#${id?.slice(0, 8).toUpperCase()}`,
+          headerTitleStyle: { fontSize: 17, fontWeight: '600' },
         }}
       />
+
       <ScrollView
-        className="flex-1"
-        style={{ backgroundColor: isDark ? colors.background : '#F9FAFB' }}
-        contentContainerStyle={{ padding: 16 }}>
-        {/* Live Stats */}
-        <Card
-          variant="elevated"
-          className="mb-4"
-          style={
-            isDark
-              ? {
-                  borderLeftWidth: 4,
-                  borderLeftColor: '#10B981',
-                  backgroundColor: '#0A0A0A',
-                  borderColor: '#1A1A1A',
-                  borderWidth: 1,
-                }
-              : { borderLeftWidth: 4, borderLeftColor: '#10B981' }
-          }>
-          <View className="mb-4 flex-row items-center">
-            <View className="mr-3 h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-              <Ionicons name="radio" size={24} color="#10B981" />
-            </View>
-            <View className="flex-1">
-              <Text className="text-lg font-bold" style={{ color: colors.text }}>
-                PATROL IN PROGRESS
+        style={{ flex: 1, backgroundColor: bg }}
+        contentContainerStyle={{ paddingBottom: 48 }}
+        showsVerticalScrollIndicator={false}>
+        {/* ── Summary stat panel (dark) ────────────────────────────────── */}
+        <View
+          style={{
+            backgroundColor: isDark ? '#0A0A0A' : '#0F172A',
+          }}>
+          {/* Title row */}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingHorizontal: 20,
+              paddingTop: 20,
+              paddingBottom: 16,
+              borderBottomWidth: 1,
+              borderBottomColor: 'rgba(255,255,255,0.06)',
+            }}>
+            <View>
+              <Text
+                style={{
+                  color: 'rgba(255,255,255,0.4)',
+                  fontSize: 11,
+                  fontWeight: '600',
+                  letterSpacing: 0.8,
+                  textTransform: 'uppercase',
+                }}>
+                {patrol?.drone?.name ?? 'Drone'}
               </Text>
-              <Text style={{ color: colors.textSecondary }}>Drone: {patrol.drone?.name}</Text>
+              <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '600', marginTop: 2 }}>
+                {safeFormatSnapshot(patrol?.started_at, 'MMM d, yyyy · HH:mm')}
+              </Text>
             </View>
-            <Badge label="LIVE" variant="success" dot />
+            {/* Status chip */}
+            <View
+              style={{
+                paddingHorizontal: 9,
+                paddingVertical: 4,
+                borderRadius: 6,
+                backgroundColor: statusCfg.darkBg,
+              }}>
+              <Text
+                style={{
+                  color: statusCfg.color,
+                  fontSize: 11,
+                  fontWeight: '700',
+                  letterSpacing: 0.5,
+                  textTransform: 'uppercase',
+                }}>
+                {patrol?.status ?? '—'}
+              </Text>
+            </View>
           </View>
 
-          <View className="mb-4 items-center rounded-xl bg-gray-50 py-6 dark:bg-gray-800">
-            <Text style={{ color: colors.textSecondary }}>Duration</Text>
-            <Text className="text-5xl font-bold" style={{ color: colors.text }}>
-              {formatDuration(elapsedSeconds)}
+          {/* Duration */}
+          <View
+            style={{
+              alignItems: 'center',
+              paddingVertical: 24,
+              borderBottomWidth: 1,
+              borderBottomColor: 'rgba(255,255,255,0.06)',
+            }}>
+            <Text
+              style={{
+                color: '#FFFFFF',
+                fontSize: 44,
+                fontWeight: '700',
+                letterSpacing: -1.5,
+                lineHeight: 48,
+                fontVariant: ['tabular-nums'],
+              }}>
+              {formatDuration(patrol?.duration)}
+            </Text>
+            <Text
+              style={{
+                color: 'rgba(255,255,255,0.35)',
+                fontSize: 11,
+                fontWeight: '500',
+                letterSpacing: 1.2,
+                textTransform: 'uppercase',
+                marginTop: 6,
+              }}>
+              Total Duration
             </Text>
           </View>
 
-          <View className="flex-row">
+          {/* Detection / violation counts */}
+          <View style={{ flexDirection: 'row' }}>
             <View
-              className="flex-1 items-center rounded-xl p-4"
-              style={{ backgroundColor: isDark ? '#F59E0B10' : '#FEF3C7' }}>
-              <Ionicons name="eye-outline" size={24} color={colors.primary} />
-              <Text className="mt-1 text-3xl font-black" style={{ color: colors.primary }}>
-                {patrol.detection_count || 0}
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                paddingVertical: 18,
+                borderRightWidth: 1,
+                borderRightColor: 'rgba(255,255,255,0.06)',
+              }}>
+              <Text
+                style={{
+                  color: '#FFFFFF',
+                  fontSize: 28,
+                  fontWeight: '700',
+                  letterSpacing: -0.8,
+                  fontVariant: ['tabular-nums'],
+                }}>
+                {patrol?.detection_count ?? 0}
               </Text>
-              <Text style={{ color: colors.textSecondary, fontWeight: '600' }}>Detections</Text>
-            </View>
-            <View className="w-4" />
-            <View className="flex-1 items-center rounded-xl bg-red-50 p-4 dark:bg-red-900/10">
-              <Ionicons name="alert-circle-outline" size={24} color="#EF4444" />
-              <Text className="mt-1 text-3xl font-black text-red-600">
-                {patrol.violation_count || 0}
-              </Text>
-              <Text style={{ color: colors.textSecondary, fontWeight: '600' }}>Violations</Text>
-            </View>
-          </View>
-        </Card>
-
-        {/* Drone Telemetry */}
-        <Card
-          variant="elevated"
-          className="mb-4"
-          style={
-            isDark ? { backgroundColor: '#0A0A0A', borderColor: '#1A1A1A', borderWidth: 1 } : {}
-          }>
-          <Text className="mb-3 text-lg font-bold" style={{ color: colors.text }}>
-            Drone Status
-          </Text>
-          <View className="flex-row flex-wrap">
-            <View className="mb-4 w-1/2">
-              <Text style={{ color: colors.textSecondary }}>Battery</Text>
-              <View className="flex-row items-center">
-                <Ionicons
-                  name={
-                    (patrol.drone?.status?.battery_level || 0) > 50
-                      ? 'battery-full-outline'
-                      : 'battery-dead-outline'
-                  }
-                  size={20}
-                  color={(patrol.drone?.status?.battery_level || 0) > 20 ? '#10B981' : '#EF4444'}
-                />
-                <Text className="ml-2 text-lg font-bold" style={{ color: colors.text }}>
-                  {patrol.drone?.status?.battery_level || '--'}%
-                </Text>
-              </View>
-            </View>
-            <View className="mb-4 w-1/2">
-              <Text style={{ color: colors.textSecondary }}>Signal</Text>
-              <View className="flex-row items-center">
-                <Ionicons name="wifi" size={20} color="#10B981" />
-                <Text className="ml-2 text-lg font-semibold" style={{ color: colors.text }}>
-                  {patrol.drone?.status?.signal_strength || '--'}%
-                </Text>
-              </View>
-            </View>
-            <View className="w-1/2">
-              <Text style={{ color: colors.textSecondary }}>Altitude</Text>
-              <Text className="text-lg font-semibold" style={{ color: colors.text }}>
-                {patrol.drone?.altitude || '--'} m
+              <Text
+                style={{
+                  color: 'rgba(255,255,255,0.35)',
+                  fontSize: 10,
+                  fontWeight: '600',
+                  letterSpacing: 0.8,
+                  textTransform: 'uppercase',
+                  marginTop: 4,
+                }}>
+                Detections
               </Text>
             </View>
-            <View className="w-1/2">
-              <Text style={{ color: colors.textSecondary }}>Speed</Text>
-              <Text className="text-lg font-semibold" style={{ color: colors.text }}>
-                {patrol.drone?.speed || '--'} km/h
+            <View style={{ flex: 1, alignItems: 'center', paddingVertical: 18 }}>
+              <Text
+                style={{
+                  color: (patrol?.violation_count ?? 0) > 0 ? '#EF4444' : '#FFFFFF',
+                  fontSize: 28,
+                  fontWeight: '700',
+                  letterSpacing: -0.8,
+                  fontVariant: ['tabular-nums'],
+                }}>
+                {patrol?.violation_count ?? 0}
+              </Text>
+              <Text
+                style={{
+                  color: 'rgba(255,255,255,0.35)',
+                  fontSize: 10,
+                  fontWeight: '600',
+                  letterSpacing: 0.8,
+                  textTransform: 'uppercase',
+                  marginTop: 4,
+                }}>
+                Violations
               </Text>
             </View>
           </View>
-        </Card>
+        </View>
 
-        {/* End Patrol Button */}
-        <Button
-          title="End Patrol"
-          variant="danger"
-          size="lg"
-          onPress={handleEndPatrol}
-          icon={<Ionicons name="stop-circle-outline" size={24} color="#FFFFFF" />}
-        />
+        {/* ── Violations list ───────────────────────────────────────────── */}
+        <View style={{ marginTop: 24 }}>
+          <View style={{ paddingHorizontal: 20, marginBottom: 12 }}>
+            <Text
+              style={{
+                color: colors.textSecondary,
+                fontSize: 12,
+                fontWeight: '600',
+                letterSpacing: 0.8,
+                textTransform: 'uppercase',
+                paddingHorizontal: 4,
+              }}>
+              Violations ({violations?.count ?? 0})
+            </Text>
+          </View>
+
+          {violations?.results && violations.results.length > 0 ? (
+            <View style={{ borderTopWidth: 1, borderTopColor: divider }}>
+              {violations.results.map((violation, index) => {
+                const isLast = index === violations.results.length - 1;
+                return (
+                  <TouchableOpacity
+                    key={violation.id}
+                    onPress={() => router.push(`/violations/${violation.id}`)}
+                    activeOpacity={0.7}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        paddingVertical: 14,
+                        paddingHorizontal: 20,
+                        borderBottomWidth: isLast ? 0 : 1,
+                        borderBottomColor: divider,
+                      }}>
+                      {/* Icon */}
+                      <View
+                        style={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: 8,
+                          backgroundColor: isDark ? '#2A0F0F' : '#FEF2F2',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginRight: 12,
+                          flexShrink: 0,
+                        }}>
+                        <Ionicons name="warning-outline" size={18} color="#EF4444" />
+                      </View>
+
+                      {/* Content */}
+                      <View style={{ flex: 1 }}>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            gap: 8,
+                            marginBottom: 3,
+                          }}>
+                          <Text
+                            style={{
+                              color: colors.text,
+                              fontSize: 15,
+                              fontWeight: '500',
+                              fontVariant: ['tabular-nums'],
+                            }}>
+                            {violation.detection?.license_plate || '—'}
+                          </Text>
+                          <View
+                            style={{
+                              paddingHorizontal: 6,
+                              paddingVertical: 2,
+                              borderRadius: 4,
+                              backgroundColor: isDark ? '#2A0F0F' : '#FEE2E2',
+                            }}>
+                            <Text
+                              style={{
+                                color: '#EF4444',
+                                fontSize: 10,
+                                fontWeight: '700',
+                                letterSpacing: 0.5,
+                                textTransform: 'uppercase',
+                              }}>
+                              {violation.violation_type}
+                            </Text>
+                          </View>
+                        </View>
+                        <Text style={{ color: colors.textSecondary, fontSize: 13, lineHeight: 18 }}>
+                          {safeFormatSnapshot(violation.timestamp, 'HH:mm:ss')}
+                          {violation.recorded_speed ? ` · ${violation.recorded_speed} km/h` : ''}
+                        </Text>
+                      </View>
+
+                      <Ionicons name="chevron-forward" size={15} color={isDark ? '#333' : '#CCC'} />
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          ) : (
+            <View style={{ alignItems: 'center', paddingVertical: 48 }}>
+              <Ionicons name="shield-checkmark-outline" size={36} color="#10B981" />
+              <Text
+                style={{
+                  color: colors.textSecondary,
+                  fontSize: 15,
+                  fontWeight: '500',
+                  marginTop: 14,
+                }}>
+                No violations
+              </Text>
+              <Text style={{ color: isDark ? '#333' : '#CCC', fontSize: 13, marginTop: 4 }}>
+                Clean patrol record
+              </Text>
+            </View>
+          )}
+        </View>
       </ScrollView>
-
-      <EndPatrolSheet ref={endPatrolRef} patrol={patrol} />
     </>
   );
 }
