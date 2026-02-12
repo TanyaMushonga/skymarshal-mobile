@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   Platform,
   KeyboardAvoidingView,
   SafeAreaView,
@@ -39,36 +38,43 @@ export const BaseModal: React.FC<BaseModalProps> = ({
       onRequestClose={onClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1, backgroundColor: colors.background }}>
-        <SafeAreaView style={{ flex: 1 }}>
+        className="flex-1"
+        style={{ backgroundColor: colors.background }}>
+        <SafeAreaView className="flex-1">
           {/* Header */}
-          <View style={[styles.header, { borderBottomColor: isDark ? '#1F1F1F' : '#E8E8E8' }]}>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+          <View
+            className="flex-row items-center border-b px-5 py-4"
+            style={{ borderBottomColor: isDark ? '#1F1F1F' : '#E8E8E8' }}>
+            <View className="flex-1">
+              <Text className="text-xl font-bold tracking-tight" style={{ color: colors.text }}>
+                {title}
+              </Text>
               {subtitle && (
-                <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
+                <Text className="mt-0.5 text-[13px]" style={{ color: colors.textSecondary }}>
+                  {subtitle}
+                </Text>
               )}
             </View>
             <TouchableOpacity
               onPress={onClose}
-              style={[styles.closeButton, { backgroundColor: isDark ? '#1A1A1A' : '#F3F4F6' }]}>
+              className="h-8 w-8 items-center justify-center rounded-full"
+              style={{ backgroundColor: isDark ? '#1A1A1A' : '#F3F4F6' }}>
               <Ionicons name="close" size={20} color={colors.text} />
             </TouchableOpacity>
           </View>
 
           {/* Content */}
-          <View style={{ flex: 1 }}>{children}</View>
+          <View className="flex-1">{children}</View>
 
           {/* Footer */}
           {footer && (
             <View
-              style={[
-                styles.footer,
-                {
-                  borderTopColor: isDark ? '#1F1F1F' : '#E8E8E8',
-                  backgroundColor: colors.background,
-                },
-              ]}>
+              className="border-t px-5 pt-4"
+              style={{
+                borderTopColor: isDark ? '#1F1F1F' : '#E8E8E8',
+                backgroundColor: colors.background,
+                paddingBottom: Platform.OS === 'ios' ? 0 : 20,
+              }}>
               {footer}
             </View>
           )}
@@ -77,35 +83,3 @@ export const BaseModal: React.FC<BaseModalProps> = ({
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: 13,
-    marginTop: 2,
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  footer: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: Platform.OS === 'ios' ? 0 : 20,
-    borderTopWidth: 1,
-  },
-});

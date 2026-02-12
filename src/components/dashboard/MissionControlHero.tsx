@@ -36,157 +36,84 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
   if (!activePatrol) return null;
 
   const battery = activePatrol.battery_level || 0;
-
-  // Theme-aware styles
-  const cardBg = colors.surface;
   const borderColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
-  const textColor = colors.text;
-  const textSecondaryColor = colors.textSecondary;
   const liveBg = isDark ? 'rgba(16,185,129,0.12)' : 'rgba(16,185,129,0.1)';
 
   return (
     <View
+      className={`mb-6 overflow-hidden rounded-2xl border ${isDark ? 'border-transparent' : ''}`}
       style={{
-        backgroundColor: cardBg,
-        borderRadius: 16,
-        marginBottom: 24,
-        overflow: 'hidden',
-        borderWidth: isDark ? 0 : 1,
+        backgroundColor: colors.surface,
         borderColor: colors.border,
       }}>
       {/* Top bar */}
       <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingHorizontal: 20,
-          paddingTop: 18,
-          paddingBottom: 14,
-          borderBottomWidth: 1,
-          borderBottomColor: borderColor,
-        }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        className="flex-row items-center justify-between border-b px-5 pb-3.5 pt-[18px]"
+        style={{ borderBottomColor: borderColor }}>
+        <View className="flex-row items-center gap-2.5">
           <Ionicons name="airplane-outline" size={18} color={colors.warning} />
           <View>
             <Text
-              style={{
-                color: colors.warning,
-                fontSize: 10,
-                fontWeight: '700',
-                letterSpacing: 1.2,
-                textTransform: 'uppercase',
-              }}>
+              className="text-[10px] font-bold uppercase tracking-widest"
+              style={{ color: colors.warning }}>
               Mission Control
             </Text>
-            <Text style={{ color: textColor, fontSize: 15, fontWeight: '600', marginTop: 1 }}>
+            <Text className="mt-0.5 text-[15px] font-semibold" style={{ color: colors.text }}>
               {activePatrol.drone?.name || 'Active Drone'}
             </Text>
           </View>
         </View>
         {/* Live pill */}
         <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 5,
-            backgroundColor: liveBg,
-            borderRadius: 20,
-            paddingHorizontal: 10,
-            paddingVertical: 4,
-          }}>
-          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success }} />
-          <Text
-            style={{ color: colors.success, fontSize: 11, fontWeight: '700', letterSpacing: 0.8 }}>
-            LIVE
-          </Text>
+          className="flex-row items-center gap-1.5 rounded-full px-2.5 py-1"
+          style={{ backgroundColor: liveBg }}>
+          <View className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          <Text className="text-[11px] font-bold tracking-widest text-emerald-500">LIVE</Text>
         </View>
       </View>
 
       {/* Timer */}
-      <View
-        style={{
-          alignItems: 'center',
-          paddingVertical: 24,
-          borderBottomWidth: 1,
-          borderBottomColor: borderColor,
-        }}>
+      <View className="items-center border-b py-6" style={{ borderBottomColor: borderColor }}>
         <Text
-          style={{
-            color: textColor,
-            fontSize: 52,
-            fontWeight: '700',
-            letterSpacing: -2,
-            lineHeight: 56,
-            fontVariant: ['tabular-nums'],
-          }}>
+          className="text-[52px] font-bold leading-[56px] tracking-tighter"
+          style={{ color: colors.text, fontVariant: ['tabular-nums'] }}>
           {formatTime(timer)}
         </Text>
         <Text
-          style={{
-            color: textSecondaryColor,
-            fontSize: 11,
-            fontWeight: '500',
-            letterSpacing: 1.2,
-            textTransform: 'uppercase',
-            marginTop: 6,
-          }}>
+          className="mt-1.5 text-[11px] font-medium uppercase tracking-widest"
+          style={{ color: colors.textSecondary }}>
           Flight Duration
         </Text>
       </View>
 
       {/* Stats row */}
-      <View
-        style={{
-          flexDirection: 'row',
-          borderBottomWidth: 1,
-          borderBottomColor: borderColor,
-        }}>
+      <View className="flex-row border-b" style={{ borderBottomColor: borderColor }}>
         {/* Battery */}
-        <View
-          style={{
-            flex: 1.4,
-            padding: 16,
-            borderRightWidth: 1,
-            borderRightColor: borderColor,
-          }}>
+        <View className="flex-[1.4] border-r p-4" style={{ borderRightColor: borderColor }}>
           <Text
-            style={{
-              color: textSecondaryColor,
-              fontSize: 10,
-              fontWeight: '600',
-              letterSpacing: 0.8,
-              textTransform: 'uppercase',
-              marginBottom: 8,
-            }}>
+            className="mb-2 text-[10px] font-semibold uppercase tracking-widest"
+            style={{ color: colors.textSecondary }}>
             Battery
           </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 2, marginBottom: 8 }}>
+          <View className="mb-2 flex-row items-baseline gap-0.5">
             <Text
-              style={{
-                color: textColor,
-                fontSize: 20,
-                fontWeight: '700',
-                letterSpacing: -0.5,
-                fontVariant: ['tabular-nums'],
-              }}>
+              className="text-xl font-bold tracking-tighter"
+              style={{ color: colors.text, fontVariant: ['tabular-nums'] }}>
               {battery}
             </Text>
-            <Text style={{ color: textSecondaryColor, fontSize: 13 }}>%</Text>
+            <Text className="text-[13px]" style={{ color: colors.textSecondary }}>
+              %
+            </Text>
           </View>
           <View
-            style={{
-              height: 3,
-              backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
-              borderRadius: 2,
-              overflow: 'hidden',
-            }}>
+            className={`h-[3px] overflow-hidden rounded-full ${
+              isDark ? 'bg-white/10' : 'bg-black/5'
+            }`}>
             <View
+              className="h-full rounded-full"
               style={{
                 width: `${battery}%`,
-                height: '100%',
                 backgroundColor: batteryColor(battery),
-                borderRadius: 2,
               }}
             />
           </View>
@@ -194,95 +121,49 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
 
         {/* Detections */}
         <View
-          style={{
-            flex: 1,
-            padding: 16,
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRightWidth: 1,
-            borderRightColor: borderColor,
-          }}>
+          className="flex-1 items-center justify-center border-r p-4"
+          style={{ borderRightColor: borderColor }}>
           <Text
-            style={{
-              color: textColor,
-              fontSize: 28,
-              fontWeight: '700',
-              letterSpacing: -1,
-              fontVariant: ['tabular-nums'],
-            }}>
+            className="text-[28px] font-bold tracking-tighter"
+            style={{ color: colors.text, fontVariant: ['tabular-nums'] }}>
             {activePatrol.detection_count || 0}
           </Text>
           <Text
-            style={{
-              color: textSecondaryColor,
-              fontSize: 10,
-              fontWeight: '600',
-              letterSpacing: 0.8,
-              textTransform: 'uppercase',
-              marginTop: 4,
-            }}>
+            className="mt-1 text-[10px] font-semibold uppercase tracking-widest"
+            style={{ color: colors.textSecondary }}>
             Detections
           </Text>
         </View>
 
         {/* Violations */}
-        <View style={{ flex: 1, padding: 16, alignItems: 'center', justifyContent: 'center' }}>
+        <View className="flex-1 items-center justify-center p-4">
           <Text
-            style={{
-              color: colors.error,
-              fontSize: 28,
-              fontWeight: '700',
-              letterSpacing: -1,
-              fontVariant: ['tabular-nums'],
-            }}>
+            className="text-[28px] font-bold tracking-tighter text-red-500"
+            style={{ fontVariant: ['tabular-nums'] }}>
             {activePatrol.violation_count || 0}
           </Text>
           <Text
-            style={{
-              color: textSecondaryColor,
-              fontSize: 10,
-              fontWeight: '600',
-              letterSpacing: 0.8,
-              textTransform: 'uppercase',
-              marginTop: 4,
-            }}>
+            className="mt-1 text-[10px] font-semibold uppercase tracking-widest"
+            style={{ color: colors.textSecondary }}>
             Violations
           </Text>
         </View>
       </View>
 
       {/* Actions */}
-      <View style={{ flexDirection: 'row', padding: 16, gap: 12 }}>
+      <View className="flex-row gap-3 p-4">
         <TouchableOpacity
           onPress={onEndPatrol}
-          style={{
-            flex: 1,
-            paddingVertical: 13,
-            alignItems: 'center',
-            borderRadius: 10,
-            borderWidth: 1,
-            borderColor: isDark ? 'rgba(239,68,68,0.3)' : 'rgba(239,68,68,0.2)',
-            backgroundColor: isDark ? 'rgba(239,68,68,0.08)' : 'rgba(239,68,68,0.05)',
-          }}>
-          <Text style={{ color: colors.error, fontSize: 14, fontWeight: '600' }}>
-            Terminate Mission
-          </Text>
+          className={`flex-1 items-center rounded-xl border py-3 ${
+            isDark ? 'border-red-500/30 bg-red-500/10' : 'border-red-500/20 bg-red-50'
+          }`}>
+          <Text className="text-sm font-semibold text-red-500">Terminate Mission</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => router.push('/(tabs)/patrols/active')}
-          style={{
-            flex: 1,
-            paddingVertical: 13,
-            alignItems: 'center',
-            borderRadius: 10,
-            backgroundColor: colors.primary,
-          }}>
-          <Text
-            style={{
-              color: isDark ? '#000000' : '#FFFFFF',
-              fontSize: 14,
-              fontWeight: '700',
-            }}>
+          className="flex-1 items-center rounded-xl py-3"
+          style={{ backgroundColor: colors.primary }}>
+          <Text className={`text-sm font-bold ${isDark ? 'text-black' : 'text-white'}`}>
             Full Telemetry
           </Text>
         </TouchableOpacity>

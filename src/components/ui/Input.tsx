@@ -36,24 +36,25 @@ export function Input({
         <Text className="mb-2 text-xl font-medium text-gray-700 dark:text-gray-300">{label}</Text>
       )}
       <View
-        className={`flex-row items-center rounded-xl border-2 bg-white px-4 dark:bg-gray-800 ${
+        className={`flex-row items-center rounded-xl border-2 bg-white px-4 dark:bg-[#0A0A0A] ${
           error
             ? 'border-red-500'
             : isFocused
-              ? 'border-primary-500'
-              : 'border-gray-200 dark:border-gray-700'
+              ? 'border-amber-500'
+              : 'border-gray-100 dark:border-zinc-800'
         }`}>
         {leftIcon && (
-          <Ionicons
-            name={leftIcon}
-            size={24}
-            color={error ? '#EF4444' : isFocused ? '#F59E0B' : '#9CA3AF'}
-            style={{ marginRight: 12 }}
-          />
+          <View className="mr-3">
+            <Ionicons
+              name={leftIcon}
+              size={24}
+              color={error ? '#EF4444' : isFocused ? '#F59E0B' : '#9CA3AF'}
+            />
+          </View>
         )}
         <TextInput
-          className={`flex-1 py-4 text-xl text-gray-900 dark:text-white ${className}`}
-          placeholderTextColor="#9CA3AF"
+          className={`flex-1 py-4 text-lg text-gray-900 dark:text-white ${className}`}
+          placeholderTextColor="#6B7280"
           secureTextEntry={isPassword && !showPassword}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -74,14 +75,15 @@ export function Input({
           <TouchableOpacity
             onPress={onRightIconPress}
             disabled={!onRightIconPress}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            className="ml-2">
             <Ionicons name={rightIcon} size={24} color={error ? '#EF4444' : '#9CA3AF'} />
           </TouchableOpacity>
         )}
       </View>
-      {error && <Text className="mt-1 text-sm text-red-500">{error}</Text>}
+      {error && <Text className="mt-1 px-1 text-sm text-red-500">{error}</Text>}
       {hint && !error && (
-        <Text className="mt-1 text-sm text-gray-500 dark:text-gray-400">{hint}</Text>
+        <Text className="mt-1 px-1 text-sm text-gray-500 dark:text-gray-400">{hint}</Text>
       )}
     </View>
   );

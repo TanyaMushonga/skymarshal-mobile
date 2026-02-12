@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, type ViewProps } from 'react-native';
+import { View, type ViewProps } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface CardProps extends ViewProps {
@@ -16,58 +16,37 @@ export function Card({
   children,
   variant = 'default',
   padding = 'md',
+  className = '',
   style,
   ...props
 }: CardProps) {
   const { colors, isDark } = useTheme();
 
-  const bgColor: Record<CardProps['variant'] & string, string> = {
-    default: colors.surface,
-    elevated: colors.surface,
-    outlined: 'transparent',
-  };
-
-  const borderStyle =
-    variant === 'outlined' ? { borderWidth: 1, borderColor: isDark ? '#1F1F1F' : '#E8E8E8' } : {};
-
-  const shadowStyle =
-    variant === 'elevated' && !isDark
-      ? {
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.06,
-          shadowRadius: 8,
-          elevation: 2,
-        }
-      : variant === 'elevated' && isDark
-        ? { borderWidth: 1, borderColor: '#1F1F1F' }
-        : {};
-
   const paddingMap = {
-    none: 0,
-    sm: 12,
-    md: 16,
-    lg: 24,
+    none: 'p-0',
+    sm: 'p-3',
+    md: 'p-4',
+    lg: 'p-6',
   };
+
+  const shadowClasses =
+    variant === 'elevated'
+      ? isDark
+        ? 'border border-[#1F1F1F]'
+        : 'shadow-sm shadow-black/10 elevation-2'
+      : '';
+
+  const borderClasses =
+    variant === 'outlined' ? `border ${isDark ? 'border-[#1F1F1F]' : 'border-[#E8E8E8]'}` : '';
+
+  const bgStyle = variant === 'outlined' ? 'transparent' : colors.surface;
 
   return (
     <View
-      style={[
-        styles.base,
-        { backgroundColor: bgColor[variant], padding: paddingMap[padding] },
-        borderStyle,
-        shadowStyle,
-        style,
-      ]}
+      className={`overflow-hidden rounded-xl ${paddingMap[padding]} ${shadowClasses} ${borderClasses} ${className}`}
+      style={[{ backgroundColor: bgStyle }, style]}
       {...props}>
       {children}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-});

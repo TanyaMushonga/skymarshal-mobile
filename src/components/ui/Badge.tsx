@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, type ViewProps } from 'react-native';
+import { View, Text, type ViewProps } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
 
 type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info';
@@ -13,23 +13,37 @@ interface BadgeProps extends ViewProps {
   dot?: boolean;
 }
 
-// Per-variant: text colour, light bg, dark bg, dot colour
-const VARIANT_CONFIG: Record<BadgeVariant, { color: string; lightBg: string; darkBg: string }> = {
-  default: { color: '#6B7280', lightBg: '#F3F4F6', darkBg: '#1F1F1F' },
-  primary: { color: '#3B82F6', lightBg: '#EFF6FF', darkBg: '#0D1525' },
-  success: { color: '#10B981', lightBg: '#ECFDF5', darkBg: '#0D2A1A' },
-  warning: { color: '#F59E0B', lightBg: '#FFFBEB', darkBg: '#2A1A08' },
-  error: { color: '#EF4444', lightBg: '#FEF2F2', darkBg: '#2A0F0F' },
-  info: { color: '#6366F1', lightBg: '#EEF2FF', darkBg: '#12122A' },
+const VARIANT_CLASSES: Record<
+  BadgeVariant,
+  { text: string; bg: string; dot: string; darkBg: string }
+> = {
+  default: { text: 'text-gray-500', bg: 'bg-gray-100', dot: 'bg-gray-400', darkBg: 'bg-[#1F1F1F]' },
+  primary: { text: 'text-blue-500', bg: 'bg-blue-50', dot: 'bg-blue-400', darkBg: 'bg-[#0D1525]' },
+  success: {
+    text: 'text-emerald-500',
+    bg: 'bg-emerald-50',
+    dot: 'bg-emerald-400',
+    darkBg: 'bg-[#0D2A1A]',
+  },
+  warning: {
+    text: 'text-amber-500',
+    bg: 'bg-amber-50',
+    dot: 'bg-amber-400',
+    darkBg: 'bg-[#2A1A08]',
+  },
+  error: { text: 'text-red-500', bg: 'bg-red-50', dot: 'bg-red-400', darkBg: 'bg-[#2A0F0F]' },
+  info: {
+    text: 'text-indigo-500',
+    bg: 'bg-indigo-50',
+    dot: 'bg-indigo-400',
+    darkBg: 'bg-[#12122A]',
+  },
 };
 
-const SIZE_CONFIG: Record<
-  BadgeSize,
-  { px: number; py: number; fontSize: number; dotSize: number }
-> = {
-  sm: { px: 6, py: 2, fontSize: 10, dotSize: 5 },
-  md: { px: 8, py: 3, fontSize: 11, dotSize: 6 },
-  lg: { px: 10, py: 4, fontSize: 13, dotSize: 7 },
+const SIZE_CLASSES: Record<BadgeSize, { container: string; text: string; dot: string }> = {
+  sm: { container: 'px-1.5 py-0.5', text: 'text-[10px]', dot: 'w-1 h-1' },
+  md: { container: 'px-2 py-1', text: 'text-[11px]', dot: 'w-1.5 h-1.5' },
+  lg: { container: 'px-2.5 py-1', text: 'text-[13px]', dot: 'w-2 h-2' },
 };
 
 export function Badge({
@@ -37,62 +51,26 @@ export function Badge({
   variant = 'default',
   size = 'md',
   dot = false,
+  className = '',
   style,
   ...props
 }: BadgeProps) {
   const { isDark } = useTheme();
 
-  const cfg = VARIANT_CONFIG[variant];
-  const sz = SIZE_CONFIG[size];
-  const bg = isDark ? cfg.darkBg : cfg.lightBg;
+  const variantCfg = VARIANT_CLASSES[variant];
+  const sizeCfg = SIZE_CLASSES[size];
+  const bgClass = isDark ? variantCfg.darkBg : variantCfg.bg;
 
   return (
     <View
-      style={[
-        styles.base,
-        {
-          backgroundColor: bg,
-          paddingHorizontal: sz.px,
-          paddingVertical: sz.py,
-        },
-        style,
-      ]}
+      className={`flex-row items-center self-start rounded ${bgClass} ${sizeCfg.container} ${className}`}
+      style={style}
       {...props}>
-      {dot && (
-        <View
-          style={[
-            styles.dot,
-            {
-              width: sz.dotSize,
-              height: sz.dotSize,
-              borderRadius: sz.dotSize / 2,
-              backgroundColor: cfg.color,
-            },
-          ]}
-        />
-      )}
+      {dot && <View className={`mr-1 rounded-full ${variantCfg.dot} ${sizeCfg.dot}`} />}
       <Text
-        style={{
-          color: cfg.color,
-          fontSize: sz.fontSize,
-          fontWeight: '600',
-          letterSpacing: 0.3,
-          textTransform: 'uppercase',
-        }}>
+        className={`font-semibold uppercase tracking-widest ${variantCfg.text} ${sizeCfg.text}`}>
         {label}
       </Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 4,
-    alignSelf: 'flex-start',
-  },
-  dot: {
-    marginRight: 5,
-  },
-});

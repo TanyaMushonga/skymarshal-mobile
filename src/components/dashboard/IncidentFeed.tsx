@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { safeFormatDistanceToNow } from '@/lib/dateUtils';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Violation } from '@/types/api';
+import { useUIStore } from '@/stores/uiStore';
 
 interface Props {
   alerts: Violation[];
@@ -18,7 +19,7 @@ const SEVERITY_CONFIG: Record<string, { color: string; bg: string }> = {
 
 const IncidentItem = ({ item, isLast }: { item: Violation; isLast: boolean }) => {
   const { colors, isDark } = useTheme();
-  const router = useRouter();
+  const { openViolationDetail } = useUIStore();
   const scale = useRef(new Animated.Value(1)).current;
 
   const cfg = SEVERITY_CONFIG[item.severity || 'LOW'] || SEVERITY_CONFIG.LOW;
@@ -44,7 +45,7 @@ const IncidentItem = ({ item, isLast }: { item: Violation; isLast: boolean }) =>
       activeOpacity={1}
       onPressIn={onPressIn}
       onPressOut={onPressOut}
-      onPress={() => router.push(`/violations/${item.id}`)}>
+      onPress={() => openViolationDetail(item.id)}>
       <Animated.View
         style={{
           transform: [{ scale }],

@@ -29,9 +29,9 @@ export function Button({
   const baseStyles = 'flex-row items-center justify-center rounded-xl';
 
   const variantStyles = {
-    primary: 'bg-primary-500 active:bg-primary-600',
+    primary: 'bg-amber-500 active:bg-amber-600',
     secondary: 'bg-gray-800 dark:bg-gray-700 active:bg-gray-900',
-    outline: 'border-2 border-primary-500 bg-transparent active:bg-primary-50',
+    outline: 'border-2 border-amber-500 bg-transparent active:bg-amber-50',
     ghost: 'bg-transparent active:bg-gray-100 dark:active:bg-gray-800',
     danger: 'bg-red-500 active:bg-red-600',
   };
@@ -43,9 +43,9 @@ export function Button({
   };
 
   const textVariantStyles = {
-    primary: 'text-white font-semibold',
+    primary: 'text-black font-semibold',
     secondary: 'text-white font-semibold',
-    outline: 'text-primary-500 font-semibold',
+    outline: 'text-amber-500 font-semibold',
     ghost: 'text-gray-800 dark:text-gray-200 font-medium',
     danger: 'text-white font-semibold',
   };
@@ -68,7 +68,7 @@ export function Button({
       {...props}>
       {loading ? (
         <ActivityIndicator
-          color={variant === 'outline' || variant === 'ghost' ? '#F59E0B' : '#FFFFFF'}
+          color={variant === 'outline' || variant === 'ghost' ? '#F59E0B' : '#000000'}
           size="small"
         />
       ) : (

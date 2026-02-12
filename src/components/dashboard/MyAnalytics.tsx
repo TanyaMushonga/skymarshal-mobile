@@ -19,78 +19,60 @@ export const MyAnalytics = ({ stats }: Props) => {
     <View className="mb-8">
       {/* Section header */}
       <Text
-        style={{
-          color: colors.textSecondary,
-          fontSize: 12,
-          fontWeight: '600',
-          letterSpacing: 0.8,
-          textTransform: 'uppercase',
-          marginBottom: 12,
-          paddingHorizontal: 4,
-        }}>
+        className="mb-3 px-1 text-[12px] font-semibold uppercase tracking-widest"
+        style={{ color: colors.textSecondary }}>
         Officer Performance
       </Text>
 
       {/* Row: Hours patrolled */}
       <View
-        style={{ borderTopWidth: 1, borderTopColor: dividerColor }}
-        className="flex-row items-center px-1 py-4">
+        className="flex-row items-center border-t px-1 py-4"
+        style={{ borderTopColor: dividerColor }}>
         <View
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            backgroundColor: isDark ? '#1A2A3A' : '#EFF6FF',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginRight: 14,
-          }}>
+          className={`mr-3.5 h-9 w-9 items-center justify-center rounded-lg ${
+            isDark ? 'bg-blue-900/20' : 'bg-blue-50'
+          }`}>
           <Ionicons name="time-outline" size={20} color="#3B82F6" />
         </View>
         <View className="flex-1">
-          <Text style={{ color: colors.text, fontSize: 16, fontWeight: '500', lineHeight: 22 }}>
+          <Text className="text-base font-medium leading-[22px]" style={{ color: colors.text }}>
             Hours Patrolled
           </Text>
-          <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 1 }}>This week</Text>
+          <Text className="mt-0.5 text-[13px]" style={{ color: colors.textSecondary }}>
+            This week
+          </Text>
         </View>
-        <Text style={{ color: colors.text, fontSize: 22, fontWeight: '700', letterSpacing: -0.5 }}>
+        <Text className="text-[22px] font-bold tracking-tighter" style={{ color: colors.text }}>
           {stats.hours_patrolled_this_week}
-          <Text style={{ fontSize: 14, fontWeight: '500', color: colors.textSecondary }}>h</Text>
+          <Text className="text-sm font-medium" style={{ color: colors.textSecondary }}>
+            h
+          </Text>
         </Text>
       </View>
 
       {/* Row: Performance rating */}
       <View
-        style={{
-          borderTopWidth: 1,
-          borderTopColor: dividerColor,
-          borderBottomWidth: 1,
-          borderBottomColor: dividerColor,
-        }}
-        className="flex-row items-center px-1 py-4">
+        className="flex-row items-center border-b border-t px-1 py-4"
+        style={{ borderColor: dividerColor }}>
         <View
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            backgroundColor: isDark ? '#2A2010' : '#FFFBEB',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginRight: 14,
-          }}>
+          className={`mr-3.5 h-9 w-9 items-center justify-center rounded-lg ${
+            isDark ? 'bg-amber-900/20' : 'bg-amber-50'
+          }`}>
           <Ionicons name="star-outline" size={20} color="#F59E0B" />
         </View>
         <View className="flex-1">
-          <Text style={{ color: colors.text, fontSize: 16, fontWeight: '500', lineHeight: 22 }}>
+          <Text className="text-base font-medium leading-[22px]" style={{ color: colors.text }}>
             Performance Rating
           </Text>
-          <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 1 }}>
+          <Text className="mt-0.5 text-[13px]" style={{ color: colors.textSecondary }}>
             Overall score
           </Text>
         </View>
-        <Text style={{ color: colors.text, fontSize: 22, fontWeight: '700', letterSpacing: -0.5 }}>
+        <Text className="text-[22px] font-bold tracking-tighter" style={{ color: colors.text }}>
           {stats.performance_rating.toFixed(1)}
-          <Text style={{ fontSize: 14, fontWeight: '500', color: colors.textSecondary }}>/5</Text>
+          <Text className="text-sm font-medium" style={{ color: colors.textSecondary }}>
+            /5
+          </Text>
         </Text>
       </View>
     </View>

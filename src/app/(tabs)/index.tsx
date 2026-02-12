@@ -11,7 +11,10 @@ import {
 } from '@/components/dashboard';
 import { StartPatrolModal } from '@/components/modals/StartPatrolModal';
 import { EndPatrolModal } from '@/components/modals/EndPatrolModal';
+import { ViolationDetailModal } from '@/components/modals/ViolationDetailModal';
+import { DetectionDetailModal } from '@/components/modals/DetectionDetailModal';
 import { analyticsApi } from '@/api';
+import type { DashboardStats } from '@/types/api';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -25,7 +28,7 @@ export default function HomeScreen() {
     data: dashboard,
     isLoading,
     refetch,
-  } = useQuery({
+  } = useQuery<DashboardStats>({
     queryKey: ['dashboard'],
     queryFn: analyticsApi.getDashboard,
     refetchInterval: 30000,
@@ -105,6 +108,8 @@ export default function HomeScreen() {
         onClose={() => setIsEndModalVisible(false)}
         patrol={dashboard?.active_patrol}
       />
+      <ViolationDetailModal />
+      <DetectionDetailModal />
     </View>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Alert, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TextInput, Alert, ScrollView } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -65,56 +65,61 @@ export const EndPatrolModal: React.FC<EndPatrolModalProps> = ({ visible, onClose
       footer={footer}>
       <ScrollView contentContainerStyle={{ padding: 20 }}>
         {/* Stats Grid */}
-        <View style={[styles.statsGrid, { borderColor: dividerColor }]}>
-          <View style={[styles.statItem, { borderRightWidth: 1, borderRightColor: dividerColor }]}>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Detections</Text>
-            <Text style={[styles.statValue, { color: colors.text }]}>
+        <View
+          className="mb-6 flex-row overflow-hidden rounded-xl border"
+          style={{ borderColor: dividerColor }}>
+          <View
+            className="flex-1 items-center border-r py-4"
+            style={{ borderRightColor: dividerColor }}>
+            <Text
+              className="mb-1 text-[11px] font-bold uppercase tracking-widest"
+              style={{ color: colors.textSecondary }}>
+              Detections
+            </Text>
+            <Text className="text-[28px] font-bold" style={{ color: colors.text }}>
               {patrol.detection_count || 0}
             </Text>
           </View>
-          <View style={styles.statItem}>
-            <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Violations</Text>
-            <Text style={[styles.statValue, { color: '#EF4444' }]}>
+          <View className="flex-1 items-center py-4">
+            <Text
+              className="mb-1 text-[11px] font-bold uppercase tracking-widest"
+              style={{ color: colors.textSecondary }}>
+              Violations
+            </Text>
+            <Text className="text-[28px] font-bold text-red-500">
               {patrol.violation_count || 0}
             </Text>
           </View>
         </View>
 
         {/* Drone Info */}
-        <View style={styles.infoRow}>
-          <View style={[styles.iconContainer, { backgroundColor: isDark ? '#1A1A1A' : '#F3F4F6' }]}>
+        <View className="flex-row items-center">
+          <View
+            className="mr-4 h-11 w-11 items-center justify-center rounded-xl"
+            style={{ backgroundColor: isDark ? '#1A1A1A' : '#F3F4F6' }}>
             <Ionicons name="airplane-outline" size={20} color={colors.primary} />
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600' }}>
+          <View className="flex-1">
+            <Text className="text-base font-bold" style={{ color: colors.text }}>
               {patrol.drone?.name || 'Patrol Drone'}
             </Text>
-            <Text style={{ color: colors.textSecondary, fontSize: 13 }}>
+            <Text className="text-[13px]" style={{ color: colors.textSecondary }}>
               {patrol.drone?.model} · {patrol.drone?.serial_number}
             </Text>
           </View>
         </View>
 
         {/* Notes Input */}
-        <Text
-          style={{
-            color: colors.text,
-            fontSize: 14,
-            fontWeight: '600',
-            marginBottom: 10,
-            marginTop: 20,
-          }}>
+        <Text className="mb-2.5 mt-5 text-sm font-bold" style={{ color: colors.text }}>
           Mission Notes
         </Text>
         <TextInput
-          style={[
-            styles.input,
-            {
-              backgroundColor: isDark ? '#0A0A0A' : '#F9FAFB',
-              color: colors.text,
-              borderColor: dividerColor,
-            },
-          ]}
+          className="min-h-[120px] rounded-xl border p-3.5 text-[15px]"
+          style={{
+            backgroundColor: isDark ? '#0A0A0A' : '#F9FAFB',
+            color: colors.text,
+            borderColor: dividerColor,
+          }}
           placeholder="Add any observations or issues encountered..."
           placeholderTextColor={colors.textSecondary}
           multiline
@@ -127,48 +132,3 @@ export const EndPatrolModal: React.FC<EndPatrolModalProps> = ({ visible, onClose
     </BaseModal>
   );
 };
-
-const styles = StyleSheet.create({
-  statsGrid: {
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderRadius: 12,
-    marginBottom: 24,
-    overflow: 'hidden',
-  },
-  statItem: {
-    flex: 1,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  statLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginBottom: 4,
-  },
-  statValue: {
-    fontSize: 28,
-    fontWeight: '700',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  iconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 14,
-    minHeight: 120,
-    fontSize: 15,
-  },
-});

@@ -10,7 +10,7 @@ import { dronesApi, patrolsApi, authApi } from '@/api';
 import { usePatrolStore } from '@/stores/patrolStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
-import type { Drone } from '@/types/api';
+import type { Drone, StartPatrolRequest } from '@/types/api';
 
 interface StartPatrolModalProps {
   visible: boolean;
@@ -32,7 +32,7 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
   });
 
   const startMutation = useMutation({
-    mutationFn: patrolsApi.start,
+    mutationFn: (data: StartPatrolRequest) => patrolsApi.start(data),
     onSuccess: async (patrol) => {
       startPatrol(patrol);
 
@@ -80,68 +80,45 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
         onPress={() => isAvailable && setSelectedDrone(item)}
         disabled={!isAvailable}
         activeOpacity={0.7}
-        style={{ opacity: isAvailable ? 1 : 0.4 }}>
+        className={isAvailable ? 'opacity-100' : 'opacity-40'}>
         <View
+          className="mb-2 flex-row items-center rounded-xl border px-3 py-3.5"
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingVertical: 14,
-            paddingHorizontal: 12,
-            borderRadius: 12,
-            marginBottom: 8,
             backgroundColor: isSelected
               ? isDark
                 ? 'rgba(245, 158, 11, 0.1)'
                 : 'rgba(245, 158, 11, 0.05)'
               : 'transparent',
-            borderWidth: 1,
             borderColor: isSelected ? colors.primary : 'transparent',
           }}>
           <View
+            className="mr-3.5 h-5 w-5 items-center justify-center rounded-full border-2"
             style={{
-              width: 20,
-              height: 20,
-              borderRadius: 10,
-              borderWidth: 2,
               borderColor: isSelected ? colors.primary : isDark ? '#333' : '#CCC',
               backgroundColor: isSelected ? colors.primary : 'transparent',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: 14,
             }}>
-            {isSelected && (
-              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#fff' }} />
-            )}
+            {isSelected && <View className="h-2 w-2 rounded-full bg-white" />}
           </View>
 
           <View
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 8,
-              backgroundColor: isDark ? '#1A1A1A' : '#F3F4F6',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: 12,
-            }}>
+            className="mr-3 h-10 w-10 items-center justify-center rounded-lg"
+            style={{ backgroundColor: isDark ? '#1A1A1A' : '#F3F4F6' }}>
             <Ionicons name="airplane-outline" size={20} color={colors.primary} />
           </View>
 
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: colors.text, fontSize: 15, fontWeight: '500', lineHeight: 20 }}>
+          <View className="flex-1">
+            <Text className="text-[15px] font-medium leading-5" style={{ color: colors.text }}>
               {item.name}
             </Text>
-            <Text style={{ color: colors.textSecondary, fontSize: 13, marginTop: 1 }}>
+            <Text className="mt-0.5 text-[13px]" style={{ color: colors.textSecondary }}>
               {item.model} · {item.serial_number}
             </Text>
           </View>
 
-          <View style={{ alignItems: 'flex-end', gap: 4 }}>
+          <View className="items-end gap-1">
             <View
+              className="rounded px-2 py-0.5"
               style={{
-                paddingHorizontal: 8,
-                paddingVertical: 3,
-                borderRadius: 4,
                 backgroundColor: isAvailable
                   ? isDark
                     ? '#0D2A1A'
@@ -151,18 +128,16 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
                     : '#FFFBEB',
               }}>
               <Text
-                style={{
-                  fontSize: 11,
-                  fontWeight: '600',
-                  letterSpacing: 0.4,
-                  color: isAvailable ? '#10B981' : '#F59E0B',
-                }}>
+                className="text-[11px] font-semibold tracking-widest"
+                style={{ color: isAvailable ? '#10B981' : '#F59E0B' }}>
                 {isAvailable ? 'Available' : 'In Use'}
               </Text>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <View className="flex-row items-center gap-1">
               <Ionicons name="battery-half-outline" size={13} color={batteryColor} />
-              <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{batteryLevel}%</Text>
+              <Text className="text-xs" style={{ color: colors.textSecondary }}>
+                {batteryLevel}%
+              </Text>
             </View>
           </View>
         </View>
@@ -196,15 +171,9 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
         ListEmptyComponent={
-          <View style={{ alignItems: 'center', paddingVertical: 48 }}>
+          <View className="items-center py-12">
             <Ionicons name="airplane-outline" size={40} color={colors.textSecondary} />
-            <Text
-              style={{
-                color: colors.textSecondary,
-                fontSize: 14,
-                marginTop: 12,
-                fontWeight: '500',
-              }}>
+            <Text className="mt-3 text-sm font-medium" style={{ color: colors.textSecondary }}>
               {isLoading ? 'Loading drones…' : 'No drones available'}
             </Text>
           </View>

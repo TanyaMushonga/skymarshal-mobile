@@ -12,70 +12,35 @@ export const StartPatrolCTA = ({ onStart }: Props) => {
 
   return (
     <View
+      className={`mb-6 items-center rounded-2xl border p-6 ${isDark ? 'border-transparent' : ''}`}
       style={{
         backgroundColor: colors.surface,
-        borderRadius: 16,
-        padding: 24,
-        marginBottom: 24,
-        alignItems: 'center',
-        borderWidth: isDark ? 0 : 1,
         borderColor: colors.border,
       }}>
       <View
-        style={{
-          width: 64,
-          height: 64,
-          borderRadius: 32,
-          backgroundColor: isDark ? 'rgba(212, 175, 55, 0.1)' : 'rgba(212, 175, 55, 0.05)',
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 16,
-        }}>
+        className={`mb-4 h-16 w-16 items-center justify-center rounded-full ${
+          isDark ? 'bg-amber-500/10' : 'bg-amber-500/5'
+        }`}>
         <Ionicons name="shield-checkmark-outline" size={32} color={colors.warning} />
       </View>
 
-      <Text
-        style={{
-          color: colors.text,
-          fontSize: 20,
-          fontWeight: '700',
-          textAlign: 'center',
-          marginBottom: 8,
-        }}>
+      <Text className="mb-2 text-center text-xl font-bold" style={{ color: colors.text }}>
         No Active Patrol
       </Text>
 
       <Text
-        style={{
-          color: colors.textSecondary,
-          fontSize: 14,
-          textAlign: 'center',
-          marginBottom: 24,
-          lineHeight: 20,
-          paddingHorizontal: 20,
-        }}>
+        className="mb-6 px-5 text-center text-sm leading-5"
+        style={{ color: colors.textSecondary }}>
         You are currently off-duty. Start a new patrol to monitor your assigned sector.
       </Text>
 
       <TouchableOpacity
         onPress={onStart}
         activeOpacity={0.8}
-        style={{
-          backgroundColor: colors.primary,
-          paddingHorizontal: 32,
-          paddingVertical: 14,
-          borderRadius: 12,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 10,
-        }}>
+        className="flex-row items-center gap-2.5 rounded-xl px-8 py-3.5"
+        style={{ backgroundColor: colors.primary }}>
         <Ionicons name="play" size={18} color={isDark ? '#000' : '#FFF'} />
-        <Text
-          style={{
-            color: isDark ? '#000' : '#FFF',
-            fontSize: 16,
-            fontWeight: '700',
-          }}>
+        <Text className="text-base font-bold" style={{ color: isDark ? '#000' : '#FFF' }}>
           Initiate Patrol
         </Text>
       </TouchableOpacity>

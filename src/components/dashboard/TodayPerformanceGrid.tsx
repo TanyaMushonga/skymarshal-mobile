@@ -24,44 +24,21 @@ export const TodayPerformanceGrid = ({ stats }: Props) => {
 
   const StatItem = ({ label, value, icon, iconColor, iconBg, isLast }: StatItemProps) => (
     <View
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        paddingVertical: 16,
-        borderRightWidth: isLast ? 0 : 1,
-        borderRightColor: dividerColor,
-      }}>
+      className={`flex-1 items-center py-4 ${isLast ? '' : 'border-r'}`}
+      style={{ borderRightColor: dividerColor }}>
       <View
-        style={{
-          width: 32,
-          height: 32,
-          borderRadius: 8,
-          backgroundColor: iconBg,
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 8,
-        }}>
+        className="mb-2 h-8 w-8 items-center justify-center rounded-lg"
+        style={{ backgroundColor: iconBg }}>
         <Ionicons name={icon} size={17} color={iconColor} />
       </View>
       <Text
-        style={{
-          color: colors.text,
-          fontSize: 26,
-          fontWeight: '700',
-          letterSpacing: -1,
-          lineHeight: 30,
-        }}>
+        className="leading-7.5 text-[26px] font-bold tracking-tighter"
+        style={{ color: colors.text }}>
         {value}
       </Text>
       <Text
-        style={{
-          color: colors.textSecondary,
-          fontSize: 11,
-          fontWeight: '500',
-          letterSpacing: 0.4,
-          marginTop: 4,
-          textTransform: 'uppercase',
-        }}>
+        className="mt-1 text-[11px] font-medium uppercase tracking-widest"
+        style={{ color: colors.textSecondary }}>
         {label}
       </Text>
     </View>
@@ -70,25 +47,12 @@ export const TodayPerformanceGrid = ({ stats }: Props) => {
   return (
     <View className="mb-8">
       <Text
-        style={{
-          color: colors.textSecondary,
-          fontSize: 12,
-          fontWeight: '600',
-          letterSpacing: 0.8,
-          textTransform: 'uppercase',
-          marginBottom: 12,
-          paddingHorizontal: 4,
-        }}>
+        className="mb-3 px-1 text-[12px] font-semibold uppercase tracking-widest"
+        style={{ color: colors.textSecondary }}>
         Today&apos;s Impact
       </Text>
 
-      <View
-        style={{
-          flexDirection: 'row',
-          borderTopWidth: 1,
-          borderBottomWidth: 1,
-          borderColor: dividerColor,
-        }}>
+      <View className="flex-row border-b border-t" style={{ borderColor: dividerColor }}>
         <StatItem
           label="Patrols"
           value={stats.patrols}
