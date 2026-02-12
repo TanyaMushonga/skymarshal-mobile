@@ -178,4 +178,12 @@ export const authApi = {
     await setUserData(response.data);
     return response.data;
   },
+
+  /**
+   * Toggle officer duty status
+   */
+  async toggleDuty(): Promise<{ is_on_duty: boolean; detail: string }> {
+    const response = await api.post<{ is_on_duty: boolean; detail: string }>(endpoints.TOGGLE_DUTY);
+    return response.data;
+  },
 };
