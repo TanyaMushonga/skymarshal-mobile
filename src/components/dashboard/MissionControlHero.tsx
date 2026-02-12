@@ -12,7 +12,7 @@ interface Props {
 
 export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
   const router = useRouter();
-  const { isDark } = useTheme();
+  const { colors, isDark } = useTheme();
   const [timer, setTimer] = useState(activePatrol?.flight_duration_seconds || 0);
 
   useEffect(() => {
@@ -36,10 +36,24 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
   if (!activePatrol) return null;
 
   const battery = activePatrol.battery_level || 0;
-  const bg = isDark ? '#0A0A0A' : '#0F172A';
+
+  // Theme-aware styles
+  const cardBg = colors.surface;
+  const borderColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
+  const textColor = colors.text;
+  const textSecondaryColor = colors.textSecondary;
+  const liveBg = isDark ? 'rgba(16,185,129,0.12)' : 'rgba(16,185,129,0.1)';
 
   return (
-    <View style={{ backgroundColor: bg, borderRadius: 16, marginBottom: 24, overflow: 'hidden' }}>
+    <View
+      style={{
+        backgroundColor: cardBg,
+        borderRadius: 16,
+        marginBottom: 24,
+        overflow: 'hidden',
+        borderWidth: isDark ? 0 : 1,
+        borderColor: colors.border,
+      }}>
       {/* Top bar */}
       <View
         style={{
@@ -50,14 +64,14 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
           paddingTop: 18,
           paddingBottom: 14,
           borderBottomWidth: 1,
-          borderBottomColor: 'rgba(255,255,255,0.06)',
+          borderBottomColor: borderColor,
         }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <Ionicons name="airplane-outline" size={18} color="#F59E0B" />
+          <Ionicons name="airplane-outline" size={18} color={colors.warning} />
           <View>
             <Text
               style={{
-                color: '#F59E0B',
+                color: colors.warning,
                 fontSize: 10,
                 fontWeight: '700',
                 letterSpacing: 1.2,
@@ -65,7 +79,7 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
               }}>
               Mission Control
             </Text>
-            <Text style={{ color: '#FFFFFF', fontSize: 15, fontWeight: '600', marginTop: 1 }}>
+            <Text style={{ color: textColor, fontSize: 15, fontWeight: '600', marginTop: 1 }}>
               {activePatrol.drone?.name || 'Active Drone'}
             </Text>
           </View>
@@ -76,13 +90,14 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
             flexDirection: 'row',
             alignItems: 'center',
             gap: 5,
-            backgroundColor: 'rgba(16,185,129,0.12)',
+            backgroundColor: liveBg,
             borderRadius: 20,
             paddingHorizontal: 10,
             paddingVertical: 4,
           }}>
-          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#10B981' }} />
-          <Text style={{ color: '#10B981', fontSize: 11, fontWeight: '700', letterSpacing: 0.8 }}>
+          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success }} />
+          <Text
+            style={{ color: colors.success, fontSize: 11, fontWeight: '700', letterSpacing: 0.8 }}>
             LIVE
           </Text>
         </View>
@@ -94,11 +109,11 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
           alignItems: 'center',
           paddingVertical: 24,
           borderBottomWidth: 1,
-          borderBottomColor: 'rgba(255,255,255,0.06)',
+          borderBottomColor: borderColor,
         }}>
         <Text
           style={{
-            color: '#FFFFFF',
+            color: textColor,
             fontSize: 52,
             fontWeight: '700',
             letterSpacing: -2,
@@ -109,7 +124,7 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
         </Text>
         <Text
           style={{
-            color: 'rgba(255,255,255,0.4)',
+            color: textSecondaryColor,
             fontSize: 11,
             fontWeight: '500',
             letterSpacing: 1.2,
@@ -125,7 +140,7 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
         style={{
           flexDirection: 'row',
           borderBottomWidth: 1,
-          borderBottomColor: 'rgba(255,255,255,0.06)',
+          borderBottomColor: borderColor,
         }}>
         {/* Battery */}
         <View
@@ -133,11 +148,11 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
             flex: 1.4,
             padding: 16,
             borderRightWidth: 1,
-            borderRightColor: 'rgba(255,255,255,0.06)',
+            borderRightColor: borderColor,
           }}>
           <Text
             style={{
-              color: 'rgba(255,255,255,0.4)',
+              color: textSecondaryColor,
               fontSize: 10,
               fontWeight: '600',
               letterSpacing: 0.8,
@@ -149,7 +164,7 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
           <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 2, marginBottom: 8 }}>
             <Text
               style={{
-                color: '#FFFFFF',
+                color: textColor,
                 fontSize: 20,
                 fontWeight: '700',
                 letterSpacing: -0.5,
@@ -157,12 +172,12 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
               }}>
               {battery}
             </Text>
-            <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>%</Text>
+            <Text style={{ color: textSecondaryColor, fontSize: 13 }}>%</Text>
           </View>
           <View
             style={{
               height: 3,
-              backgroundColor: 'rgba(255,255,255,0.08)',
+              backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
               borderRadius: 2,
               overflow: 'hidden',
             }}>
@@ -185,11 +200,11 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
             alignItems: 'center',
             justifyContent: 'center',
             borderRightWidth: 1,
-            borderRightColor: 'rgba(255,255,255,0.06)',
+            borderRightColor: borderColor,
           }}>
           <Text
             style={{
-              color: '#FFFFFF',
+              color: textColor,
               fontSize: 28,
               fontWeight: '700',
               letterSpacing: -1,
@@ -199,7 +214,7 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
           </Text>
           <Text
             style={{
-              color: 'rgba(255,255,255,0.4)',
+              color: textSecondaryColor,
               fontSize: 10,
               fontWeight: '600',
               letterSpacing: 0.8,
@@ -214,7 +229,7 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
         <View style={{ flex: 1, padding: 16, alignItems: 'center', justifyContent: 'center' }}>
           <Text
             style={{
-              color: '#EF4444',
+              color: colors.error,
               fontSize: 28,
               fontWeight: '700',
               letterSpacing: -1,
@@ -224,7 +239,7 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
           </Text>
           <Text
             style={{
-              color: 'rgba(255,255,255,0.4)',
+              color: textSecondaryColor,
               fontSize: 10,
               fontWeight: '600',
               letterSpacing: 0.8,
@@ -246,10 +261,10 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
             alignItems: 'center',
             borderRadius: 10,
             borderWidth: 1,
-            borderColor: 'rgba(239,68,68,0.3)',
-            backgroundColor: 'rgba(239,68,68,0.08)',
+            borderColor: isDark ? 'rgba(239,68,68,0.3)' : 'rgba(239,68,68,0.2)',
+            backgroundColor: isDark ? 'rgba(239,68,68,0.08)' : 'rgba(239,68,68,0.05)',
           }}>
-          <Text style={{ color: '#EF4444', fontSize: 14, fontWeight: '600' }}>
+          <Text style={{ color: colors.error, fontSize: 14, fontWeight: '600' }}>
             Terminate Mission
           </Text>
         </TouchableOpacity>
@@ -260,9 +275,16 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
             paddingVertical: 13,
             alignItems: 'center',
             borderRadius: 10,
-            backgroundColor: '#F59E0B',
+            backgroundColor: colors.primary,
           }}>
-          <Text style={{ color: '#000000', fontSize: 14, fontWeight: '700' }}>Full Telemetry</Text>
+          <Text
+            style={{
+              color: isDark ? '#000000' : '#FFFFFF',
+              fontSize: 14,
+              fontWeight: '700',
+            }}>
+            Full Telemetry
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, forwardRef } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import BottomSheet, {
   BottomSheetBackdrop,
+  BottomSheetModal,
   BottomSheetView,
   type BottomSheetProps,
 } from '@gorhom/bottom-sheet';
@@ -15,7 +16,7 @@ interface BaseSheetProps extends Partial<BottomSheetProps> {
   enablePanDownToClose?: boolean;
 }
 
-export const BaseSheet = forwardRef<BottomSheet, BaseSheetProps>(
+export const BaseSheet = forwardRef<BottomSheetModal, BaseSheetProps>(
   (
     {
       title,
@@ -62,9 +63,9 @@ export const BaseSheet = forwardRef<BottomSheet, BaseSheetProps>(
     );
 
     return (
-      <BottomSheet
+      <BottomSheetModal
         ref={ref}
-        index={-1}
+        index={0}
         snapPoints={snapPoints}
         enablePanDownToClose={enablePanDownToClose}
         backdropComponent={renderBackdrop}
@@ -99,7 +100,7 @@ export const BaseSheet = forwardRef<BottomSheet, BaseSheetProps>(
           )}
           {children}
         </BottomSheetView>
-      </BottomSheet>
+      </BottomSheetModal>
     );
   }
 );

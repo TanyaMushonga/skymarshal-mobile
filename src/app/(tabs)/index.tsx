@@ -1,13 +1,14 @@
 import React, { useRef, useCallback, useEffect } from 'react';
 import { ScrollView, RefreshControl, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import BottomSheet from '@gorhom/bottom-sheet';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
 
 import {
   MissionControlHero,
   TodayPerformanceGrid,
   IncidentFeed,
   MyAnalytics,
+  StartPatrolCTA,
 } from '@/components/dashboard';
 import { StartPatrolSheet } from '@/components/sheets/StartPatrolSheet';
 import { EndPatrolSheet } from '@/components/sheets/EndPatrolSheet';
@@ -18,8 +19,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 export default function HomeScreen() {
   const { colors, isDark } = useTheme();
   const { user } = useAuthStore();
-  const startPatrolRef = useRef<BottomSheet>(null);
-  const endPatrolRef = useRef<BottomSheet>(null);
+  const startPatrolRef = useRef<BottomSheetModal>(null);
+  const endPatrolRef = useRef<BottomSheetModal>(null);
 
   const {
     data: dashboard,
@@ -54,7 +55,11 @@ export default function HomeScreen() {
   }, [dashboard?.today_stats?.violations]);
 
   const handleEndPatrol = useCallback(() => {
-    endPatrolRef.current?.expand();
+    endPatrolRef.current?.present();
+  }, []);
+
+  const handleStartPatrol = useCallback(() => {
+    startPatrolRef.current?.present();
   }, []);
 
   return (
@@ -72,11 +77,13 @@ export default function HomeScreen() {
           />
         }>
         {/* Mission Control Hero (Active Patrol) */}
-        {dashboard?.active_patrol && (
+        {dashboard?.active_patrol ? (
           <MissionControlHero
             activePatrol={dashboard.active_patrol}
             onEndPatrol={handleEndPatrol}
           />
+        ) : (
+          <StartPatrolCTA onStart={handleStartPatrol} />
         )}
 
         {/* Today's Performance Grid */}

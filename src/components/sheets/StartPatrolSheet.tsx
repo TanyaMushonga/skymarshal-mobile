@@ -1,20 +1,24 @@
 import React, { forwardRef, useMemo, useCallback, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
-import BottomSheet from '@gorhom/bottom-sheet';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { BottomSheetModal, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 import { BaseSheet } from './BaseSheet';
 import { Button, Badge } from '@/components/ui';
-import { dronesApi, patrolsApi } from '@/api';
+import { dronesApi, patrolsApi, authApi } from '@/api';
 import { usePatrolStore } from '@/stores/patrolStore';
+import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
 import type { Drone } from '@/types/api';
 
-export const StartPatrolSheet = forwardRef<BottomSheet>((_, ref) => {
+export const StartPatrolSheet = forwardRef<BottomSheetModal>((_, ref) => {
   const { colors, isDark } = useTheme();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { startPatrol } = usePatrolStore();
+  const { user, setUser } = useAuthStore();
   const [selectedDrone, setSelectedDrone] = useState<Drone | null>(null);
 
   const { data: drones, isLoading } = useQuery({
@@ -24,11 +28,28 @@ export const StartPatrolSheet = forwardRef<BottomSheet>((_, ref) => {
 
   const startMutation = useMutation({
     mutationFn: patrolsApi.start,
-    onSuccess: (patrol) => {
+    onSuccess: async (patrol) => {
       startPatrol(patrol);
+
+      // Auto-toggle duty to On Duty if not already
+      if (user && !user.is_on_duty) {
+        try {
+          const result = await authApi.toggleDuty();
+          setUser({ ...user, is_on_duty: result.is_on_duty });
+        } catch (error) {
+          console.error('[StartPatrolSheet] Failed to toggle duty:', error);
+        }
+      }
+
       queryClient.invalidateQueries({ queryKey: ['activePatrol'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
-      (ref as React.RefObject<BottomSheet>)?.current?.close();
+      (ref as React.RefObject<BottomSheetModal>)?.current?.dismiss();
+
+      router.push({
+        pathname: '/(tabs)/patrols/active',
+        params: { id: patrol.id },
+      });
+
       Alert.alert('Patrol Started', 'Your patrol has been initiated successfully.');
     },
     onError: (error: any) => {
@@ -47,7 +68,7 @@ export const StartPatrolSheet = forwardRef<BottomSheet>((_, ref) => {
   const snapPoints = useMemo(() => ['70%'], []);
   const dividerColor = isDark ? '#1F1F1F' : '#E8E8E8';
 
-  const renderDrone = ({ item, index }: { item: Drone; index: number }) => {
+  const renderDrone = ({ item }: { item: Drone }) => {
     const isSelected = selectedDrone?.id === item.id;
     const isAvailable = !item.current_patrol;
     const batteryLevel = item.status?.battery_level || 85;
@@ -65,9 +86,16 @@ export const StartPatrolSheet = forwardRef<BottomSheet>((_, ref) => {
             flexDirection: 'row',
             alignItems: 'center',
             paddingVertical: 14,
-            paddingHorizontal: 4,
-            borderBottomWidth: 1,
-            borderBottomColor: dividerColor,
+            paddingHorizontal: 12,
+            borderRadius: 12,
+            marginBottom: 8,
+            backgroundColor: isSelected
+              ? isDark
+                ? 'rgba(245, 158, 11, 0.1)'
+                : 'rgba(245, 158, 11, 0.05)'
+              : 'transparent',
+            borderWidth: 1,
+            borderColor: isSelected ? colors.primary : 'transparent',
           }}>
           {/* Selection indicator */}
           <View
@@ -167,12 +195,12 @@ export const StartPatrolSheet = forwardRef<BottomSheet>((_, ref) => {
           Select an available drone to begin
         </Text>
 
-        <FlatList
+        <BottomSheetFlatList
           data={drones || []}
           renderItem={renderDrone}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item: Drone) => item.id}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{ paddingBottom: 120 }}
           ListEmptyComponent={
             <View style={{ alignItems: 'center', paddingVertical: 48 }}>
               <Ionicons name="airplane-outline" size={40} color={colors.textSecondary} />
@@ -189,12 +217,34 @@ export const StartPatrolSheet = forwardRef<BottomSheet>((_, ref) => {
           }
         />
 
-        <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}>
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: -20,
+            right: -20,
+            paddingTop: 16,
+            paddingBottom: 32,
+            paddingHorizontal: 20,
+            backgroundColor: isDark ? colors.surface : '#FFF',
+            borderTopWidth: 1,
+            borderTopColor: dividerColor,
+            elevation: 10,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+          }}>
           <Button
-            title="Start Patrol"
+            title={
+              selectedDrone
+                ? `Initiate Mission with ${selectedDrone.name}`
+                : 'Select a Drone to Start'
+            }
             onPress={handleStartPatrol}
             loading={startMutation.isPending}
             disabled={!selectedDrone}
+            variant="primary"
           />
         </View>
       </View>
