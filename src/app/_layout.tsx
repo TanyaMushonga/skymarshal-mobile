@@ -9,6 +9,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { useAuthStore } from '@/stores/authStore';
 import { setAuthFailureListener } from '@/api/client';
+import { useToast } from '@/hooks/useToast';
+import ToastModal from '@/components/common/ToastModal';
 
 import '../../global.css';
 
@@ -93,9 +95,15 @@ export default function RootLayout() {
           <ThemeProvider>
             <StatusBar style="auto" />
             <RootLayoutNav />
+            <GlobalToasts />
           </ThemeProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
+}
+
+function GlobalToasts() {
+  const { toasts, hideToast, isVisible } = useToast();
+  return <ToastModal visible={isVisible} toasts={toasts} onClose={hideToast} />;
 }

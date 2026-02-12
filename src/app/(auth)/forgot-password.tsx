@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { Button, Input } from '@/components/ui';
 import { authApi } from '@/api';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useToast } from '@/hooks/useToast';
 
 const forgotPasswordSchema = z.object({
   identifier: z.string().min(1, 'Email or Force Number is required'),
@@ -19,13 +20,13 @@ type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
 export default function ForgotPasswordScreen() {
   const router = useRouter();
   const { colors, isDark } = useTheme();
+  const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-    getValues,
   } = useForm<ForgotPasswordForm>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: { identifier: '' },
@@ -45,7 +46,7 @@ export default function ForgotPasswordScreen() {
       });
     } catch (error: any) {
       const message = error.response?.data?.detail || 'Failed to send reset code.';
-      Alert.alert('Error', message);
+      showToast('error', 'Error', message);
     } finally {
       setIsLoading(false);
     }

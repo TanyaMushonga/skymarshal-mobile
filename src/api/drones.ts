@@ -24,9 +24,10 @@ export const dronesApi = {
    */
   async getAvailable(): Promise<Drone[]> {
     const response = await api.get<PaginatedResponse<Drone>>(endpoints.DRONES, {
-      params: { 'status.status': 'online' },
+      params: { status: 'online' },
     });
-    return response.data.results.filter((d) => !d.current_patrol);
+    // Double filter to ensure data integrity
+    return response.data.results.filter((d) => !d.current_patrol && d.status?.status === 'online');
   },
 
   /**
@@ -41,7 +42,7 @@ export const dronesApi = {
    * Get GPS locations for a drone
    */
   async getGPS(id: string, limit = 100): Promise<DroneGPS[]> {
-    const response = await api.get<DroneGPS[]>(endpoints.DRONE_GPS(id), {
+    const response = await api.get<DroneGPS[]>(endpoints.DRONE_HISTORY(id), {
       params: { limit },
     });
     return response.data;

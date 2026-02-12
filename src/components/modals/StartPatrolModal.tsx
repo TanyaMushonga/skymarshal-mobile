@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, TouchableOpacity, Alert, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -10,6 +10,7 @@ import { dronesApi, patrolsApi, authApi } from '@/api';
 import { usePatrolStore } from '@/stores/patrolStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useToast } from '@/hooks/useToast';
 import type { Drone, StartPatrolRequest } from '@/types/api';
 
 interface StartPatrolModalProps {
@@ -23,6 +24,7 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
   const queryClient = useQueryClient();
   const { startPatrol } = usePatrolStore();
   const { user, setUser } = useAuthStore();
+  const { showToast } = useToast();
   const [selectedDrone, setSelectedDrone] = useState<Drone | null>(null);
 
   const { data: drones, isLoading } = useQuery({
@@ -54,33 +56,28 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
         params: { id: patrol.id },
       });
 
-      Alert.alert('Patrol Started', 'Your patrol has been initiated successfully.');
+      showToast('success', 'Patrol Started', 'Your patrol has been initiated successfully.');
     },
     onError: (error: any) => {
-      Alert.alert('Error', error.response?.data?.detail || 'Failed to start patrol');
+      showToast('error', 'Error', error.response?.data?.detail || 'Failed to start patrol');
     },
   });
 
   const handleStartPatrol = useCallback(() => {
     if (!selectedDrone) {
-      Alert.alert('Select Drone', 'Please select a drone to start patrol');
+      showToast('warning', 'Select Drone', 'Please select a drone to start patrol');
       return;
     }
-    startMutation.mutate({ drone_id: selectedDrone.id });
-  }, [selectedDrone, startMutation]);
+    startMutation.mutate({ drone_id: selectedDrone.drone_id });
+  }, [selectedDrone, startMutation, showToast]);
 
   const renderDrone = ({ item }: { item: Drone }) => {
     const isSelected = selectedDrone?.id === item.id;
-    const isAvailable = !item.current_patrol;
     const batteryLevel = item.status?.battery_level || 85;
     const batteryColor = batteryLevel > 50 ? '#10B981' : batteryLevel > 20 ? '#F59E0B' : '#EF4444';
 
     return (
-      <TouchableOpacity
-        onPress={() => isAvailable && setSelectedDrone(item)}
-        disabled={!isAvailable}
-        activeOpacity={0.7}
-        className={isAvailable ? 'opacity-100' : 'opacity-40'}>
+      <TouchableOpacity onPress={() => setSelectedDrone(item)} activeOpacity={0.7}>
         <View
           className="mb-2 flex-row items-center rounded-xl border px-3 py-3.5"
           style={{
@@ -119,18 +116,12 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
             <View
               className="rounded px-2 py-0.5"
               style={{
-                backgroundColor: isAvailable
-                  ? isDark
-                    ? '#0D2A1A'
-                    : '#ECFDF5'
-                  : isDark
-                    ? '#2A1A08'
-                    : '#FFFBEB',
+                backgroundColor: isDark ? '#0D2A1A' : '#ECFDF5',
               }}>
               <Text
                 className="text-[11px] font-semibold tracking-widest"
-                style={{ color: isAvailable ? '#10B981' : '#F59E0B' }}>
-                {isAvailable ? 'Available' : 'In Use'}
+                style={{ color: '#10B981' }}>
+                Available
               </Text>
             </View>
             <View className="flex-row items-center gap-1">

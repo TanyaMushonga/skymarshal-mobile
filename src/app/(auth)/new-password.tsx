@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -10,6 +10,7 @@ import { Button, Input } from '@/components/ui';
 import { authApi } from '@/api';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useToast } from '@/hooks/useToast';
 
 const newPasswordSchema = z
   .object({
@@ -32,6 +33,7 @@ export default function NewPasswordScreen() {
   const router = useRouter();
   const { token } = useLocalSearchParams<{ token: string }>();
   const { colors, isDark } = useTheme();
+  const { showToast } = useToast();
   const { requiresPasswordChange, setRequiresPasswordChange } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -81,13 +83,12 @@ export default function NewPasswordScreen() {
           new_password: data.password,
           confirm_password: data.confirmPassword,
         });
-        Alert.alert('Success', 'Password reset successfully!', [
-          { text: 'OK', onPress: () => router.replace('/(auth)/login') },
-        ]);
+        showToast('success', 'Success', 'Password reset successfully!');
+        router.replace('/(auth)/login');
       }
     } catch (error: any) {
       const message = error.response?.data?.detail || 'Failed to update password.';
-      Alert.alert('Error', message);
+      showToast('error', 'Error', message);
     } finally {
       setIsLoading(false);
     }

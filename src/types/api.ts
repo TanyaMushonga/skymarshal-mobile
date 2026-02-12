@@ -79,6 +79,7 @@ export interface DroneStatusInfo {
 
 export interface Drone {
   id: string;
+  drone_id: string;
   name: string;
   model: string;
   serial_number: string;

@@ -1,16 +1,18 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, Alert } from 'react-native';
+import { View, Text, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
 import { Button } from '@/components/ui';
 import { authApi } from '@/api';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useToast } from '@/hooks/useToast';
 
 export default function VerifyResetScreen() {
   const router = useRouter();
   const { identifier } = useLocalSearchParams<{ identifier: string }>();
   const { colors, isDark } = useTheme();
+  const { showToast } = useToast();
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const inputRefs = useRef<(TextInput | null)[]>([]);
@@ -41,7 +43,7 @@ export default function VerifyResetScreen() {
   const handleSubmit = async (codeString?: string) => {
     const fullCode = codeString || code.join('');
     if (fullCode.length !== 6) {
-      Alert.alert('Error', 'Please enter the 6-digit code');
+      showToast('warning', 'Error', 'Please enter the 6-digit code');
       return;
     }
 
@@ -60,7 +62,7 @@ export default function VerifyResetScreen() {
       });
     } catch (error: any) {
       const message = error.response?.data?.detail || 'Invalid code. Please try again.';
-      Alert.alert('Verification Failed', message);
+      showToast('error', 'Verification Failed', message);
       setCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
     } finally {

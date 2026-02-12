@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, ScrollView } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui';
 import { patrolsApi } from '@/api';
 import { usePatrolStore } from '@/stores/patrolStore';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useToast } from '@/hooks/useToast';
 import type { Patrol } from '@/types/api';
 
 interface EndPatrolModalProps {
@@ -20,6 +21,7 @@ export const EndPatrolModal: React.FC<EndPatrolModalProps> = ({ visible, onClose
   const { colors, isDark } = useTheme();
   const queryClient = useQueryClient();
   const { endPatrol } = usePatrolStore();
+  const { showToast } = useToast();
   const [notes, setNotes] = useState('');
 
   const endMutation = useMutation({
@@ -31,10 +33,14 @@ export const EndPatrolModal: React.FC<EndPatrolModalProps> = ({ visible, onClose
       queryClient.invalidateQueries({ queryKey: ['patrols'] });
       onClose();
       setNotes('');
-      Alert.alert('Patrol Completed', 'The patrol session has been summarized and closed.');
+      showToast(
+        'success',
+        'Patrol Completed',
+        'The patrol session has been summarized and closed.'
+      );
     },
     onError: (error: any) => {
-      Alert.alert('Error', error.response?.data?.detail || 'Failed to end patrol');
+      showToast('error', 'Error', error.response?.data?.detail || 'Failed to end patrol');
     },
   });
 

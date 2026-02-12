@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 
 import { Card, Badge, Button } from '@/components/ui';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -22,19 +23,12 @@ export default function ProfileScreen() {
     setNotificationsEnabled,
     setBiometricEnabled,
   } = useSettingsStore();
+  const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
 
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: async () => {
-          await logout();
-          router.replace('/(auth)/login');
-        },
-      },
-    ]);
+  const handleLogout = async () => {
+    setShowLogoutConfirm(false);
+    await logout();
+    router.replace('/(auth)/login');
   };
 
   const settingsSections = [
@@ -257,10 +251,20 @@ export default function ProfileScreen() {
           title="Logout"
           variant="danger"
           icon={<Ionicons name="log-out-outline" size={20} color="#FFFFFF" />}
-          onPress={handleLogout}
+          onPress={() => setShowLogoutConfirm(true)}
           className="mt-4"
         />
       </ScrollView>
+
+      <ConfirmationModal
+        visible={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={handleLogout}
+        title="Logout"
+        message="Are you sure you want to logout from SkyMarshal?"
+        confirmLabel="Logout"
+        variant="danger"
+      />
     </SafeAreaView>
   );
 }

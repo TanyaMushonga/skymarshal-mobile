@@ -6,8 +6,6 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
-  Alert,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -23,7 +21,6 @@ import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useToast } from '@/hooks/useToast';
-import ToastModal from '@/components/common/ToastModal';
 import { getErrorMessage } from '@/utils/errorHelper';
 
 const loginSchema = z.object({
@@ -38,7 +35,7 @@ export default function LoginScreen() {
   const { colors, isDark } = useTheme();
   const { setUser, setRequires2FA, setRequiresPasswordChange } = useAuthStore();
   const { biometricEnabled } = useSettingsStore();
-  const { toasts, showToast, hideToast, isVisible } = useToast();
+  const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [biometricType, setBiometricType] = useState<string | null>(null);
 
@@ -78,7 +75,7 @@ export default function LoginScreen() {
 
     if (result.success) {
       // Biometric auth successful, use stored credentials
-      Alert.alert('Success', 'Biometric authentication successful');
+      showToast('success', 'Success', 'Biometric authentication successful');
     }
   };
 
@@ -142,7 +139,7 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled">
           <View className="flex-1 px-6 py-12">
             {/* Logo Section */}
-            <View className="mb-12 items-sta">
+            <View className="items-sta mb-12">
               <Text className="text-3xl font-bold text-black dark:text-white">SkyMarshal</Text>
               <Text className="mt-2 text-lg leading-6" style={{ color: colors.textSecondary }}>
                 Secure access for authorized personnel to manage deployments, monitor live
@@ -192,7 +189,7 @@ export default function LoginScreen() {
             <TouchableOpacity
               className="mb-6 self-end"
               onPress={() => router.push('/(auth)/forgot-password')}>
-              <Text className="text-primary-500 text-lg font-medium">Forgot Password?</Text>
+              <Text className="text-lg font-medium text-primary-500">Forgot Password?</Text>
             </TouchableOpacity>
 
             {/* Login Button */}
@@ -222,8 +219,6 @@ export default function LoginScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
-      <ToastModal visible={isVisible} toasts={toasts} onClose={hideToast} />
     </SafeAreaView>
   );
 }

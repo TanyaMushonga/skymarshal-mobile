@@ -1,22 +1,12 @@
-import { useState, useCallback } from 'react';
-import { ToastType, ToastMessage } from '@/components/common/Toast';
+import { useToastStore } from '@/stores/toastStore';
 
 export const useToast = () => {
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
-
-  const showToast = useCallback((type: ToastType, heading: string, message: string) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, type, heading, message }]);
-  }, []);
-
-  const hideToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  }, []);
+  const { toasts, showToast, hideToast, isVisible } = useToastStore();
 
   return {
     toasts,
     showToast,
     hideToast,
-    isVisible: toasts.length > 0,
+    isVisible,
   };
 };
