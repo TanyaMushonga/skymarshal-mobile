@@ -1,11 +1,6 @@
 import React, { useCallback, useMemo, forwardRef } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetView,
-  type BottomSheetProps,
-} from '@gorhom/bottom-sheet';
+import { BottomSheetBackdrop, BottomSheetModal, type BottomSheetProps } from '@gorhom/bottom-sheet';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface BaseSheetProps extends Partial<BottomSheetProps> {
@@ -14,6 +9,7 @@ interface BaseSheetProps extends Partial<BottomSheetProps> {
   children: React.ReactNode;
   snapPoints?: (string | number)[];
   enablePanDownToClose?: boolean;
+  footerComponent?: React.FC<any>;
 }
 
 export const BaseSheet = forwardRef<BottomSheetModal, BaseSheetProps>(
@@ -24,6 +20,7 @@ export const BaseSheet = forwardRef<BottomSheetModal, BaseSheetProps>(
       children,
       snapPoints: customSnapPoints,
       enablePanDownToClose = true,
+      footerComponent,
       ...props
     },
     ref
@@ -67,12 +64,14 @@ export const BaseSheet = forwardRef<BottomSheetModal, BaseSheetProps>(
         ref={ref}
         index={0}
         snapPoints={snapPoints}
+        enableDynamicSizing={false}
         enablePanDownToClose={enablePanDownToClose}
         backdropComponent={renderBackdrop}
         handleIndicatorStyle={handleIndicatorStyle}
         backgroundStyle={backgroundStyle}
+        footerComponent={footerComponent}
         {...props}>
-        <BottomSheetView style={styles.contentContainer}>
+        <View style={styles.contentContainer}>
           {title && (
             <View style={styles.header}>
               <Text
@@ -99,7 +98,7 @@ export const BaseSheet = forwardRef<BottomSheetModal, BaseSheetProps>(
             </View>
           )}
           {children}
-        </BottomSheetView>
+        </View>
       </BottomSheetModal>
     );
   }
@@ -111,12 +110,11 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 10,
   },
   header: {
-    paddingBottom: 16,
+    paddingBottom: 3,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: 'rgba(0,0,0,0.08)',
-    marginBottom: 16,
   },
 });

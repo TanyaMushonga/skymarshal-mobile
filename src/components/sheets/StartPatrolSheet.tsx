@@ -1,6 +1,6 @@
 import React, { forwardRef, useMemo, useCallback, useState } from 'react';
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
-import { BottomSheetModal, BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import { View, Text, TouchableOpacity, Alert, Platform } from 'react-native';
+import { BottomSheetModal, BottomSheetFlatList, BottomSheetFooter } from '@gorhom/bottom-sheet';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -65,8 +65,42 @@ export const StartPatrolSheet = forwardRef<BottomSheetModal>((_, ref) => {
     startMutation.mutate({ drone_id: selectedDrone.id });
   }, [selectedDrone, startMutation]);
 
-  const snapPoints = useMemo(() => ['70%'], []);
+  const snapPoints = useMemo(() => ['50%'], []);
   const dividerColor = isDark ? '#1F1F1F' : '#E8E8E8';
+
+  const renderFooter = useCallback(
+    (props: any) => (
+      <BottomSheetFooter {...props} bottomInset={Platform.OS === 'ios' ? 34 : 20}>
+        <View
+          style={{
+            paddingTop: 16,
+            paddingBottom: Platform.OS === 'ios' ? 0 : 12,
+            paddingHorizontal: 20,
+            backgroundColor: isDark ? colors.surface : '#FFF',
+            borderTopWidth: 1,
+            borderTopColor: dividerColor,
+            elevation: 10,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+          }}>
+          <Button
+            title={
+              selectedDrone
+                ? `Initiate Mission with ${selectedDrone.name}`
+                : 'Select a Drone to Start'
+            }
+            onPress={handleStartPatrol}
+            loading={startMutation.isPending}
+            disabled={!selectedDrone}
+            variant="primary"
+          />
+        </View>
+      </BottomSheetFooter>
+    ),
+    [selectedDrone, handleStartPatrol, startMutation.isPending, colors, isDark, dividerColor]
+  );
 
   const renderDrone = ({ item }: { item: Drone }) => {
     const isSelected = selectedDrone?.id === item.id;
@@ -182,15 +216,18 @@ export const StartPatrolSheet = forwardRef<BottomSheetModal>((_, ref) => {
   };
 
   return (
-    <BaseSheet ref={ref} title="Start New Patrol" snapPoints={snapPoints}>
+    <BaseSheet
+      ref={ref}
+      title="Start New Patrol"
+      snapPoints={snapPoints}
+      footerComponent={renderFooter}>
       <View style={{ flex: 1 }}>
         {/* Sub-label */}
         <Text
           style={{
             color: colors.textSecondary,
-            fontSize: 13,
+            fontSize: 15,
             marginBottom: 16,
-            paddingHorizontal: 4,
           }}>
           Select an available drone to begin
         </Text>
@@ -200,7 +237,8 @@ export const StartPatrolSheet = forwardRef<BottomSheetModal>((_, ref) => {
           renderItem={renderDrone}
           keyExtractor={(item: Drone) => item.id}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 120 }}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingBottom: 100 }}
           ListEmptyComponent={
             <View style={{ alignItems: 'center', paddingVertical: 48 }}>
               <Ionicons name="airplane-outline" size={40} color={colors.textSecondary} />
@@ -216,37 +254,6 @@ export const StartPatrolSheet = forwardRef<BottomSheetModal>((_, ref) => {
             </View>
           }
         />
-
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: -20,
-            right: -20,
-            paddingTop: 16,
-            paddingBottom: 32,
-            paddingHorizontal: 20,
-            backgroundColor: isDark ? colors.surface : '#FFF',
-            borderTopWidth: 1,
-            borderTopColor: dividerColor,
-            elevation: 10,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: -4 },
-            shadowOpacity: 0.1,
-            shadowRadius: 8,
-          }}>
-          <Button
-            title={
-              selectedDrone
-                ? `Initiate Mission with ${selectedDrone.name}`
-                : 'Select a Drone to Start'
-            }
-            onPress={handleStartPatrol}
-            loading={startMutation.isPending}
-            disabled={!selectedDrone}
-            variant="primary"
-          />
-        </View>
       </View>
     </BaseSheet>
   );
