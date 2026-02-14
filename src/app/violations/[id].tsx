@@ -74,11 +74,11 @@ export default function ViolationDetailScreen() {
             <View className="items-center rounded-xl bg-red-50 py-4 dark:bg-red-900/20">
               <Text style={{ color: colors.textSecondary }}>Recorded Speed</Text>
               <Text className="text-4xl font-bold text-red-500">
-                {violation.recorded_speed} km/h
+                {violation?.recorded_speed} km/h
               </Text>
-              {violation.speed_limit && (
+              {violation?.speed_limit && (
                 <Text style={{ color: colors.textSecondary }}>
-                  Speed Limit: {violation.speed_limit} km/h
+                  Speed Limit: {violation?.speed_limit} km/h
                 </Text>
               )}
             </View>
@@ -107,7 +107,7 @@ export default function ViolationDetailScreen() {
               <Text style={{ color: colors.textSecondary }}>Confidence</Text>
               <Text className="text-lg font-semibold" style={{ color: colors.text }}>
                 {violation?.detection?.confidence
-                  ? `${(violation.detection.confidence * 100).toFixed(1)}%`
+                  ? `${(violation?.detection?.confidence * 100).toFixed(1)}%`
                   : 'N/A'}
               </Text>
             </View>
@@ -129,7 +129,7 @@ export default function ViolationDetailScreen() {
             <Ionicons name="location" size={20} color="#EF4444" />
             <Text className="ml-2 flex-1" style={{ color: colors.text }}>
               {violation?.detection?.gps
-                ? `${violation.detection.gps.latitude.toFixed(6)}, ${violation.detection.gps.longitude.toFixed(6)}`
+                ? `${violation?.detection?.gps?.latitude?.toFixed(6)}, ${violation?.detection?.gps?.longitude?.toFixed(6)}`
                 : 'Location unavailable'}
             </Text>
           </View>
