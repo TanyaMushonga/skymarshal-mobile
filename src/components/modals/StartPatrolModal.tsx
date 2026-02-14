@@ -2,7 +2,6 @@ import React, { useCallback, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 
 import { BaseModal } from '../ui/BaseModal';
 import { Button } from '@/components/ui';
@@ -11,6 +10,7 @@ import { usePatrolStore } from '@/stores/patrolStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useToast } from '@/hooks/useToast';
+import { useUIStore } from '@/stores/uiStore';
 import type { Drone, StartPatrolRequest } from '@/types/api';
 
 interface StartPatrolModalProps {
@@ -20,8 +20,8 @@ interface StartPatrolModalProps {
 
 export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onClose }) => {
   const { colors, isDark } = useTheme();
-  const router = useRouter();
   const queryClient = useQueryClient();
+  const { openTelemetry } = useUIStore();
   const { startPatrol } = usePatrolStore();
   const { user, setUser } = useAuthStore();
   const { showToast } = useToast();
@@ -51,10 +51,7 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       onClose();
 
-      router.push({
-        pathname: '/(tabs)/patrols/active',
-        params: { id: patrol.id },
-      });
+      openTelemetry(patrol.id);
 
       showToast('success', 'Patrol Started', 'Your patrol has been initiated successfully.');
     },
