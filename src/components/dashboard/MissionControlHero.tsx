@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useUIStore } from '@/stores/uiStore';
 import { DashboardStats } from '@/types/api';
 
 interface Props {
@@ -11,8 +10,8 @@ interface Props {
 }
 
 export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
-  const router = useRouter();
   const { colors, isDark } = useTheme();
+  const { openTelemetry } = useUIStore();
   const [timer, setTimer] = useState(activePatrol?.flight_duration_seconds || 0);
 
   useEffect(() => {
@@ -160,7 +159,7 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
           <Text className="text-sm font-semibold text-red-500">Terminate Mission</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => router.push(`/(tabs)/patrols/active?id=${activePatrol.id}`)}
+          onPress={() => openTelemetry(activePatrol.id)}
           className="flex-1 items-center rounded-xl py-3"
           style={{ backgroundColor: colors.primary }}>
           <Text className={`text-sm font-bold ${isDark ? 'text-black' : 'text-white'}`}>
