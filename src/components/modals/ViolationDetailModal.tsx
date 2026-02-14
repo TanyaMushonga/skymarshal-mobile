@@ -48,26 +48,33 @@ export const ViolationDetailModal: React.FC = () => {
             <View className="mb-4 flex-row items-center justify-between">
               <View>
                 <Text className="text-2xl font-bold" style={{ color: colors.text }}>
-                  {violation?.detection?.license_plate}
+                  {(violation?.detection as any)?.license_plate ||
+                    (violation as any)?.license_plate ||
+                    (violation as any)?.evidence_meta?.license_plate ||
+                    'SPEEDING'}
                 </Text>
                 <Text style={{ color: colors.textSecondary }}>
-                  {safeFormatSnapshot(violation?.timestamp)}
+                  {safeFormatSnapshot(violation?.timestamp || (violation as any)?.created_at)}
                 </Text>
               </View>
               <Badge label={violation?.violation_type || 'SPEEDING'} variant="error" />
             </View>
 
-            {violation?.recorded_speed && (
+            {(violation?.recorded_speed || (violation as any)?.evidence_meta?.violation_speed) && (
               <View
                 className="items-center rounded-xl p-4"
                 style={{ backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : '#FEF2F2' }}>
                 <Text style={{ color: colors.textSecondary }}>Recorded Speed</Text>
                 <Text className="text-[32px] font-extrabold text-[#EF4444]">
-                  {violation.recorded_speed} km/h
+                  {Math.round(
+                    violation?.recorded_speed || (violation as any)?.evidence_meta?.violation_speed
+                  )}{' '}
+                  km/h
                 </Text>
-                {violation.speed_limit && (
+                {(violation?.speed_limit || (violation as any)?.evidence_meta?.zone_limit) && (
                   <Text style={{ color: colors.textSecondary }}>
-                    Limit: {violation.speed_limit} km/h
+                    Limit: {violation?.speed_limit || (violation as any)?.evidence_meta?.zone_limit}{' '}
+                    km/h
                   </Text>
                 )}
               </View>
@@ -85,7 +92,9 @@ export const ViolationDetailModal: React.FC = () => {
                   License Plate
                 </Text>
                 <Text className="text-base font-semibold" style={{ color: colors.text }}>
-                  {violation?.detection?.license_plate}
+                  {(violation?.detection as any)?.license_plate ||
+                    (violation as any)?.license_plate ||
+                    '—'}
                 </Text>
               </View>
               <View className="mb-4 w-1/2">
@@ -93,7 +102,7 @@ export const ViolationDetailModal: React.FC = () => {
                   Vehicle Type
                 </Text>
                 <Text className="text-base font-semibold" style={{ color: colors.text }}>
-                  {violation?.detection?.vehicle_type || 'Car'}
+                  {(violation?.detection as any)?.vehicle_type || 'Car'}
                 </Text>
               </View>
               <View className="mb-4 w-1/2">
@@ -101,17 +110,85 @@ export const ViolationDetailModal: React.FC = () => {
                   Confidence
                 </Text>
                 <Text className="text-base font-semibold" style={{ color: colors.text }}>
-                  {violation?.detection?.confidence
-                    ? `${(violation.detection.confidence * 100).toFixed(1)}%`
+                  {(violation?.detection as any)?.confidence
+                    ? `${((violation?.detection as any).confidence * 100).toFixed(1)}%`
                     : 'N/A'}
                 </Text>
               </View>
               <View className="mb-4 w-1/2">
                 <Text className="mb-1 text-xs" style={{ color: colors.textSecondary }}>
-                  Model
+                  Frame Number
                 </Text>
                 <Text className="text-base font-semibold" style={{ color: colors.text }}>
-                  {violation?.detection?.vehicle_model || 'Unknown'}
+                  {(violation?.detection as any)?.frame_number || '—'}
+                </Text>
+              </View>
+            </View>
+          </Card>
+
+          {/* Location Info */}
+          <Card variant="elevated" className="mb-4 p-4">
+            <Text className="mb-3 text-base font-bold" style={{ color: colors.text }}>
+              📍 GPS Location
+            </Text>
+            <View className="flex-row flex-wrap">
+              <View className="mb-4 w-1/2">
+                <Text className="mb-1 text-xs" style={{ color: colors.textSecondary }}>
+                  Latitude
+                </Text>
+                <Text className="text-base font-semibold" style={{ color: colors.text }}>
+                  {(
+                    violation?.latitude ||
+                    (violation as any)?.evidence_meta?.coordinates?.lat ||
+                    '—'
+                  ).toString()}
+                </Text>
+              </View>
+              <View className="mb-4 w-1/2">
+                <Text className="mb-1 text-xs" style={{ color: colors.textSecondary }}>
+                  Longitude
+                </Text>
+                <Text className="text-base font-semibold" style={{ color: colors.text }}>
+                  {(
+                    violation?.longitude ||
+                    (violation as any)?.evidence_meta?.coordinates?.lon ||
+                    '—'
+                  ).toString()}
+                </Text>
+              </View>
+            </View>
+          </Card>
+
+          {/* Evidence Meta */}
+          <Card variant="elevated" className="mb-4 p-4">
+            <Text className="mb-3 text-base font-bold" style={{ color: colors.text }}>
+              📂 Evidence Metadata
+            </Text>
+            <View className="flex-row flex-wrap">
+              <View className="mb-4 w-1/2">
+                <Text className="mb-1 text-xs" style={{ color: colors.textSecondary }}>
+                  Altitude
+                </Text>
+                <Text className="text-base font-semibold" style={{ color: colors.text }}>
+                  {(violation as any)?.evidence_meta?.altitude
+                    ? `${Math.round((violation as any).evidence_meta.altitude)}m`
+                    : '—'}
+                </Text>
+              </View>
+              <View className="mb-4 w-1/2">
+                <Text className="mb-1 text-xs" style={{ color: colors.textSecondary }}>
+                  Patrol ID
+                </Text>
+                <Text className="text-base font-semibold" style={{ color: colors.text }}>
+                  {violation?.patrol?.slice(0, 8).toUpperCase() || '—'}
+                </Text>
+              </View>
+              <View className="w-1/2">
+                <Text className="mb-1 text-xs" style={{ color: colors.textSecondary }}>
+                  Drone Unit
+                </Text>
+                <Text className="text-base font-semibold" style={{ color: colors.text }}>
+                  {(violation as any)?.evidence_meta?.drone_id || '—'}
                 </Text>
               </View>
             </View>
