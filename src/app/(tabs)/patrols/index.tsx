@@ -1,13 +1,16 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, RefreshControl, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
+import {} from 'expo-router';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { safeFormatSnapshot } from '@/lib/dateUtils';
 import { patrolsApi } from '@/api';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useUIStore } from '@/stores/uiStore';
+import { PatrolDetailModal } from '@/components/modals/PatrolDetailModal';
+import { TelemetryModal } from '@/components/modals/TelemetryModal';
 import type { Patrol, PatrolStatus } from '@/types/api';
 
 const STATUS_CONFIG: Record<
@@ -27,33 +30,39 @@ const FILTERS: { label: string; value: PatrolStatus | 'ALL' }[] = [
 ];
 
 const formatDuration = (seconds?: number) => {
-  if (!seconds) return '—';
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (h === 0) return `${m}m`;
-  return `${h}h ${m}m`;
+  if (seconds === undefined || seconds === null) return '—';
+  const h = Math.floor(Math.abs(seconds) / 3600);
+  const m = Math.floor((Math.abs(seconds) % 3600) / 60);
+  const prefix = seconds < 0 ? '-' : '';
+  if (h === 0) return `${prefix}${m}m`;
+  return `${prefix}${h}h ${m}m`;
 };
 
 export default function PatrolsScreen() {
-  const router = useRouter();
   const { colors, isDark } = useTheme();
   const { user } = useAuthStore();
+  const { openPatrolDetail } = useUIStore();
   const [filter, setFilter] = useState<PatrolStatus | 'ALL'>('ALL');
 
-  const {
-    data: patrols,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['patrols', filter, user?.email],
-    queryFn: () =>
-      patrolsApi.list({
-        ...(filter !== 'ALL' && { status: filter }),
-        officer__email: user?.email,
-        limit: 50,
-      }),
-    enabled: !!user?.email,
-  });
+  const { data, isLoading, isFetchingNextPage, refetch, hasNextPage, fetchNextPage } =
+    useInfiniteQuery({
+      queryKey: ['patrols', filter, user?.email],
+      queryFn: ({ pageParam = 0 }) =>
+        patrolsApi.list({
+          ...(filter !== 'ALL' && { status: filter }),
+          officer__email: user?.email,
+          limit: 20,
+          offset: pageParam,
+        }),
+      getNextPageParam: (lastPage, allPages) => {
+        const currentOffset = allPages.length * 20;
+        return currentOffset < lastPage.count ? currentOffset : undefined;
+      },
+      enabled: !!user?.email,
+      initialPageParam: 0,
+    });
+
+  const patrols = data?.pages.flatMap((page) => page.results) || [];
 
   const divider = isDark ? '#1F1F1F' : '#E8E8E8';
   const bg = isDark ? colors.background : '#FFFFFF';
@@ -62,7 +71,7 @@ export default function PatrolsScreen() {
   const PatrolRow = ({ item, index }: { item: Patrol; index: number }) => {
     const scale = useRef(new Animated.Value(1)).current;
     const cfg = STATUS_CONFIG[item.status];
-    const isLast = index === (patrols?.results?.length ?? 0) - 1;
+    const isLast = index === patrols.length - 1;
 
     const onPressIn = () =>
       Animated.spring(scale, {
@@ -79,10 +88,7 @@ export default function PatrolsScreen() {
         friction: 12,
       }).start();
 
-    const handlePress = () =>
-      item.status === 'ACTIVE'
-        ? router.push('/(tabs)/patrols/active')
-        : router.push(`/(tabs)/patrols/${item.id}`);
+    const handlePress = () => openPatrolDetail(item.id);
 
     return (
       <TouchableOpacity
@@ -161,7 +167,7 @@ export default function PatrolsScreen() {
                 marginBottom: 6,
                 lineHeight: 18,
               }}>
-              {safeFormatSnapshot(item.started_at, 'MMM d, yyyy · HH:mm')}
+              {safeFormatSnapshot(item.start_time || item.started_at, 'MMM d, yyyy · HH:mm')}
             </Text>
 
             {/* Row 3: Stats inline */}
@@ -169,7 +175,11 @@ export default function PatrolsScreen() {
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                 <Ionicons name="time-outline" size={12} color={colors.textSecondary} />
                 <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
-                  {formatDuration(item.duration)}
+                  {formatDuration(
+                    item.flight_duration_seconds !== undefined
+                      ? item.flight_duration_seconds
+                      : item.duration
+                  )}
                 </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
@@ -255,13 +265,28 @@ export default function PatrolsScreen() {
       {/* List */}
       <View style={{ borderTopWidth: 0, flex: 1 }}>
         <FlatList
-          data={patrols?.results || []}
+          data={patrols}
           renderItem={({ item, index }) => <PatrolRow item={item} index={index} />}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ flexGrow: 1 }}
+          onEndReached={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}
+          onEndReachedThreshold={0.5}
           refreshControl={
             <RefreshControl refreshing={isLoading} onRefresh={refetch} tintColor={colors.primary} />
+          }
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <View style={{ paddingVertical: 20 }}>
+                <Text style={{ textAlign: 'center', color: colors.textSecondary }}>
+                  Loading more...
+                </Text>
+              </View>
+            ) : null
           }
           ListEmptyComponent={
             <View style={{ alignItems: 'center', paddingVertical: 64 }}>
@@ -284,6 +309,8 @@ export default function PatrolsScreen() {
           }
         />
       </View>
+      <PatrolDetailModal />
+      <TelemetryModal />
     </SafeAreaView>
   );
 }
