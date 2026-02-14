@@ -46,7 +46,7 @@ export const EndPatrolModal: React.FC<EndPatrolModalProps> = ({ visible, onClose
   const { data: fullPatrol, isLoading: isFetchingFull } = useQuery({
     queryKey: ['patrol', patrol?.id],
     queryFn: () => patrolsApi.get(patrol!.id),
-    enabled: visible && !!patrol?.id && (!patrol.officer || !patrol.drone),
+    enabled: visible && !!patrol?.id,
   });
 
   const displayPatrol = fullPatrol || patrol;
@@ -114,11 +114,11 @@ export const EndPatrolModal: React.FC<EndPatrolModalProps> = ({ visible, onClose
           </View>
           <View className="flex-1">
             <Text className="text-base font-bold" style={{ color: colors.text }}>
-              {displayPatrol?.drone?.name || 'Patrol Drone'}
+              {displayPatrol?.drone?.name || displayPatrol?.drone_id || 'Patrol Drone'}
             </Text>
             <Text className="text-[13px]" style={{ color: colors.textSecondary }}>
               {displayPatrol?.drone?.model || 'Generic Model'} ·{' '}
-              {displayPatrol?.drone?.serial_number || displayPatrol?.drone?.drone_id || 'N/A'}
+              {displayPatrol?.drone?.serial_number || displayPatrol?.drone_id || 'N/A'}
             </Text>
           </View>
         </View>
