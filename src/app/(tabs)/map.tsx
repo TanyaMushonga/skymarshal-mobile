@@ -183,7 +183,7 @@ export default function MapScreen() {
       </MapView>
 
       {/* Quick Actions */}
-      <View className="absolute bottom-8 right-4">
+      <View className="absolute bottom-28 right-4">
         <TouchableOpacity
           className="mb-3 h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg dark:bg-gray-800"
           onPress={() =>
@@ -210,7 +210,7 @@ export default function MapScreen() {
 
       {/* Selected Item Card */}
       {selectedItem && (
-        <View className="absolute bottom-8 left-4 right-20">
+        <View className="absolute bottom-28 left-4 right-20">
           <Card variant="elevated">
             <TouchableOpacity
               className="absolute right-2 top-2 p-2"
