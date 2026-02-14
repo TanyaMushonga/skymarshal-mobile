@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView } from 'react-native';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-
 import { BaseModal } from '../ui/BaseModal';
 import { Button } from '@/components/ui';
 import { patrolsApi } from '@/api';
@@ -44,12 +43,20 @@ export const EndPatrolModal: React.FC<EndPatrolModalProps> = ({ visible, onClose
     },
   });
 
+  const { data: fullPatrol, isLoading: isFetchingFull } = useQuery({
+    queryKey: ['patrol', patrol?.id],
+    queryFn: () => patrolsApi.get(patrol!.id),
+    enabled: visible && !!patrol?.id && (!patrol.officer || !patrol.drone),
+  });
+
+  const displayPatrol = fullPatrol || patrol;
+
   const handleEndPatrol = () => {
-    if (!patrol?.id) return;
-    endMutation.mutate({ id: patrol.id, notes });
+    if (!displayPatrol?.id) return;
+    endMutation.mutate({ id: displayPatrol.id, notes });
   };
 
-  if (!patrol) return null;
+  if (!displayPatrol && !isFetchingFull) return null;
 
   const footer = (
     <Button
@@ -83,7 +90,7 @@ export const EndPatrolModal: React.FC<EndPatrolModalProps> = ({ visible, onClose
               Detections
             </Text>
             <Text className="text-[28px] font-bold" style={{ color: colors.text }}>
-              {patrol.detection_count || 0}
+              {displayPatrol?.detection_count || 0}
             </Text>
           </View>
           <View className="flex-1 items-center py-4">
@@ -93,7 +100,7 @@ export const EndPatrolModal: React.FC<EndPatrolModalProps> = ({ visible, onClose
               Violations
             </Text>
             <Text className="text-[28px] font-bold text-red-500">
-              {patrol.violation_count || 0}
+              {displayPatrol?.violation_count || 0}
             </Text>
           </View>
         </View>
@@ -107,10 +114,11 @@ export const EndPatrolModal: React.FC<EndPatrolModalProps> = ({ visible, onClose
           </View>
           <View className="flex-1">
             <Text className="text-base font-bold" style={{ color: colors.text }}>
-              {patrol.drone?.name || 'Patrol Drone'}
+              {displayPatrol?.drone?.name || 'Patrol Drone'}
             </Text>
             <Text className="text-[13px]" style={{ color: colors.textSecondary }}>
-              {patrol.drone?.model} · {patrol.drone?.serial_number}
+              {displayPatrol?.drone?.model || 'Generic Model'} ·{' '}
+              {displayPatrol?.drone?.serial_number || displayPatrol?.drone?.drone_id || 'N/A'}
             </Text>
           </View>
         </View>

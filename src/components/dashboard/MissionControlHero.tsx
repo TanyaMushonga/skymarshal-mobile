@@ -51,7 +51,7 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
         className="flex-row items-center justify-between border-b px-5 pb-3.5 pt-[18px]"
         style={{ borderBottomColor: borderColor }}>
         <View className="flex-row items-center gap-2.5">
-          <Ionicons name="airplane-outline" size={18} color={colors.warning} />
+          {/* <Ionicons name="airplane-outline" size={18} color={colors.warning} /> */}
           <View>
             <Text
               className="text-[10px] font-bold uppercase tracking-widest"
@@ -160,7 +160,7 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
           <Text className="text-sm font-semibold text-red-500">Terminate Mission</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => router.push('/(tabs)/patrols/active')}
+          onPress={() => router.push(`/(tabs)/patrols/active?id=${activePatrol.id}`)}
           className="flex-1 items-center rounded-xl py-3"
           style={{ backgroundColor: colors.primary }}>
           <Text className={`text-sm font-bold ${isDark ? 'text-black' : 'text-white'}`}>

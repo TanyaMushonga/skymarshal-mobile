@@ -57,8 +57,9 @@ export default function HomeScreen() {
   }, [dashboard?.today_stats?.violations]);
 
   const handleEndPatrol = useCallback(() => {
+    console.log('[Dashboard] Opening EndPatrolModal for patrol:', dashboard?.active_patrol?.id);
     setIsEndModalVisible(true);
-  }, []);
+  }, [dashboard?.active_patrol]);
 
   const handleStartPatrol = useCallback(() => {
     setIsStartModalVisible(true);

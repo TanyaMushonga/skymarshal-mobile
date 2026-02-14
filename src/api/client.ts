@@ -132,10 +132,16 @@ api.interceptors.request.use(
 
     // Log requests in development
     if (__DEV__) {
-      console.log(
-        `[API Request] ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`,
-        token ? `(Auth: Bearer ${token.substring(0, 10)}...)` : '(No Auth)'
-      );
+      const logObj = {
+        auth: token ? `Bearer ${token.substring(0, 10)}...` : 'None',
+        params: requestConfig.params,
+        data: requestConfig.data,
+      };
+      console.log('┌────────────────────────────────────────────────────────────');
+      console.log(`│ [API Request] ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`);
+      console.log('├────────────────────────────────────────────────────────────');
+      console.log(JSON.stringify(logObj, null, 2));
+      console.log('└────────────────────────────────────────────────────────────');
     }
 
     return requestConfig;
@@ -148,7 +154,11 @@ api.interceptors.response.use(
   (response: AxiosResponse) => {
     // Log success in development
     if (__DEV__) {
-      console.log(`[API Response] ${response.status} ${response.config.url}`);
+      console.log('┌────────────────────────────────────────────────────────────');
+      console.log(`│ [API Response] ${response.status} ${response.config.url}`);
+      console.log('├────────────────────────────────────────────────────────────');
+      console.log(JSON.stringify(response.data, null, 2));
+      console.log('└────────────────────────────────────────────────────────────');
     }
     return response;
   },
@@ -232,10 +242,13 @@ api.interceptors.response.use(
     const formattedError = formatApiError(error);
 
     if (__DEV__) {
-      console.error(
-        `[API Error] ${formattedError.status} ${formattedError.message}`,
-        formattedError.fieldErrors
-      );
+      console.log('┌─── API ERROR ──────────────────────────────────────────────');
+      console.log(`│ ${formattedError.status} ${formattedError.message}`);
+      if (formattedError.fieldErrors) {
+        console.log('├────────────────────────────────────────────────────────────');
+        console.log(JSON.stringify(formattedError.fieldErrors, null, 2));
+      }
+      console.log('└────────────────────────────────────────────────────────────');
     }
 
     return Promise.reject(formattedError);

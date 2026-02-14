@@ -23,11 +23,9 @@ export const dronesApi = {
    * Get available drones (online and not in use)
    */
   async getAvailable(): Promise<Drone[]> {
-    const response = await api.get<PaginatedResponse<Drone>>(endpoints.DRONES, {
-      params: { status: 'online' },
-    });
+    const response = await api.get<PaginatedResponse<Drone>>(endpoints.DRONES);
     // Double filter to ensure data integrity
-    return response.data.results.filter((d) => !d.current_patrol && d.status?.status === 'online');
+    return response.data.results;
   },
 
   /**

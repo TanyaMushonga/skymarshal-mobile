@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { safeFormatSnapshot } from '@/lib/dateUtils';
 import { patrolsApi, violationsApi } from '@/api';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuthStore } from '@/stores/authStore';
 
 const formatDuration = (seconds?: number) => {
   if (!seconds) return '—';
@@ -25,11 +26,13 @@ export default function PatrolDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { colors, isDark } = useTheme();
+  const { user } = useAuthStore();
 
   const { data: patrol, isLoading } = useQuery({
-    queryKey: ['patrol', id],
-    queryFn: () => patrolsApi.get(id),
-    enabled: !!id,
+    queryKey: ['patrol', id || 'active'],
+    queryFn: () =>
+      id && id !== 'active' ? patrolsApi.get(id) : patrolsApi.getActive(user?.email || ''),
+    enabled: !!id || !!user?.email,
   });
 
   const { data: violations } = useQuery({
