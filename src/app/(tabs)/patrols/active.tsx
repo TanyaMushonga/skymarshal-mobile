@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { safeFormatSnapshot } from '@/lib/dateUtils';
 import { patrolsApi, violationsApi } from '@/api';
 import { useTheme } from '@/contexts/ThemeContext';
+import { usePatrolStore } from '@/stores/patrolStore';
 import { useAuthStore } from '@/stores/authStore';
 
 const formatDuration = (seconds?: number) => {
@@ -28,11 +29,13 @@ export default function PatrolDetailScreen() {
   const { colors, isDark } = useTheme();
   const { user } = useAuthStore();
 
+  const { activePatrol } = usePatrolStore();
   const { data: patrol, isLoading } = useQuery({
     queryKey: ['patrol', id || 'active'],
     queryFn: () =>
       id && id !== 'active' ? patrolsApi.get(id) : patrolsApi.getActive(user?.email || ''),
     enabled: !!id || !!user?.email,
+    initialData: id && activePatrol?.id === id ? activePatrol : undefined,
   });
 
   const { data: violations } = useQuery({
@@ -111,10 +114,13 @@ export default function PatrolDetailScreen() {
                   letterSpacing: 0.8,
                   textTransform: 'uppercase',
                 }}>
-                {patrol?.drone?.name ?? 'Drone'}
+                {patrol?.drone?.name || patrol?.drone_id || 'Drone'}
               </Text>
               <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '600', marginTop: 2 }}>
-                {safeFormatSnapshot(patrol?.started_at, 'MMM d, yyyy · HH:mm')}
+                {safeFormatSnapshot(
+                  patrol?.start_time || patrol?.started_at,
+                  'MMM d, yyyy · HH:mm'
+                )}
               </Text>
             </View>
             {/* Status chip */}
@@ -155,7 +161,11 @@ export default function PatrolDetailScreen() {
                 lineHeight: 48,
                 fontVariant: ['tabular-nums'],
               }}>
-              {formatDuration(patrol?.duration)}
+              {formatDuration(
+                patrol?.flight_duration_seconds !== undefined
+                  ? patrol?.flight_duration_seconds
+                  : patrol?.duration
+              )}
             </Text>
             <Text
               style={{
