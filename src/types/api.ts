@@ -49,10 +49,14 @@ export interface Patrol {
   id: string;
   officer: User;
   drone: Drone;
+  drone_id?: string;
   status: PatrolStatus;
   started_at: string;
+  start_time?: string;
   ended_at?: string;
+  end_time?: string;
   duration?: number;
+  flight_duration_seconds?: number;
   detection_count: number;
   violation_count: number;
   speed_limit?: number;
@@ -60,6 +64,7 @@ export interface Patrol {
   notes?: string;
   created_at: string;
   updated_at: string;
+  battery_level?: number;
 }
 
 export interface StartPatrolRequest {
