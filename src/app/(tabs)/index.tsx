@@ -11,6 +11,7 @@ import {
 } from '@/components/dashboard';
 import { StartPatrolModal } from '@/components/modals/StartPatrolModal';
 import { EndPatrolModal } from '@/components/modals/EndPatrolModal';
+import { TelemetryModal } from '@/components/modals/TelemetryModal';
 import { ViolationDetailModal } from '@/components/modals/ViolationDetailModal';
 import { DetectionDetailModal } from '@/components/modals/DetectionDetailModal';
 import { analyticsApi } from '@/api';
@@ -111,6 +112,7 @@ export default function HomeScreen() {
       />
       <ViolationDetailModal />
       <DetectionDetailModal />
+      <TelemetryModal />
     </View>
   );
 }
