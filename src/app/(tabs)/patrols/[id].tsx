@@ -71,7 +71,7 @@ export default function PatrolDetailScreen() {
                 Patrol Details
               </Text>
               <Text style={{ color: colors.textSecondary }}>
-                {safeFormatSnapshot(patrol?.started_at)}
+                {safeFormatSnapshot(patrol?.start_time || patrol?.started_at)}
               </Text>
             </View>
             <Badge
@@ -84,13 +84,17 @@ export default function PatrolDetailScreen() {
             <View className="mb-4 w-1/2">
               <Text style={{ color: colors.textSecondary }}>Drone</Text>
               <Text className="text-lg font-semibold" style={{ color: colors.text }}>
-                {patrol?.drone?.name || 'N/A'}
+                {patrol?.drone?.name || patrol?.drone_id || 'N/A'}
               </Text>
             </View>
             <View className="mb-4 w-1/2">
               <Text style={{ color: colors.textSecondary }}>Duration</Text>
               <Text className="text-lg font-semibold" style={{ color: colors.text }}>
-                {formatDuration(patrol?.duration)}
+                {formatDuration(
+                  patrol?.flight_duration_seconds !== undefined
+                    ? patrol?.flight_duration_seconds
+                    : patrol?.duration
+                )}
               </Text>
             </View>
             <View className="w-1/2">
