@@ -155,7 +155,7 @@ export default function AlertsScreen() {
               <Text
                 style={{
                   color: colors.text,
-                  fontSize: 15,
+                  fontSize: 16,
                   fontWeight: item.is_read ? '400' : '600',
                   lineHeight: 20,
                   flex: 1,
