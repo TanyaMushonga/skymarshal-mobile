@@ -69,4 +69,9 @@ export const endpoints = {
 
   // Compliance (Namespace: api/v1/compliance/)
   LOTTERIES: '/v1/compliance/lotteries/',
+
+  // Vehicles
+  VEHICLE_LOOKUP: '/v1/vehicles/lookup/',
+  CLEAR_FINES: '/v1/vehicles/clear-fines/',
+  RECORD_PAYMENT: '/v1/vehicles/record-payment/',
 } as const;
