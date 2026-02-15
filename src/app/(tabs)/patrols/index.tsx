@@ -132,10 +132,10 @@ export default function PatrolsScreen() {
               <Text
                 style={{
                   color: colors.text,
-                  fontSize: 15,
-                  fontWeight: '500',
+                  fontSize: 17,
+                  fontWeight: '700',
                   fontVariant: ['tabular-nums'],
-                  lineHeight: 20,
+                  lineHeight: 22,
                 }}>
                 #{item.id.slice(0, 8).toUpperCase()}
               </Text>
@@ -149,7 +149,7 @@ export default function PatrolsScreen() {
                 <Text
                   style={{
                     color: cfg.color,
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: '700',
                     letterSpacing: 0.5,
                     textTransform: 'uppercase',
@@ -163,9 +163,10 @@ export default function PatrolsScreen() {
             <Text
               style={{
                 color: colors.textSecondary,
-                fontSize: 13,
+                fontSize: 14,
+                fontWeight: '500',
                 marginBottom: 6,
-                lineHeight: 18,
+                lineHeight: 20,
               }}>
               {safeFormatSnapshot(item.start_time || item.started_at, 'MMM d, yyyy · HH:mm')}
             </Text>
@@ -173,8 +174,8 @@ export default function PatrolsScreen() {
             {/* Row 3: Stats inline */}
             <View style={{ flexDirection: 'row', gap: 16 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <Ionicons name="time-outline" size={12} color={colors.textSecondary} />
-                <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
+                <Ionicons name="time-outline" size={13} color={colors.textSecondary} />
+                <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: '500' }}>
                   {formatDuration(
                     item.flight_duration_seconds !== undefined
                       ? item.flight_duration_seconds
@@ -183,15 +184,15 @@ export default function PatrolsScreen() {
                 </Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <Ionicons name="layers-outline" size={12} color={colors.textSecondary} />
-                <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
+                <Ionicons name="layers-outline" size={13} color={colors.textSecondary} />
+                <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: '500' }}>
                   {item.detection_count} detections
                 </Text>
               </View>
               {item.violation_count > 0 && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                  <Ionicons name="warning-outline" size={12} color="#EF4444" />
-                  <Text style={{ color: '#EF4444', fontSize: 12 }}>{item.violation_count}</Text>
+                  <Ionicons name="warning-outline" size={13} color="#EF4444" />
+                  <Text style={{ color: '#EF4444', fontSize: 13, fontWeight: '600' }}>{item.violation_count}</Text>
                 </View>
               )}
             </View>
@@ -250,8 +251,8 @@ export default function PatrolsScreen() {
               }}>
               <Text
                 style={{
-                  fontSize: 13,
-                  fontWeight: active ? '700' : '500',
+                  fontSize: 14,
+                  fontWeight: active ? '700' : '600',
                   color: active ? '#000000' : colors.textSecondary,
                   letterSpacing: 0.1,
                 }}>
