@@ -43,10 +43,10 @@ export const DetectionDetailModal: React.FC = () => {
           <Card variant="elevated" className="mb-4 p-4">
             <View className="mb-5 flex-row items-center justify-between">
               <View>
-                <Text className="text-2xl font-bold" style={{ color: colors.text }}>
+                <Text className="text-3xl font-bold" style={{ color: colors.text }}>
                   {detection?.license_plate}
                 </Text>
-                <Text style={{ color: colors.textSecondary }}>
+                <Text className="text-lg" style={{ color: colors.textSecondary }}>
                   {safeFormatSnapshot(detection?.timestamp)}
                 </Text>
               </View>
@@ -55,34 +55,34 @@ export const DetectionDetailModal: React.FC = () => {
 
             <View className="flex-row flex-wrap">
               <View className="mb-4 w-1/2">
-                <Text className="mb-1 text-xs" style={{ color: colors.textSecondary }}>
+                <Text className="mb-1 text-sm font-medium" style={{ color: colors.textSecondary }}>
                   Confidence
                 </Text>
-                <Text className="text-base font-semibold text-green-500">
+                <Text className="text-lg font-semibold text-green-500">
                   {detection?.confidence ? `${(detection.confidence * 100).toFixed(1)}%` : 'N/A'}
                 </Text>
               </View>
               <View className="mb-4 w-1/2">
-                <Text className="mb-1 text-xs" style={{ color: colors.textSecondary }}>
+                <Text className="mb-1 text-sm font-medium" style={{ color: colors.textSecondary }}>
                   Model
                 </Text>
-                <Text className="text-base font-semibold" style={{ color: colors.text }}>
+                <Text className="text-lg font-semibold" style={{ color: colors.text }}>
                   {detection?.vehicle_model || 'Unknown'}
                 </Text>
               </View>
               <View className="mb-4 w-1/2">
-                <Text className="mb-1 text-xs" style={{ color: colors.textSecondary }}>
+                <Text className="mb-1 text-sm font-medium" style={{ color: colors.textSecondary }}>
                   Color
                 </Text>
-                <Text className="text-base font-semibold" style={{ color: colors.text }}>
+                <Text className="text-lg font-semibold" style={{ color: colors.text }}>
                   {detection?.color || 'Unknown'}
                 </Text>
               </View>
               <View className="mb-4 w-1/2">
-                <Text className="mb-1 text-xs" style={{ color: colors.textSecondary }}>
+                <Text className="mb-1 text-sm font-medium" style={{ color: colors.textSecondary }}>
                   Drone
                 </Text>
-                <Text className="text-base font-semibold" style={{ color: colors.text }}>
+                <Text className="text-lg font-semibold" style={{ color: colors.text }}>
                   {detection?.drone?.name || 'N/A'}
                 </Text>
               </View>
@@ -91,16 +91,22 @@ export const DetectionDetailModal: React.FC = () => {
 
           {/* Location Card */}
           <Card variant="elevated" className="mb-4 p-4">
-            <Text className="mb-3 text-base font-bold" style={{ color: colors.text }}>
-              📍 Location
+            <Text className="mb-3 text-2xl font-bold" style={{ color: colors.text }}>
+              Location
             </Text>
             {detection?.gps ? (
               <View>
-                <Text className="mb-1 text-[15px]" style={{ color: colors.text }}>
-                  Latitude: {detection.gps.latitude.toFixed(6)}
+                <Text className="mb-2 text-sm font-medium" style={{ color: colors.textSecondary }}>
+                  Latitude
                 </Text>
-                <Text className="mb-1 text-[15px]" style={{ color: colors.text }}>
-                  Longitude: {detection.gps.longitude.toFixed(6)}
+                <Text className="mb-3 text-lg font-semibold" style={{ color: colors.text }}>
+                  {detection.gps.latitude.toFixed(6)}
+                </Text>
+                <Text className="mb-2 text-sm font-medium" style={{ color: colors.textSecondary }}>
+                  Longitude
+                </Text>
+                <Text className="text-lg font-semibold" style={{ color: colors.text }}>
+                  {detection.gps.longitude.toFixed(6)}
                 </Text>
               </View>
             ) : (
