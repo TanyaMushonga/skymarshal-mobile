@@ -394,10 +394,12 @@ export const ViolationDetailModal: React.FC = () => {
                 </View>
               )}
 
-              {((violation?.detection as any)?.frame_number ||
-                (violation as any)?.evidence_meta?.timestamp) && (
+              {!!(
+                (violation?.detection as any)?.frame_number ||
+                (violation as any)?.evidence_meta?.timestamp
+              ) && (
                 <View className="flex-row justify-between">
-                  {(violation?.detection as any)?.frame_number && (
+                  {!!(violation?.detection as any)?.frame_number && (
                     <View className="flex-1">
                       <Text
                         className="mb-2 text-sm font-medium"
@@ -409,7 +411,7 @@ export const ViolationDetailModal: React.FC = () => {
                       </Text>
                     </View>
                   )}
-                  {(violation as any)?.evidence_meta?.timestamp && (
+                  {!!(violation as any)?.evidence_meta?.timestamp && (
                     <View className="flex-1">
                       <Text
                         className="mb-2 text-sm font-medium"
