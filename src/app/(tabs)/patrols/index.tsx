@@ -12,6 +12,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { PatrolDetailModal } from '@/components/modals/PatrolDetailModal';
 import { TelemetryModal } from '@/components/modals/TelemetryModal';
 import type { Patrol, PatrolStatus } from '@/types/api';
+import { useScrollTracking } from '@/hooks/useScrollTracking';
 
 const STATUS_CONFIG: Record<
   PatrolStatus,
@@ -43,6 +44,7 @@ export default function PatrolsScreen() {
   const { user } = useAuthStore();
   const { openPatrolDetail } = useUIStore();
   const [filter, setFilter] = useState<PatrolStatus | 'ALL'>('ALL');
+  const { onScroll } = useScrollTracking();
 
   const { data, isLoading, isFetchingNextPage, refetch, hasNextPage, fetchNextPage } =
     useInfiniteQuery({
@@ -273,6 +275,8 @@ export default function PatrolsScreen() {
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ flexGrow: 1 }}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
           onEndReached={() => {
             if (hasNextPage && !isFetchingNextPage) {
               fetchNextPage();
