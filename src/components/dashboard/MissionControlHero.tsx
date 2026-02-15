@@ -15,9 +15,10 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
   const [timer, setTimer] = useState(activePatrol?.flight_duration_seconds || 0);
 
   useEffect(() => {
+    if (!activePatrol) return;
     const interval = setInterval(() => setTimer((p) => p + 1), 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [activePatrol]);
 
   const formatTime = (s: number) => {
     const h = Math.floor(s / 3600);
@@ -58,7 +59,7 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
               Mission Control
             </Text>
             <Text className="mt-0.5 text-[15px] font-semibold" style={{ color: colors.text }}>
-              {activePatrol.drone?.name || 'Active Drone'}
+              {activePatrol?.drone?.name || activePatrol?.drone_id || 'Active Drone'}
             </Text>
           </View>
         </View>
