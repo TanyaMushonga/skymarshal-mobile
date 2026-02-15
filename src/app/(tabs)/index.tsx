@@ -8,21 +8,26 @@ import {
   IncidentFeed,
   MyAnalytics,
   StartPatrolCTA,
+  VehicleScanCTA,
 } from '@/components/dashboard';
 import { StartPatrolModal } from '@/components/modals/StartPatrolModal';
 import { EndPatrolModal } from '@/components/modals/EndPatrolModal';
 import { TelemetryModal } from '@/components/modals/TelemetryModal';
 import { ViolationDetailModal } from '@/components/modals/ViolationDetailModal';
 import { DetectionDetailModal } from '@/components/modals/DetectionDetailModal';
+import { VehicleScanModal } from '@/components/modals/VehicleScanModal';
+import { PaymentModal } from '@/components/modals/PaymentModal';
 import { analyticsApi } from '@/api';
 import type { DashboardStats } from '@/types/api';
 import { useAuthStore } from '@/stores/authStore';
+import { useUIStore } from '@/stores/uiStore';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useScrollTracking } from '@/hooks/useScrollTracking';
 
 export default function HomeScreen() {
   const { colors, isDark } = useTheme();
   const { user } = useAuthStore();
+  const { setVehicleScanVisible } = useUIStore();
   const [isStartModalVisible, setIsStartModalVisible] = useState(false);
   const [isEndModalVisible, setIsEndModalVisible] = useState(false);
   const { onScroll } = useScrollTracking();
@@ -34,7 +39,6 @@ export default function HomeScreen() {
   } = useQuery<DashboardStats>({
     queryKey: ['dashboard'],
     queryFn: analyticsApi.getDashboard,
-    refetchInterval: 30000,
   });
 
   const { data: myStats } = useQuery({
@@ -91,8 +95,11 @@ export default function HomeScreen() {
             onEndPatrol={handleEndPatrol}
           />
         ) : (
-          <StartPatrolCTA onStart={handleStartPatrol} />
+          <>
+            <StartPatrolCTA onStart={handleStartPatrol} />
+          </>
         )}
+        <VehicleScanCTA onPress={() => setVehicleScanVisible(true)} />
 
         {/* Today's Performance Grid */}
         {dashboard?.today_stats && <TodayPerformanceGrid stats={dashboard.today_stats} />}
@@ -117,6 +124,8 @@ export default function HomeScreen() {
       <ViolationDetailModal />
       <DetectionDetailModal />
       <TelemetryModal />
+      <VehicleScanModal />
+      <PaymentModal />
     </View>
   );
 }
