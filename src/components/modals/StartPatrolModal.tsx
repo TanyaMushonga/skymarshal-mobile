@@ -11,7 +11,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useToast } from '@/hooks/useToast';
 import { useUIStore } from '@/stores/uiStore';
-import type { Drone, StartPatrolRequest } from '@/types/api';
+import type { Drone, StartPatrolRequest, DashboardStats } from '@/types/api';
 
 interface StartPatrolModalProps {
   visible: boolean;
@@ -38,6 +38,19 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
     onSuccess: async (patrol) => {
       startPatrol(patrol);
 
+      // Optimistically update dashboard to prevent UI flicker/termination appearance
+      queryClient.setQueryData(['dashboard'], (oldData: DashboardStats | undefined) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          active_patrol: {
+            ...patrol,
+            battery_level: selectedDrone?.status?.battery_level || 100,
+            flight_duration_seconds: 0,
+          },
+        };
+      });
+
       if (user && !user.is_on_duty) {
         try {
           const result = await authApi.toggleDuty();
@@ -47,8 +60,8 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
         }
       }
 
-      queryClient.invalidateQueries({ queryKey: ['activePatrol'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      // queryClient.invalidateQueries({ queryKey: ['activePatrol'] });
+      // queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       onClose();
 
       openTelemetry(patrol.id);
@@ -69,12 +82,16 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
   }, [selectedDrone, startMutation, showToast]);
 
   const renderDrone = ({ item }: { item: Drone }) => {
-    const isSelected = selectedDrone?.id === item.id;
+    const isPatrolling = !!item.is_patrolling;
+    const isSelected = !isPatrolling && selectedDrone?.id === item.id;
     const batteryLevel = item.status?.battery_level || 85;
     const batteryColor = batteryLevel > 50 ? '#10B981' : batteryLevel > 20 ? '#F59E0B' : '#EF4444';
 
     return (
-      <TouchableOpacity onPress={() => setSelectedDrone(item)} activeOpacity={0.7}>
+      <TouchableOpacity
+        onPress={() => !isPatrolling && setSelectedDrone(item)}
+        activeOpacity={isPatrolling ? 1 : 0.7}
+        disabled={isPatrolling}>
         <View
           className="mb-2 flex-row items-center rounded-xl border px-3 py-3.5"
           style={{
@@ -84,6 +101,7 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
                 : 'rgba(245, 158, 11, 0.05)'
               : 'transparent',
             borderColor: isSelected ? colors.primary : 'transparent',
+            opacity: isPatrolling ? 0.5 : 1,
           }}>
           <View
             className="mr-3.5 h-5 w-5 items-center justify-center rounded-full border-2"
@@ -97,7 +115,11 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
           <View
             className="mr-3 h-10 w-10 items-center justify-center rounded-lg"
             style={{ backgroundColor: isDark ? '#1A1A1A' : '#F3F4F6' }}>
-            <Ionicons name="airplane-outline" size={20} color={colors.primary} />
+            <Ionicons
+              name="airplane-outline"
+              size={20}
+              color={isPatrolling ? colors.textSecondary : colors.primary}
+            />
           </View>
 
           <View className="flex-1">
@@ -113,12 +135,18 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
             <View
               className="rounded px-2 py-0.5"
               style={{
-                backgroundColor: isDark ? '#0D2A1A' : '#ECFDF5',
+                backgroundColor: isPatrolling
+                  ? isDark
+                    ? 'rgba(245, 158, 11, 0.1)'
+                    : 'rgba(245, 158, 11, 0.05)'
+                  : isDark
+                    ? '#0D2A1A'
+                    : '#ECFDF5',
               }}>
               <Text
-                className="text-[11px] font-semibold tracking-widest"
-                style={{ color: '#10B981' }}>
-                Available
+                className="text-[11px] font-semibold uppercase tracking-widest"
+                style={{ color: isPatrolling ? '#F59E0B' : '#10B981' }}>
+                {isPatrolling ? 'Patrolling' : 'Available'}
               </Text>
             </View>
             <View className="flex-row items-center gap-1">
