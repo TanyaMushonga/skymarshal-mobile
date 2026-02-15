@@ -10,8 +10,18 @@ export function useScrollTracking() {
 
   const onScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const currentOffset = event.nativeEvent.contentOffset.y;
+      const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+      const currentOffset = contentOffset.y;
       const diff = currentOffset - lastScrollY.current;
+
+      // Check if content is scrollable
+      const isScrollable = contentSize.height > layoutMeasurement.height + 20; // 20px buffer
+
+      // If not scrollable, ensure visible
+      if (!isScrollable) {
+        if (!isTabBarVisible) setTabBarVisible(true);
+        return;
+      }
 
       // Reset to visible at the top
       if (currentOffset <= 0) {
