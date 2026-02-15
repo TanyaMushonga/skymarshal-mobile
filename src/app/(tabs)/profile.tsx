@@ -196,7 +196,7 @@ export default function ProfileScreen() {
         {settingsSections.map((section) => (
           <View key={section.title} className="mb-4">
             <Text
-              className="mb-2 text-sm font-medium uppercase"
+              className="mb-2 text-lg font-medium uppercase"
               style={{ color: colors.textSecondary }}>
               {section.title}
             </Text>
