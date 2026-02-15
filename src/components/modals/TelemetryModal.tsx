@@ -168,7 +168,7 @@ export const TelemetryModal: React.FC = () => {
             <Text
               style={{
                 color: colors.textSecondary,
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: '700',
                 letterSpacing: 1,
                 textTransform: 'uppercase',
@@ -190,10 +190,10 @@ export const TelemetryModal: React.FC = () => {
                       <Ionicons name="warning-outline" size={20} color="#EF4444" />
                     </View>
                     <View className="flex-1">
-                      <Text className="font-bold" style={{ color: colors.text }}>
+                      <Text className="text-lg font-bold" style={{ color: colors.text }}>
                         {(v.detection as any)?.license_plate || (v as any).license_plate || '—'}
                       </Text>
-                      <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
+                      <Text className="text-base" style={{ color: colors.textSecondary }}>
                         {v.violation_type} • {safeFormatSnapshot(v.timestamp, 'HH:mm:ss')}
                       </Text>
                     </View>
