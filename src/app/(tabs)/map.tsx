@@ -139,7 +139,7 @@ export default function MapScreen() {
                 <View className="rounded-full p-2" style={{ backgroundColor: colors.primary }}>
                   <Ionicons name="airplane-outline" size={20} color="#000000" />
                 </View>
-                <Text style={{ color: colors.primary }} className="mt-1 text-xs font-black">
+                <Text style={{ color: colors.primary }} className="mt-1 text-sm font-black">
                   {drone.name}
                 </Text>
               </View>
