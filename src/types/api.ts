@@ -88,6 +88,8 @@ export interface Drone {
   name: string;
   model: string;
   serial_number: string;
+  is_active?: boolean;
+  is_patrolling?: boolean;
   status: DroneStatusInfo;
   current_patrol?: string;
   gps?: {
@@ -215,4 +217,77 @@ export interface DashboardStats {
 export interface OfficerStats {
   hours_patrolled_this_week: number;
   performance_rating: number;
+}
+
+// Vehicle Scan Types
+export interface Vehicle {
+  id: string;
+  license_plate: string;
+  owner_name: string;
+  owner_phone_number?: string;
+  make?: string;
+  model?: string;
+  color?: string;
+  status: string;
+  license_points?: number;
+  license_status?: 'ACTIVE' | 'REVOKED';
+  expiry_date?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VehicleLookupSummary {
+  total_detections: number;
+  total_violations: number;
+  total_fines_outstanding: number;
+  last_seen?: {
+    timestamp: string;
+    location: [number, number];
+    drone: string;
+  };
+}
+
+export interface VehicleLookupEncounters {
+  drones: {
+    drone__drone_id: string;
+    drone__name: string;
+    count: number;
+  }[];
+  patrols: {
+    patrol__id: string;
+    patrol__start_time: string;
+    count: number;
+  }[];
+}
+
+export interface VehicleLookupResponse {
+  resolved_plate: string;
+  vehicle: Vehicle;
+  summary: VehicleLookupSummary;
+  encounters: VehicleLookupEncounters;
+  recent_detections: {
+    id: string;
+    timestamp: string;
+    speed: number;
+    location: [number, number];
+    drone_id: string;
+  }[];
+  violations_history: {
+    id: string;
+    type: string;
+    status: string;
+    fine: number;
+    timestamp: string;
+  }[];
+  fines_issued: {
+    id: string;
+    amount: number;
+    paid_amount: number;
+    outstanding_balance: number;
+    status: 'NEW' | 'PARTIAL' | 'PAID';
+    is_cleared: boolean;
+    description: string;
+    date: string;
+  }[];
+  detailed_report: string;
 }
