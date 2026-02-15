@@ -192,7 +192,9 @@ export default function PatrolsScreen() {
               {item.violation_count > 0 && (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                   <Ionicons name="warning-outline" size={13} color="#EF4444" />
-                  <Text style={{ color: '#EF4444', fontSize: 13, fontWeight: '600' }}>{item.violation_count}</Text>
+                  <Text style={{ color: '#EF4444', fontSize: 13, fontWeight: '600' }}>
+                    {item.violation_count}
+                  </Text>
                 </View>
               )}
             </View>
