@@ -13,6 +13,7 @@ interface ButtonProps extends TouchableOpacityProps {
   loading?: boolean;
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
+  textClassName?: string;
 }
 
 export function Button({
@@ -24,6 +25,7 @@ export function Button({
   icon,
   iconPosition = 'left',
   className = '',
+  textClassName = '',
   ...props
 }: ButtonProps) {
   const baseStyles = 'flex-row items-center justify-center rounded-xl';
@@ -77,7 +79,7 @@ export function Button({
           <Text
             className={`${textVariantStyles[variant]} ${textSizeStyles[size]} ${
               icon ? (iconPosition === 'left' ? 'ml-2' : 'mr-2') : ''
-            }`}>
+            } ${textClassName}`}>
             {title}
           </Text>
           {icon && iconPosition === 'right' && <>{icon}</>}
