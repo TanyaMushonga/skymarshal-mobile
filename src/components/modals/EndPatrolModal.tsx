@@ -113,10 +113,10 @@ export const EndPatrolModal: React.FC<EndPatrolModalProps> = ({ visible, onClose
             <Ionicons name="airplane-outline" size={20} color={colors.primary} />
           </View>
           <View className="flex-1">
-            <Text className="text-base font-bold" style={{ color: colors.text }}>
+            <Text className="text-lg font-bold" style={{ color: colors.text }}>
               {displayPatrol?.drone?.name || displayPatrol?.drone_id || 'Patrol Drone'}
             </Text>
-            <Text className="text-[13px]" style={{ color: colors.textSecondary }}>
+            <Text className="text-base" style={{ color: colors.textSecondary }}>
               {displayPatrol?.drone?.model || 'Generic Model'} ·{' '}
               {displayPatrol?.drone?.serial_number || displayPatrol?.drone_id || 'N/A'}
             </Text>
@@ -124,11 +124,11 @@ export const EndPatrolModal: React.FC<EndPatrolModalProps> = ({ visible, onClose
         </View>
 
         {/* Notes Input */}
-        <Text className="mb-2.5 mt-5 text-sm font-bold" style={{ color: colors.text }}>
+        <Text className="mb-2.5 mt-5 text-lg font-bold" style={{ color: colors.text }}>
           Mission Notes
         </Text>
         <TextInput
-          className="min-h-[120px] rounded-xl border p-3.5 text-[15px]"
+          className="min-h-[120px] rounded-xl border p-3.5 text-base"
           style={{
             backgroundColor: isDark ? '#0A0A0A' : '#F9FAFB',
             color: colors.text,
