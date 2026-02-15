@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-import { safeFormatSnapshot } from '@/lib/dateUtils';
+import { safeFormatSnapshot, safeParseDate } from '@/lib/dateUtils';
 
 import { BaseModal } from '../ui/BaseModal';
 import { Card, Badge } from '@/components/ui';
@@ -17,6 +17,7 @@ export const TelemetryModal: React.FC = () => {
   const { colors, isDark } = useTheme();
   const { user } = useAuthStore();
   const { activePatrol } = usePatrolStore();
+  const [liveSeconds, setLiveSeconds] = useState<number | null>(null);
 
   const { data: patrol, isLoading } = useQuery({
     queryKey: ['patrol', telemetryPatrolId || 'active'],
@@ -27,8 +28,38 @@ export const TelemetryModal: React.FC = () => {
     enabled: !!telemetryPatrolId || !!user?.email,
     initialData:
       telemetryPatrolId && activePatrol?.id === telemetryPatrolId ? activePatrol : undefined,
-    refetchInterval: telemetryPatrolId ? 5000 : false, // Poll for live updates if active
   });
+
+  const patrolStatus = patrol?.status;
+  const startTimeStr = patrol?.start_time || patrol?.started_at;
+  const flightDuration = patrol?.flight_duration_seconds;
+  const patrolDuration = (patrol as any)?.duration;
+
+  // Live timer effect
+  useEffect(() => {
+    let interval: any;
+
+    if (patrolStatus === 'ACTIVE' && startTimeStr) {
+      const startTime = safeParseDate(startTimeStr);
+
+      if (startTime) {
+        const updateTimer = () => {
+          const now = new Date();
+          const diff = Math.floor((now.getTime() - startTime.getTime()) / 1000);
+          setLiveSeconds(diff > 0 ? diff : 0);
+        };
+
+        updateTimer();
+        interval = setInterval(updateTimer, 1000);
+      }
+    } else {
+      setLiveSeconds(flightDuration !== undefined ? flightDuration : patrolDuration || null);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [patrolStatus, startTimeStr, flightDuration, patrolDuration]);
 
   const { data: violations } = useQuery({
     queryKey: ['violations', 'patrol', telemetryPatrolId],
@@ -36,7 +67,7 @@ export const TelemetryModal: React.FC = () => {
     enabled: !!telemetryPatrolId,
   });
 
-  const formatDuration = (seconds?: number) => {
+  const formatDuration = (seconds?: number | null) => {
     if (seconds === undefined || seconds === null) return '--:--:--';
     const hrs = Math.floor(Math.abs(seconds) / 3600);
     const mins = Math.floor((Math.abs(seconds) % 3600) / 60);
@@ -53,8 +84,8 @@ export const TelemetryModal: React.FC = () => {
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-          {/* ── Summary stat panel (dark) ────────────────────────────────── */}
-          <View style={{ backgroundColor: isDark ? '#0A0A0A' : '#0F172A' }}>
+          {/* ── Summary stat panel (dark in dark mode, primary in light mode) ── */}
+          <Card variant="elevated">
             {/* Title row */}
             <View
               style={{
@@ -65,12 +96,12 @@ export const TelemetryModal: React.FC = () => {
                 paddingTop: 20,
                 paddingBottom: 16,
                 borderBottomWidth: 1,
-                borderBottomColor: 'rgba(255,255,255,0.06)',
+                borderBottomColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
               }}>
               <View>
                 <Text
                   style={{
-                    color: 'rgba(255,255,255,0.4)',
+                    color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.5)',
                     fontSize: 11,
                     fontWeight: '600',
                     letterSpacing: 0.8,
@@ -81,7 +112,7 @@ export const TelemetryModal: React.FC = () => {
                     patrol?.drone_id ||
                     'Drone Unit'}
                 </Text>
-                <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '600', marginTop: 2 }}>
+                <Text style={{ color: colors.text, fontSize: 16, fontWeight: '600', marginTop: 2 }}>
                   {safeFormatSnapshot(
                     patrol?.start_time || patrol?.started_at,
                     'MMM d, yyyy · HH:mm'
@@ -100,26 +131,22 @@ export const TelemetryModal: React.FC = () => {
                 alignItems: 'center',
                 paddingVertical: 24,
                 borderBottomWidth: 1,
-                borderBottomColor: 'rgba(255,255,255,0.06)',
+                borderBottomColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
               }}>
               <Text
                 style={{
-                  color: '#FFFFFF',
+                  color: colors.text,
                   fontSize: 44,
                   fontWeight: '700',
                   letterSpacing: -1.5,
                   lineHeight: 48,
                   fontVariant: ['tabular-nums'],
                 }}>
-                {formatDuration(
-                  patrol?.flight_duration_seconds !== undefined
-                    ? patrol?.flight_duration_seconds
-                    : (patrol as any)?.duration
-                )}
+                {formatDuration(liveSeconds)}
               </Text>
               <Text
                 style={{
-                  color: 'rgba(255,255,255,0.35)',
+                  color: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.45)',
                   fontSize: 11,
                   fontWeight: '500',
                   letterSpacing: 1.2,
@@ -138,30 +165,40 @@ export const TelemetryModal: React.FC = () => {
                   alignItems: 'center',
                   paddingVertical: 18,
                   borderRightWidth: 1,
-                  borderRightColor: 'rgba(255,255,255,0.06)',
+                  borderRightColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
                 }}>
-                <Text style={{ color: '#FFFFFF', fontSize: 24, fontWeight: '700' }}>
+                <Text style={{ color: colors.text, fontSize: 24, fontWeight: '700' }}>
                   {patrol?.detection_count || 0}
                 </Text>
-                <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: '600' }}>
+                <Text
+                  style={{
+                    color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.5)',
+                    fontSize: 10,
+                    fontWeight: '600',
+                  }}>
                   DETECTIONS
                 </Text>
               </View>
               <View style={{ flex: 1, alignItems: 'center', paddingVertical: 18 }}>
                 <Text
                   style={{
-                    color: (patrol?.violation_count || 0) > 0 ? '#EF4444' : '#FFFFFF',
+                    color: (patrol?.violation_count || 0) > 0 ? '#EF4444' : colors.text,
                     fontSize: 24,
                     fontWeight: '700',
                   }}>
                   {patrol?.violation_count || 0}
                 </Text>
-                <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 10, fontWeight: '600' }}>
+                <Text
+                  style={{
+                    color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.5)',
+                    fontSize: 10,
+                    fontWeight: '600',
+                  }}>
                   VIOLATIONS
                 </Text>
               </View>
             </View>
-          </View>
+          </Card>
 
           {/* Violations List */}
           <View style={{ paddingHorizontal: 20, marginTop: 24 }}>
