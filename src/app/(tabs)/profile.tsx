@@ -10,11 +10,13 @@ import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useScrollTracking } from '@/hooks/useScrollTracking';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { colors, isDark } = useTheme();
   const { user, logout } = useAuthStore();
+  const { onScroll } = useScrollTracking();
   const {
     theme,
     notificationsEnabled,
@@ -106,7 +108,11 @@ export default function ProfileScreen() {
     <SafeAreaView
       className="flex-1"
       style={{ backgroundColor: isDark ? colors.background : '#F9FAFB' }}>
-      <ScrollView className="flex-1" contentContainerStyle={{ padding: 16 }}>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ padding: 16 }}
+        onScroll={onScroll}
+        scrollEventThrottle={16}>
         {/* Profile Header */}
         <Card
           variant="elevated"
