@@ -82,13 +82,17 @@ export default function PatrolDetailScreen() {
 
           <View className="flex-row flex-wrap">
             <View className="mb-4 w-1/2">
-              <Text style={{ color: colors.textSecondary }}>Drone</Text>
+              <Text className="mb-2 text-sm font-medium" style={{ color: colors.textSecondary }}>
+                Drone
+              </Text>
               <Text className="text-lg font-semibold" style={{ color: colors.text }}>
                 {patrol?.drone?.name || patrol?.drone_id || 'N/A'}
               </Text>
             </View>
             <View className="mb-4 w-1/2">
-              <Text style={{ color: colors.textSecondary }}>Duration</Text>
+              <Text className="mb-2 text-sm font-medium" style={{ color: colors.textSecondary }}>
+                Duration
+              </Text>
               <Text className="text-lg font-semibold" style={{ color: colors.text }}>
                 {formatDuration(
                   patrol?.flight_duration_seconds !== undefined
@@ -98,7 +102,9 @@ export default function PatrolDetailScreen() {
               </Text>
             </View>
             <View className="w-1/2">
-              <Text style={{ color: colors.textSecondary }}>Detections</Text>
+              <Text className="mb-2 text-sm font-medium" style={{ color: colors.textSecondary }}>
+                Detections
+              </Text>
               <Text className="text-lg font-bold" style={{ color: colors.primary }}>
                 {patrol?.detection_count || 0}
               </Text>
