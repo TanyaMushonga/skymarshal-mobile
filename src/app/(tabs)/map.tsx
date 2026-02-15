@@ -22,7 +22,6 @@ export default function MapScreen() {
   const { data: drones } = useQuery({
     queryKey: ['drones'],
     queryFn: () => dronesApi.list(),
-    refetchInterval: 5000,
   });
 
   const { data: violations } = useQuery({
