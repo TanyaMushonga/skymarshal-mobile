@@ -5,10 +5,12 @@ interface UIState {
   detectionDetailId: string | null;
   patrolDetailId: string | null;
   telemetryPatrolId: string | null;
+  isTabBarVisible: boolean;
   openViolationDetail: (id: string) => void;
   openDetectionDetail: (id: string) => void;
   openPatrolDetail: (id: string) => void;
   openTelemetry: (id: string) => void;
+  setTabBarVisible: (visible: boolean) => void;
   closeDetail: () => void;
 }
 
@@ -17,6 +19,7 @@ export const useUIStore = create<UIState>((set) => ({
   detectionDetailId: null,
   patrolDetailId: null,
   telemetryPatrolId: null,
+  isTabBarVisible: true,
   openViolationDetail: (id) =>
     set({
       violationDetailId: id,
@@ -45,6 +48,7 @@ export const useUIStore = create<UIState>((set) => ({
       detectionDetailId: null,
       patrolDetailId: null,
     }),
+  setTabBarVisible: (visible) => set({ isTabBarVisible: visible }),
   closeDetail: () =>
     set({
       violationDetailId: null,
