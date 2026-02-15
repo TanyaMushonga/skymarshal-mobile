@@ -7,3 +7,4 @@ export { detectionsApi } from './detections';
 export { violationsApi } from './violations';
 export { notificationsApi } from './notifications';
 export { analyticsApi } from './analytics';
+export { vehiclesApi } from './vehicles';
