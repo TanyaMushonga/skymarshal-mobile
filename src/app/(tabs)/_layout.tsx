@@ -2,8 +2,11 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect } from 'react';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuthStore } from '@/stores/authStore';
+import { authApi } from '@/api';
 import { UserHeader } from '@/components/dashboard/UserHeader';
 import { useUIStore } from '@/stores/uiStore';
 import { BottomTabBar, BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -36,6 +39,26 @@ function AnimatedTabBar(props: BottomTabBarProps) {
 
 export default function TabLayout() {
   const { colors, isDark } = useTheme();
+  const { user, setUser } = useAuthStore();
+
+  useEffect(() => {
+    const checkAndToggleDuty = async () => {
+      if (user && !user.is_on_duty) {
+        try {
+          console.log('[TabLayout] User is off-duty, auto-toggling to ON DUTY...');
+          const result = await authApi.toggleDuty();
+          if (result.is_on_duty) {
+            setUser({ ...user, is_on_duty: true });
+            console.log('[TabLayout] Successfully set to ON DUTY');
+          }
+        } catch (error) {
+          console.error('[TabLayout] Failed to auto-toggle duty:', error);
+        }
+      }
+    };
+
+    checkAndToggleDuty();
+  }, [user?.is_on_duty]); // Depend on duty status to only run when it's falsely
 
   return (
     <Tabs
