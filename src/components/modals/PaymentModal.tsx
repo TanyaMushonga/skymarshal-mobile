@@ -72,8 +72,8 @@ export const PaymentModal: React.FC = () => {
         'Payment Recorded',
         `Successfully recorded ${currency} ${numericAmount} payment for ${paymentPlate}`
       );
+      useUIStore.getState().triggerVehicleRefresh();
       setPaymentModalVisible(false);
-      // Trigger a refresh if possible, usually by refreshing the vehicle lookup
     } catch (error: any) {
       showToast('error', 'Payment Failed', error.message || 'Could not record payment');
     } finally {
