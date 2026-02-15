@@ -13,8 +13,13 @@ import type { VehicleLookupResponse } from '@/types/api';
 import { safeFormatSnapshot } from '@/lib/dateUtils';
 
 export const VehicleScanModal: React.FC = () => {
-  const { vehicleScanVisible, setVehicleScanVisible, openViolationDetail, openPayment } =
-    useUIStore();
+  const {
+    vehicleScanVisible,
+    setVehicleScanVisible,
+    openViolationDetail,
+    openPayment,
+    vehicleRefreshTrigger,
+  } = useUIStore();
   const { colors, isDark } = useTheme();
   const { showToast } = useToast();
 
@@ -22,11 +27,22 @@ export const VehicleScanModal: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VehicleLookupResponse | null>(null);
 
+  React.useEffect(() => {
+    if (result && vehicleScanVisible) {
+      // Use the resolved plate from the result for revalidation to ensure we refresh the correct vehicle
+      // even if the input field has been changed or cleared.
+      const plateToRefresh = result.resolved_plate || result.vehicle?.license_plate || plate;
+      if (plateToRefresh) {
+        performLookup(plateToRefresh);
+      }
+    }
+  }, [vehicleRefreshTrigger]);
+
   const formatPlate = (text: string) => text.toUpperCase();
   const handlePlateChange = (text: string) => setPlate(formatPlate(text));
 
-  const handleLookup = async () => {
-    const trimmedPlate = plate.trim();
+  const performLookup = async (searchPlate: string) => {
+    const trimmedPlate = searchPlate.trim();
     if (!trimmedPlate) {
       showToast('warning', 'Input Required', 'Please enter a license plate number');
       return;
@@ -36,13 +52,21 @@ export const VehicleScanModal: React.FC = () => {
     try {
       const data = await vehiclesApi.lookupByPlate(trimmedPlate);
       setResult(data);
+      // Ensure input stays in sync if we refreshed from a different source
+      if (plate !== trimmedPlate) setPlate(formatPlate(trimmedPlate));
     } catch (error: any) {
       showToast('error', 'Lookup Failed', error.message || 'Could not find vehicle details');
-      setResult(null);
+      // Only clear result if it was a manual new search, not a refresh?
+      // Actually for refresh, if it fails, we probably want to keep the old data or show error.
+      // But if we are revalidating and it fails... maybe keeps old data?
+      // For now, let's stick to standard behavior but maybe we can improve later.
+      if (!result) setResult(null);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleLookup = () => performLookup(plate);
 
   const handleClearFines = async () => {
     if (!result?.vehicle?.license_plate && !result?.resolved_plate) return;
