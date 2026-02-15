@@ -2,14 +2,44 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useTheme } from '@/contexts/ThemeContext';
 import { UserHeader } from '@/components/dashboard/UserHeader';
+import { useUIStore } from '@/stores/uiStore';
+import { BottomTabBar, BottomTabBarProps } from '@react-navigation/bottom-tabs';
+
+function AnimatedTabBar(props: BottomTabBarProps) {
+  const { isTabBarVisible } = useUIStore();
+  const tabBarHeight = Platform.OS === 'ios' ? 95 : 75;
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: withTiming(isTabBarVisible ? 0 : tabBarHeight + 20, {
+            duration: 300,
+          }),
+        },
+      ],
+      opacity: withTiming(isTabBarVisible ? 1 : 0, {
+        duration: 300,
+      }),
+    };
+  });
+
+  return (
+    <Animated.View style={[styles.tabBarContainer, animatedStyle]}>
+      <BottomTabBar {...props} />
+    </Animated.View>
+  );
+}
 
 export default function TabLayout() {
   const { colors, isDark } = useTheme();
 
   return (
     <Tabs
+      tabBar={(props) => <AnimatedTabBar {...props} />}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
@@ -29,6 +59,7 @@ export default function TabLayout() {
           shadowOffset: { width: 0, height: -10 },
           shadowOpacity: isDark ? 0.3 : 0.1,
           shadowRadius: 20,
+          borderWidth: 0,
         },
         tabBarLabelStyle: {
           fontSize: 14,
@@ -98,6 +129,13 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
+  tabBarContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+  },
   elevatedButton: {
     width: 58,
     height: 58,
