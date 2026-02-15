@@ -76,7 +76,7 @@ const IncidentItem = ({ item, isLast }: { item: Violation; isLast: boolean }) =>
             <Text
               style={{
                 color: colors.text,
-                fontSize: 15,
+                fontSize: 16,
                 fontWeight: '500',
                 lineHeight: 20,
               }}
@@ -97,7 +97,7 @@ const IncidentItem = ({ item, isLast }: { item: Violation; isLast: boolean }) =>
           <Text
             style={{
               color: colors.textSecondary,
-              fontSize: 13,
+              fontSize: 14,
               marginTop: 2,
               lineHeight: 18,
             }}>
@@ -131,7 +131,7 @@ export const IncidentFeed = ({ alerts }: Props) => {
         <Text
           style={{
             color: colors.textSecondary,
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: '600',
             letterSpacing: 0.8,
             textTransform: 'uppercase',
@@ -139,7 +139,7 @@ export const IncidentFeed = ({ alerts }: Props) => {
           Recent Incidents
         </Text>
         <TouchableOpacity onPress={() => router.push('/(tabs)/alerts')} hitSlop={8}>
-          <Text style={{ color: colors.primary, fontSize: 13, fontWeight: '600' }}>View All</Text>
+          <Text style={{ color: colors.primary, fontSize: 14, fontWeight: '600' }}>View All</Text>
         </TouchableOpacity>
       </View>
 
@@ -156,7 +156,7 @@ export const IncidentFeed = ({ alerts }: Props) => {
           <Text
             style={{
               color: colors.textSecondary,
-              fontSize: 14,
+              fontSize: 15,
               fontWeight: '500',
               marginTop: 10,
             }}>
