@@ -18,12 +18,14 @@ import { analyticsApi } from '@/api';
 import type { DashboardStats } from '@/types/api';
 import { useAuthStore } from '@/stores/authStore';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useScrollTracking } from '@/hooks/useScrollTracking';
 
 export default function HomeScreen() {
   const { colors, isDark } = useTheme();
   const { user } = useAuthStore();
   const [isStartModalVisible, setIsStartModalVisible] = useState(false);
   const [isEndModalVisible, setIsEndModalVisible] = useState(false);
+  const { onScroll } = useScrollTracking();
 
   const {
     data: dashboard,
@@ -71,6 +73,8 @@ export default function HomeScreen() {
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         refreshControl={
           <RefreshControl
             refreshing={isLoading}
