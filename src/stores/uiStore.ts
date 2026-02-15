@@ -11,6 +11,8 @@ interface UIState {
   paymentPlate: string | null;
   paymentViolationId: string | null;
   paymentAmount: number | null;
+  vehicleRefreshTrigger: number;
+  triggerVehicleRefresh: () => void;
   openViolationDetail: (id: string) => void;
   openDetectionDetail: (id: string) => void;
   openPatrolDetail: (id: string) => void;
@@ -34,6 +36,7 @@ const getSnapshot = (state: UIState): Partial<UIState> => ({
   paymentPlate: state.paymentPlate,
   paymentViolationId: state.paymentViolationId,
   paymentAmount: state.paymentAmount,
+  vehicleRefreshTrigger: state.vehicleRefreshTrigger,
 });
 
 const isAnyModalOpen = (state: UIState) =>
@@ -58,6 +61,9 @@ export const useUIStore = create<UIState>((set) => ({
   paymentPlate: null,
   paymentViolationId: null,
   paymentAmount: null,
+  vehicleRefreshTrigger: 0,
+  triggerVehicleRefresh: () =>
+    set((state) => ({ vehicleRefreshTrigger: state.vehicleRefreshTrigger + 1 })),
   openViolationDetail: (id) =>
     set((state) => {
       const history = isAnyModalOpen(state)
