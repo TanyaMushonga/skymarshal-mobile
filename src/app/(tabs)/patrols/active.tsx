@@ -3,11 +3,13 @@ import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
+import { StreamsModal } from '@/components/modals/StreamsModal';
 import { safeFormatSnapshot } from '@/lib/dateUtils';
 import { patrolsApi, violationsApi } from '@/api';
 import { useTheme } from '@/contexts/ThemeContext';
 import { usePatrolStore } from '@/stores/patrolStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useUIStore } from '@/stores/uiStore';
 
 const formatDuration = (seconds?: number) => {
   if (!seconds) return '—';
@@ -28,6 +30,7 @@ export default function PatrolDetailScreen() {
   const router = useRouter();
   const { colors, isDark } = useTheme();
   const { user } = useAuthStore();
+  const { setStreamsModalVisible } = useUIStore();
 
   const { activePatrol } = usePatrolStore();
   const { data: patrol, isLoading } = useQuery({
@@ -76,11 +79,17 @@ export default function PatrolDetailScreen() {
       <Stack.Screen
         options={{
           headerShown: true,
-          headerStyle: { backgroundColor: bg },
-          headerShadowVisible: false,
+          title: 'Patrol Details',
+          headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.text,
-          title: `#${id?.slice(0, 8).toUpperCase()}`,
-          headerTitleStyle: { fontSize: 17, fontWeight: '600' },
+          headerShadowVisible: false,
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => setStreamsModalVisible(true, patrol?.stream?.id)}
+              style={{ padding: 8 }}>
+              <Ionicons name="videocam-outline" size={24} color={colors.primary} />
+            </TouchableOpacity>
+          ),
         }}
       />
 
@@ -355,6 +364,9 @@ export default function PatrolDetailScreen() {
           )}
         </View>
       </ScrollView>
+
+      {/* Modals */}
+      <StreamsModal />
     </>
   );
 }
