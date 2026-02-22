@@ -11,6 +11,8 @@ import { useAuthStore } from '@/stores/authStore';
 import { setAuthFailureListener } from '@/api/client';
 import { useToast } from '@/hooks/useToast';
 import ToastModal from '@/components/common/ToastModal';
+import { webSocketService } from '@/services/WebSocketService';
+import { getAccessToken } from '@/lib/secureStorage';
 
 import '../../global.css';
 
@@ -27,6 +29,7 @@ function RootLayoutNav() {
   const { isAuthenticated, isLoading, initialize, clearAuthState } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
+  const { showToast } = useToast();
 
   useEffect(() => {
     initialize();
@@ -48,6 +51,44 @@ function RootLayoutNav() {
       router.replace('/(tabs)');
     }
   }, [isAuthenticated, isLoading, segments, router]);
+
+  // WebSocket Connection Management
+  useEffect(() => {
+    let unsubscribe: () => void;
+
+    const connectSocket = async () => {
+      if (isAuthenticated) {
+        const token = await getAccessToken();
+        if (token) {
+          webSocketService.connect(token);
+        }
+      } else {
+        webSocketService.disconnect();
+      }
+    };
+
+    connectSocket();
+
+    // Register notification handler
+    unsubscribe = webSocketService.addListener((data) => {
+      if (data.type === 'notification') {
+        console.log('[WebSocket] Notification received:', data);
+
+        // Map notification types to toast types
+        let toastType: 'success' | 'error' | 'info' | 'warning' = 'info';
+        if (data.notification_type === 'alert') toastType = 'error';
+        if (data.notification_type === 'mission_update') toastType = 'success';
+
+        showToast(toastType, data.title, data.message);
+      }
+    });
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+      // We don't disconnect on unmount here because RootLayout persists.
+      // Disconnection is handled by the auth state change above or manual logout.
+    };
+  }, [isAuthenticated, showToast]);
 
   if (isLoading) {
     return (
