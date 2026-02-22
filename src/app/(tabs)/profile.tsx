@@ -4,6 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import { useQuery } from '@tanstack/react-query';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 import { Card, Badge, Button } from '@/components/ui';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
@@ -11,12 +13,16 @@ import { useAuthStore } from '@/stores/authStore';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useScrollTracking } from '@/hooks/useScrollTracking';
+import { useToast } from '@/hooks/useToast';
+import { analyticsApi } from '@/api';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { colors, isDark } = useTheme();
   const { user, logout } = useAuthStore();
   const { onScroll } = useScrollTracking();
+  const { showToast } = useToast();
+
   const {
     theme,
     notificationsEnabled,
@@ -25,12 +31,68 @@ export default function ProfileScreen() {
     setNotificationsEnabled,
     setBiometricEnabled,
   } = useSettingsStore();
+
   const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
+  const [biometricProcessing, setBiometricProcessing] = React.useState(false);
+
+  // Fetch real officer stats
+  const { data: stats } = useQuery({
+    queryKey: ['my-stats'],
+    queryFn: analyticsApi.getMyStats,
+    enabled: !!user,
+  });
 
   const handleLogout = async () => {
     setShowLogoutConfirm(false);
     await logout();
     router.replace('/(auth)/login');
+  };
+
+  const handleBiometricToggle = async (value: boolean) => {
+    if (biometricProcessing) return;
+
+    if (value) {
+      // Turning ON: Verify identity first
+      setBiometricProcessing(true);
+      try {
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+        if (!hasHardware || !isEnrolled) {
+          showToast(
+            'error',
+            'Biometrics Unavailable',
+            'Your device does not support biometrics or none are enrolled.'
+          );
+          return;
+        }
+
+        const result = await LocalAuthentication.authenticateAsync({
+          promptMessage: 'Authenticate to enable biometric login',
+          fallbackLabel: 'Use Passcode',
+        });
+
+        if (result.success) {
+          setBiometricEnabled(true);
+          showToast('success', 'Biometrics Enabled', 'You can now use biometrics to login.');
+        } else {
+          // User cancelled or failed
+          // Switch remains off (state not updated)
+        }
+      } catch (error) {
+        console.error('Biometric error:', error);
+        showToast('error', 'Error', 'Failed to authenticate.');
+      } finally {
+        setBiometricProcessing(false);
+      }
+    } else {
+      // Turning OFF: Just disable it
+      setBiometricEnabled(false);
+    }
+  };
+
+  const handleComingSoon = () => {
+    showToast('info', 'Coming Soon', 'This feature is currently under development.');
   };
 
   const settingsSections = [
@@ -56,7 +118,7 @@ export default function ProfileScreen() {
           label: 'Biometric Login',
           type: 'toggle',
           value: biometricEnabled,
-          onToggle: setBiometricEnabled,
+          onToggle: handleBiometricToggle,
         },
       ],
     },
@@ -74,7 +136,7 @@ export default function ProfileScreen() {
           label: 'Two-Factor Authentication',
           type: 'link',
           badge: '2FA Enabled',
-          onPress: () => {},
+          onPress: handleComingSoon,
         },
       ],
     },
@@ -85,20 +147,20 @@ export default function ProfileScreen() {
           icon: 'help-circle',
           label: 'Help Center',
           type: 'link',
-          onPress: () => {},
+          onPress: handleComingSoon,
         },
         {
           icon: 'document-text',
           label: 'Terms of Service',
           type: 'link',
-          onPress: () => {},
+          onPress: handleComingSoon,
         },
         {
           icon: 'information-circle',
           label: 'About',
           type: 'link',
           value: 'v1.0.0',
-          onPress: () => {},
+          onPress: handleComingSoon,
         },
       ],
     },
@@ -155,20 +217,22 @@ export default function ProfileScreen() {
           <View className="mt-4 flex-row">
             <View className="flex-1 items-center rounded-xl bg-gray-50 p-3 dark:bg-[#1A1A1A]">
               <Text className="text-2xl font-bold" style={{ color: colors.text }}>
-                24
+                {stats?.total_patrols || 0}
               </Text>
               <Text style={{ color: colors.textSecondary }}>Patrols</Text>
             </View>
             <View className="w-3" />
             <View className="flex-1 items-center rounded-xl bg-gray-50 p-3 dark:bg-[#1A1A1A]">
               <Text className="text-2xl font-bold" style={{ color: colors.primary }}>
-                156
+                {stats?.total_detections || 0}
               </Text>
               <Text style={{ color: colors.textSecondary }}>Detections</Text>
             </View>
             <View className="w-3" />
             <View className="flex-1 items-center rounded-xl bg-gray-50 p-3 dark:bg-[#1A1A1A]">
-              <Text className="text-2xl font-bold text-red-500">12</Text>
+              <Text className="text-2xl font-bold text-red-500">
+                {stats?.total_violations || 0}
+              </Text>
               <Text style={{ color: colors.textSecondary }}>Violations</Text>
             </View>
           </View>
