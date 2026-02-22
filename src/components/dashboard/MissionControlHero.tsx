@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUIStore } from '@/stores/uiStore';
 import { DashboardStats } from '@/types/api';
@@ -11,7 +12,7 @@ interface Props {
 
 export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
   const { colors, isDark } = useTheme();
-  const { openTelemetry } = useUIStore();
+  const { openTelemetry, setStreamsModalVisible } = useUIStore();
   const [timer, setTimer] = useState(activePatrol?.flight_duration_seconds || 0);
 
   useEffect(() => {
@@ -150,21 +151,33 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
         </View>
       </View>
 
-      {/* Actions */}
       <View className="flex-row gap-3 p-4">
         <TouchableOpacity
           onPress={onEndPatrol}
-          className={`flex-1 items-center rounded-xl border py-3 ${
+          className={`flex-1 flex-row items-center justify-center gap-2 rounded-xl border py-3 ${
             isDark ? 'border-red-500/30 bg-red-500/10' : 'border-red-500/20 bg-red-50'
           }`}>
-          <Text className="text-sm font-semibold text-red-500">Terminate Mission</Text>
+          <Ionicons name="stop-circle-outline" size={18} color="#EF4444" />
+          <Text className="text-sm font-semibold text-red-500">End</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setStreamsModalVisible(true, activePatrol.stream?.id)}
+          className="flex-1 flex-row items-center justify-center gap-2 rounded-xl py-3"
+          style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: borderColor }}>
+          <Ionicons name="videocam-outline" size={18} color={colors.text} />
+          <Text className="text-sm font-semibold" style={{ color: colors.text }}>
+            Live Feed
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           onPress={() => openTelemetry(activePatrol.id)}
-          className="flex-1 items-center rounded-xl py-3"
+          className="flex-1 flex-row items-center justify-center gap-2 rounded-xl py-3"
           style={{ backgroundColor: colors.primary }}>
+          <Ionicons name="speedometer-outline" size={18} color={isDark ? 'black' : 'white'} />
           <Text className={`text-sm font-bold ${isDark ? 'text-black' : 'text-white'}`}>
-            Full Telemetry
+            Telemetry
           </Text>
         </TouchableOpacity>
       </View>
