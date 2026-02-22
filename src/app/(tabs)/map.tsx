@@ -8,11 +8,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { Card } from '@/components/ui';
 import { dronesApi, violationsApi, detectionsApi } from '@/api';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useUIStore } from '@/stores/uiStore';
+import { DroneDetailModal } from '@/components/modals/DroneDetailModal';
 
 type MarkerType = 'drones' | 'violations' | 'detections';
 
 export default function MapScreen() {
   const { colors, isDark } = useTheme();
+  const { openDroneDetail } = useUIStore();
   const mapRef = useRef<MapView>(null);
   const [activeFilters, setActiveFilters] = useState<Set<MarkerType>>(
     new Set(['drones', 'violations'])
@@ -133,7 +136,12 @@ export default function MapScreen() {
                 latitude: drone.gps?.latitude || -17.8252,
                 longitude: drone.gps?.longitude || 31.0335,
               }}
-              onPress={() => setSelectedItem({ type: 'drone', data: drone })}>
+              onPress={() => {
+                // For drones, open full detail modal
+                openDroneDetail(drone.id);
+                // Clear any other selected item to avoid conflicts overlapping UI
+                setSelectedItem(null);
+              }}>
               <View className="items-center">
                 <View className="rounded-full p-2" style={{ backgroundColor: colors.primary }}>
                   <Ionicons name="airplane-outline" size={20} color="#000000" />
@@ -249,6 +257,7 @@ export default function MapScreen() {
           </Card>
         </View>
       )}
+      <DroneDetailModal />
     </SafeAreaView>
   );
 }
