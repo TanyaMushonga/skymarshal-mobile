@@ -2,11 +2,14 @@ import { create } from 'zustand';
 
 interface UIState {
   violationDetailId: string | null;
+  droneDetailId: string | null;
   detectionDetailId: string | null;
   patrolDetailId: string | null;
   telemetryPatrolId: string | null;
   isTabBarVisible: boolean;
   vehicleScanVisible: boolean;
+  streamsModalVisible: boolean;
+  targetStreamId: string | null;
   paymentModalVisible: boolean;
   paymentPlate: string | null;
   paymentViolationId: string | null;
@@ -14,12 +17,14 @@ interface UIState {
   vehicleRefreshTrigger: number;
   triggerVehicleRefresh: () => void;
   openViolationDetail: (id: string) => void;
+  openDroneDetail: (id: string) => void;
   openDetectionDetail: (id: string) => void;
   openPatrolDetail: (id: string) => void;
   openTelemetry: (id: string) => void;
   openPayment: (plate: string, amount: number, violationId?: string) => void;
   setTabBarVisible: (visible: boolean) => void;
   setVehicleScanVisible: (visible: boolean) => void;
+  setStreamsModalVisible: (visible: boolean, streamId?: string) => void;
   setPaymentModalVisible: (visible: boolean) => void;
   closeDetail: () => void;
   closeAll: () => void;
@@ -28,10 +33,13 @@ interface UIState {
 
 const getSnapshot = (state: UIState): Partial<UIState> => ({
   violationDetailId: state.violationDetailId,
+  droneDetailId: state.droneDetailId,
   detectionDetailId: state.detectionDetailId,
   patrolDetailId: state.patrolDetailId,
   telemetryPatrolId: state.telemetryPatrolId,
   vehicleScanVisible: state.vehicleScanVisible,
+  streamsModalVisible: state.streamsModalVisible,
+  targetStreamId: state.targetStreamId,
   paymentModalVisible: state.paymentModalVisible,
   paymentPlate: state.paymentPlate,
   paymentViolationId: state.paymentViolationId,
@@ -42,20 +50,25 @@ const getSnapshot = (state: UIState): Partial<UIState> => ({
 const isAnyModalOpen = (state: UIState) =>
   !!(
     state.violationDetailId ||
+    state.droneDetailId ||
     state.detectionDetailId ||
     state.patrolDetailId ||
     state.telemetryPatrolId ||
     state.vehicleScanVisible ||
+    state.streamsModalVisible ||
     state.paymentModalVisible
   );
 
 export const useUIStore = create<UIState>((set) => ({
   violationDetailId: null,
+  droneDetailId: null,
   detectionDetailId: null,
   patrolDetailId: null,
   telemetryPatrolId: null,
   isTabBarVisible: true,
   vehicleScanVisible: false,
+  streamsModalVisible: false,
+  targetStreamId: null,
   history: [],
   paymentModalVisible: false,
   paymentPlate: null,
@@ -73,6 +86,24 @@ export const useUIStore = create<UIState>((set) => ({
         ...state,
         history,
         violationDetailId: id,
+        droneDetailId: null,
+        detectionDetailId: null,
+        patrolDetailId: null,
+        telemetryPatrolId: null,
+        vehicleScanVisible: false,
+        paymentModalVisible: false,
+      };
+    }),
+  openDroneDetail: (id) =>
+    set((state) => {
+      const history = isAnyModalOpen(state)
+        ? [...state.history, getSnapshot(state)]
+        : state.history;
+      return {
+        ...state,
+        history,
+        droneDetailId: id,
+        violationDetailId: null,
         detectionDetailId: null,
         patrolDetailId: null,
         telemetryPatrolId: null,
@@ -145,13 +176,15 @@ export const useUIStore = create<UIState>((set) => ({
   setTabBarVisible: (visible) => set({ isTabBarVisible: visible }),
   setVehicleScanVisible: (visible) =>
     set((state) => {
-      // If opening, push history. If closing explicitly via this setter, behavior is ambiguous,
-      // but usually setters are used for opening. For closing, closeDetail is preferred.
-      // We will assume this is mostly used for opening or simple toggles.
-      // To be safe, if visible=true and something is open, push.
       const history =
         visible && isAnyModalOpen(state) ? [...state.history, getSnapshot(state)] : state.history;
       return { ...state, history, vehicleScanVisible: visible };
+    }),
+  setStreamsModalVisible: (visible, streamId) =>
+    set((state) => {
+      const history =
+        visible && isAnyModalOpen(state) ? [...state.history, getSnapshot(state)] : state.history;
+      return { ...state, history, streamsModalVisible: visible, targetStreamId: streamId || null };
     }),
   setPaymentModalVisible: (visible) => set({ paymentModalVisible: visible }),
   closeDetail: () =>
@@ -173,6 +206,8 @@ export const useUIStore = create<UIState>((set) => ({
         patrolDetailId: null,
         telemetryPatrolId: null,
         vehicleScanVisible: false,
+        streamsModalVisible: false,
+        targetStreamId: null,
         paymentModalVisible: false,
         paymentPlate: null,
         paymentViolationId: null,
@@ -183,10 +218,13 @@ export const useUIStore = create<UIState>((set) => ({
   closeAll: () =>
     set({
       violationDetailId: null,
+      droneDetailId: null,
       detectionDetailId: null,
       patrolDetailId: null,
       telemetryPatrolId: null,
       vehicleScanVisible: false,
+      streamsModalVisible: false,
+      targetStreamId: null,
       paymentModalVisible: false,
       paymentPlate: null,
       paymentViolationId: null,
