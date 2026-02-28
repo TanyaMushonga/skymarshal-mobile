@@ -1,4 +1,6 @@
 // API Response Types
+import { Stream } from '@/api/streams';
+
 export interface ApiResponse<T> {
   data: T;
   message?: string;
@@ -65,6 +67,7 @@ export interface Patrol {
   created_at: string;
   updated_at: string;
   battery_level?: number;
+  stream?: Stream;
 }
 
 export interface StartPatrolRequest {
@@ -217,6 +220,9 @@ export interface DashboardStats {
 export interface OfficerStats {
   hours_patrolled_this_week: number;
   performance_rating: number;
+  total_patrols?: number;
+  total_detections?: number;
+  total_violations?: number;
 }
 
 // Vehicle Scan Types
