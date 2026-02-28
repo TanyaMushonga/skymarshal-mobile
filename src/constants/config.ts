@@ -1,5 +1,10 @@
 export const config = {
   API_BASE_URL: process.env.EXPO_PUBLIC_API_URL!,
+  // Derive WebSocket URL from API URL if not explicitly set
+  WS_URL:
+    process.env.EXPO_PUBLIC_WS_URL ||
+    process.env.EXPO_PUBLIC_API_URL?.replace(/\/api\/?$/, '').replace(/^http/, 'ws') ||
+    '',
   APP_NAME: 'SkyMarshal',
   APP_VERSION: '1.0.0',
 
@@ -61,6 +66,7 @@ export const endpoints = {
   NOTIFICATION_MARK_READ: (id: string) => `/v1/notifications/${id}/mark_read/`,
   NOTIFICATIONS_MARK_ALL_READ: '/v1/notifications/mark_all_read/',
   NOTIFICATIONS_BULK_DELETE: '/v1/notifications/bulk_delete/',
+  WS_NOTIFICATIONS: '/ws/notifications/',
 
   // Analytics (Namespace: api/v1/analytics/)
   OFFICER_STATS: '/v1/analytics/officer/my_stats/',
@@ -74,4 +80,9 @@ export const endpoints = {
   VEHICLE_LOOKUP: '/v1/vehicles/lookup/',
   CLEAR_FINES: '/v1/vehicles/clear-fines/',
   RECORD_PAYMENT: '/v1/vehicles/record-payment/',
+
+  // Streams
+  STREAMS: '/v1/streams/',
+  STREAM_START: (id: string | number) => `/v1/streams/${id}/start/`,
+  STREAM_STOP: (id: string | number) => `/v1/streams/${id}/stop/`,
 } as const;
