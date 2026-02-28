@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
 import { BaseModal } from '../ui/BaseModal';
-import { Card, Button, Input, Badge } from '@/components/ui';
+import { Button, Input, Badge } from '@/components/ui';
 import { vehiclesApi } from '@/api/vehicles';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useUIStore } from '@/stores/uiStore';
