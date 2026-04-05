@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 
 interface ButtonProps extends TouchableOpacityProps {
-  title: string;
+  title?: string;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
@@ -39,9 +39,9 @@ export function Button({
   };
 
   const sizeStyles = {
-    sm: 'px-4 py-2',
-    md: 'px-6 py-3',
-    lg: 'px-8 py-4',
+    sm: icon && !title ? 'p-2' : 'px-4 py-2',
+    md: icon && !title ? 'p-3' : 'px-6 py-3',
+    lg: icon && !title ? 'p-4' : 'px-8 py-4',
   };
 
   const textVariantStyles = {
@@ -76,12 +76,14 @@ export function Button({
       ) : (
         <>
           {icon && iconPosition === 'left' && <>{icon}</>}
-          <Text
-            className={`${textVariantStyles[variant]} ${textSizeStyles[size]} ${
-              icon ? (iconPosition === 'left' ? 'ml-2' : 'mr-2') : ''
-            } ${textClassName}`}>
-            {title}
-          </Text>
+          {title ? (
+            <Text
+              className={`${textVariantStyles[variant]} ${textSizeStyles[size]} ${
+                icon ? (iconPosition === 'left' ? 'ml-2' : 'mr-2') : ''
+              } ${textClassName}`}>
+              {title}
+            </Text>
+          ) : null}
           {icon && iconPosition === 'right' && <>{icon}</>}
         </>
       )}
