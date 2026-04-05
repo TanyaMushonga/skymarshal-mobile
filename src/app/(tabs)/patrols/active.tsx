@@ -85,7 +85,7 @@ export default function PatrolDetailScreen() {
           headerShadowVisible: false,
           headerRight: () => (
             <TouchableOpacity
-              onPress={() => setStreamsModalVisible(true, patrol?.stream?.id)}
+              onPress={() => setStreamsModalVisible(true, patrol?.stream_id)}
               style={{ padding: 8 }}>
               <Ionicons name="videocam-outline" size={24} color={colors.primary} />
             </TouchableOpacity>
