@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { StreamsModal } from '@/components/modals/StreamsModal';
 import { safeFormatSnapshot } from '@/lib/dateUtils';
-import { patrolsApi, violationsApi } from '@/api';
+import { patrolsApi, violationsApi, streamsApi } from '@/api';
 import { useTheme } from '@/contexts/ThemeContext';
 import { usePatrolStore } from '@/stores/patrolStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
+import { useToast } from '@/hooks/useToast';
 
 const formatDuration = (seconds?: number) => {
   if (!seconds) return '—';
@@ -31,6 +32,9 @@ export default function PatrolDetailScreen() {
   const { colors, isDark } = useTheme();
   const { user } = useAuthStore();
   const { setStreamsModalVisible } = useUIStore();
+  const { showToast } = useToast();
+
+  const [isSimulating, setIsSimulating] = useState(false);
 
   const { activePatrol } = usePatrolStore();
   const { data: patrol, isLoading } = useQuery({
@@ -51,6 +55,37 @@ export default function PatrolDetailScreen() {
   const bg = isDark ? colors.background : '#FFFFFF';
 
   const statusCfg = STATUS_CONFIG[patrol?.status ?? ''] ?? STATUS_CONFIG.CANCELLED;
+
+  const handleSimulate = async () => {
+    if (!patrol) return;
+    try {
+      setIsSimulating(true);
+      const droneId = patrol.drone_id_str || patrol.drone_id || patrol.drone?.drone_id;
+      if (!droneId) {
+        showToast('error', 'Error', 'No drone ID found for this patrol');
+        return;
+      }
+
+      showToast('info', 'Simulating', `Initializing feed for ${droneId}...`);
+      await streamsApi.simulateForDrone(droneId, patrol.id);
+      
+      showToast('success', 'Started', 'Simulation feed is now active');
+      // Small delay to allow backend to initialize
+      setTimeout(() => {
+        setStreamsModalVisible(true, patrol.stream_id);
+      }, 1500);
+    } catch (err: any) {
+      console.error(err);
+      if (err.response?.data?.error?.includes('already active')) {
+        showToast('info', 'Active', 'Simulation already running');
+        setStreamsModalVisible(true, patrol.stream_id);
+      } else {
+        showToast('error', 'Failed', 'Could not start simulation');
+      }
+    } finally {
+      setIsSimulating(false);
+    }
+  };
 
   // ─── Loading ───────────────────────────────────────────────────────────────
   if (isLoading) {
@@ -84,11 +119,25 @@ export default function PatrolDetailScreen() {
           headerTintColor: colors.text,
           headerShadowVisible: false,
           headerRight: () => (
-            <TouchableOpacity
-              onPress={() => setStreamsModalVisible(true, patrol?.stream_id)}
-              style={{ padding: 8 }}>
-              <Ionicons name="videocam-outline" size={24} color={colors.primary} />
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              {patrol?.status === 'ACTIVE' && (
+                <TouchableOpacity
+                  onPress={handleSimulate}
+                  disabled={isSimulating}
+                  style={{ padding: 8, marginRight: 4 }}>
+                  <Ionicons 
+                    name="flash-outline" 
+                    size={22} 
+                    color={isSimulating ? colors.textSecondary : '#F59E0B'} 
+                  />
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                onPress={() => setStreamsModalVisible(true, patrol?.stream_id)}
+                style={{ padding: 8 }}>
+                <Ionicons name="videocam-outline" size={24} color={colors.primary} />
+              </TouchableOpacity>
+            </View>
           ),
         }}
       />
