@@ -85,4 +85,6 @@ export const endpoints = {
   STREAMS: '/v1/streams/',
   STREAM_START: (id: string | number) => `/v1/streams/${id}/start/`,
   STREAM_STOP: (id: string | number) => `/v1/streams/${id}/stop/`,
+  STREAM_SIMULATE: (id: string | number) => `/v1/streams/${id}/simulate/`,
+  STREAM_SIMULATE_FOR_DRONE: '/v1/streams/simulate_for_drone/',
 } as const;
