@@ -68,20 +68,6 @@ export const ViolationDetailModal: React.FC = () => {
     }
   };
 
-  const handleOpenVideo = async () => {
-    if (!(violation as any)?.video_clip) {
-      showToast('warning', 'Video', 'Video clip URL not available');
-      return;
-    }
-
-    try {
-      await Linking.openURL((violation as any).video_clip);
-    } catch (error) {
-      showToast('error', 'Error', 'Could not open video link');
-      console.error(error);
-    }
-  };
-
   const handleShareReport = async () => {
     if (!violation) return;
 
@@ -114,16 +100,32 @@ export const ViolationDetailModal: React.FC = () => {
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ padding: 16 }}>
-          {/* Evidence Image */}
-          {violation?.detection?.image_url && (
-            <View className="mb-6 overflow-hidden rounded-2xl">
-              <Image
-                source={{ uri: violation.detection.image_url }}
-                style={{ width: '100%', aspectRatio: 16 / 9 }}
-                contentFit="cover"
-              />
-            </View>
-          )}
+          {/* Evidence Image Gallery */}
+          <View className="mb-6 space-y-4">
+            {(violation?.detection?.image_snapshot ||
+              violation?.detection?.image_url ||
+              violation?.image_snapshot) && (
+              <View
+                className="overflow-hidden rounded-2xl border"
+                style={{ borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#E5E7EB' }}>
+                <Image
+                  source={{
+                    uri:
+                      violation?.detection?.image_snapshot ||
+                      violation?.detection?.image_url ||
+                      violation?.image_snapshot,
+                  }}
+                  style={{ width: '100%', aspectRatio: 16 / 9 }}
+                  contentFit="cover"
+                />
+                <View className="absolute bottom-0 left-0 right-0 bg-black/40 px-3 py-1">
+                  <Text className="text-[10px] font-bold uppercase text-white">
+                    Detection Snapshot
+                  </Text>
+                </View>
+              </View>
+            )}
+          </View>
 
           {/* Violation Header Card - Status Bar Style */}
           <Card
@@ -471,17 +473,23 @@ export const ViolationDetailModal: React.FC = () => {
                 </View>
               )}
 
-              {(violation as any)?.video_clip && (
+              {(violation?.video_clip || violation?.video_url) && (
                 <View>
                   <Text
                     className="mb-2 text-sm font-medium"
                     style={{ color: colors.textSecondary }}>
-                    Video Clip
+                    Video Evidence
                   </Text>
                   <TouchableOpacity
                     className="flex-row items-center rounded-lg p-3"
                     style={{ backgroundColor: isDark ? '#1A1A1A' : '#F3F4F6' }}
-                    onPress={handleOpenVideo}>
+                    onPress={() => {
+                      const url = violation?.video_clip || violation?.video_url;
+                      if (url)
+                        Linking.openURL(url).catch(() =>
+                          showToast('error', 'Error', 'Could not open video')
+                        );
+                    }}>
                     <Ionicons
                       name="play-circle-outline"
                       size={20}
@@ -489,7 +497,7 @@ export const ViolationDetailModal: React.FC = () => {
                       style={{ marginRight: 8 }}
                     />
                     <Text className="text-base font-semibold" style={{ color: colors.primary }}>
-                      View Video
+                      Play Video Clip
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -564,6 +572,15 @@ function generateViolationReportHTML(violation: any): string {
   const description = violation?.description || '';
   const patrolId = violation?.patrol ? violation.patrol.slice(0, 8).toUpperCase() : 'N/A';
 
+  const detectionImage =
+    violation?.detection?.image_snapshot ||
+    violation?.detection?.image_url ||
+    violation?.image_snapshot;
+  const evidenceImage =
+    violation?.image_snapshot ||
+    violation?.evidence_url ||
+    (violation as any)?.evidence_meta?.image_url;
+
   return `
     <!DOCTYPE html>
     <html>
@@ -628,6 +645,28 @@ function generateViolationReportHTML(violation: any): string {
           color: #333;
           font-size: 13px;
         }
+        .evidence-gallery {
+          display: flex;
+          gap: 20px;
+          margin-bottom: 30px;
+          flex-wrap: wrap;
+        }
+        .evidence-item {
+          flex: 1;
+          min-width: 300px;
+        }
+        .evidence-image {
+          width: 100%;
+          border-radius: 8px;
+          border: 1px solid #e0e0e0;
+        }
+        .evidence-caption {
+          font-size: 10px;
+          color: #666;
+          text-align: center;
+          margin-top: 5px;
+          text-transform: uppercase;
+        }
         .speed-box {
           background-color: #FEF2F2;
           border: 2px solid #EF4444;
@@ -676,6 +715,29 @@ function generateViolationReportHTML(violation: any): string {
           <h1>TRAFFIC VIOLATION REPORT</h1>
           <p>License Plate: <strong>${licensePlate}</strong></p>
           <p>${new Date().toLocaleDateString()}</p>
+        </div>
+
+        <div class="evidence-gallery">
+          ${
+            detectionImage
+              ? `
+          <div class="evidence-item">
+            <img src="${detectionImage}" class="evidence-image" />
+            <div class="evidence-caption">Detection Snapshot</div>
+          </div>
+          `
+              : ''
+          }
+          ${
+            evidenceImage && evidenceImage !== detectionImage
+              ? `
+          <div class="evidence-item">
+            <img src="${evidenceImage}" class="evidence-image" />
+            <div class="evidence-caption">Photographic Evidence</div>
+          </div>
+          `
+              : ''
+          }
         </div>
 
         <div class="section">
