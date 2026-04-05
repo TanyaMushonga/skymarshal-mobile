@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Image, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useVideoStream } from '../../hooks/useVideoStream';
-import { Wifi, WifiOff, ShieldCheck } from 'lucide-react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface AnnotatedVideoViewProps {
   streamId: string;
@@ -22,29 +22,31 @@ const AnnotatedVideoView: React.FC<AnnotatedVideoViewProps> = ({
           <View style={styles.liveDot} />
           <Text style={styles.badgeText}>LIVE • {droneName}</Text>
         </View>
-        <ShieldCheck size={18} color="#10b981" />
+        <MaterialCommunityIcons name="shield-check" size={18} color="#10b981" />
       </View>
 
       {/* Video Content */}
       <View style={styles.videoContainer}>
         {frame ? (
           <Image
+            key={`frame-${streamId}`}
             source={{ uri: `data:image/jpeg;base64,${frame}` }}
             style={styles.frame}
-            resizeMode="contain"
+            resizeMode="cover"
+            fadeDuration={0}
           />
         ) : (
           <View style={styles.placeholder}>
             {isConnected ? (
               <>
                 <ActivityIndicator size="large" color="#0ea5e9" />
-                <Text style={styles.placeholderText}>Loading stream...</Text>
+                <Text style={styles.placeholderText}>Loading live feed...</Text>
               </>
             ) : error ? (
               <Text style={styles.errorText}>Connection Error</Text>
             ) : (
               <>
-                <WifiOff size={48} color="#475569" />
+                <MaterialCommunityIcons name="wifi-off" size={48} color="#475569" />
                 <Text style={styles.placeholderText}>Stream Offline</Text>
               </>
             )}
@@ -55,7 +57,11 @@ const AnnotatedVideoView: React.FC<AnnotatedVideoViewProps> = ({
       {/* Connection Status Indicator */}
       <View style={styles.footer}>
         <View style={styles.statusBox}>
-          <Wifi size={14} color={isConnected ? '#10b981' : '#ef4444'} />
+          <MaterialCommunityIcons
+            name="wifi"
+            size={14}
+            color={isConnected ? '#10b981' : '#ef4444'}
+          />
           <Text style={[styles.statusText, { color: isConnected ? '#10b981' : '#ef4444' }]}>
             {isConnected ? 'STABLE' : 'DISCONNECTED'}
           </Text>
