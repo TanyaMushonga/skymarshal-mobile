@@ -96,6 +96,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   setUser: (user) => {
+    if (user) {
+      setUserData(user).catch((err) =>
+        console.error('[AuthStore] Failed to persist user data:', err)
+      );
+    }
     set({
       user,
       isAuthenticated: !!user,
