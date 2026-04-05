@@ -15,7 +15,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Card, Button, Badge } from '@/components/ui';
 import { streamsApi, Stream } from '@/api/streams';
-import { DroneStreamPlayer } from '@/components/streaming/DroneStreamPlayer';
+import { dronesApi } from '@/api/drones';
+import { violationsApi } from '@/api/violations';
+import { Violation } from '@/types/api';
+import AnnotatedVideoView from '@/components/streaming/AnnotatedVideoView';
 import { useToast } from '@/hooks/useToast';
 import { useUIStore } from '@/stores/uiStore';
 
@@ -25,7 +28,9 @@ export const StreamsModal = () => {
   const { streamsModalVisible, setStreamsModalVisible, targetStreamId } = useUIStore();
 
   const [selectedStreamId, setSelectedStreamId] = useState<string | null>(null);
+  const [isSimulating, setIsSimulating] = useState(false);
 
+  // Fetch active streams
   const {
     data: streams = [],
     isLoading,
@@ -34,27 +39,59 @@ export const StreamsModal = () => {
   } = useQuery<Stream[]>({
     queryKey: ['streams', 'active'],
     queryFn: () => streamsApi.getStreams(true),
-    enabled: streamsModalVisible, // Only fetch when modal is open
-    refetchInterval: 10000, // Refresh every 10s
+    enabled: streamsModalVisible,
+    refetchInterval: 5000, // Faster refresh for dashboard feel
+  });
+
+  // Fetch drones for simulation targets
+  const { data: drones = [] } = useQuery({
+    queryKey: ['drones', 'available'],
+    queryFn: async () => {
+      const res = await dronesApi.list();
+      return res.results;
+    },
+    enabled: streamsModalVisible && streams.length === 0,
   });
 
   // Auto-select stream if targetStreamId is provided
   useEffect(() => {
     if (streamsModalVisible && targetStreamId) {
       setSelectedStreamId(targetStreamId);
-    } else if (
-      streamsModalVisible &&
-      !selectedStreamId &&
-      streams.length > 0 &&
-      targetStreamId === null
-    ) {
-      // Optional: Auto-select first stream if none specific is requested?
-      // For now, adhere to "Link Patrol to Stream" -> if targetStreamId is present, use it.
     }
-  }, [streamsModalVisible, targetStreamId, streams, selectedStreamId]);
+  }, [streamsModalVisible, targetStreamId]);
 
   const onRefresh = () => {
     refetch();
+  };
+
+  // Fetch recent violations for snapshots
+  const { data: recentViolations = [] } = useQuery({
+    queryKey: ['violations', 'recent'],
+    queryFn: async () => {
+      const res = await violationsApi.list({ today: true, limit: 5 });
+      return res.results;
+    },
+    enabled: streamsModalVisible,
+    refetchInterval: 10000,
+  });
+
+  const handleSimulate = async () => {
+    try {
+      setIsSimulating(true);
+      // Try to simulate for the first drone found, or a default one
+      const targetDroneId = drones[0]?.drone_id || 'DRN-123';
+      showToast('info', 'Initializing Simulation', `Setting up live feed for ${targetDroneId}...`);
+
+      await streamsApi.simulateForDrone(targetDroneId);
+
+      showToast('success', 'Simulation Started', 'Live feed is now being generated.');
+      setTimeout(() => refetch(), 1000);
+    } catch (error) {
+      console.error(error);
+      showToast('error', 'Simulation Failed', 'Could not initialize simulated stream.');
+    } finally {
+      setIsSimulating(false);
+    }
   };
 
   const toggleProcessing = async (stream: Stream) => {
@@ -100,114 +137,156 @@ export const StreamsModal = () => {
         style={{ backgroundColor: isDark ? colors.background : '#F9FAFB' }}>
         {/* Header */}
         <View
-          className="flex-row items-center justify-between border-b px-4 py-2"
-          style={{ borderColor: isDark ? colors.border : '#e5e7eb' }}>
-          <Text className="text-xl font-bold" style={{ color: colors.text }}>
-            Live Feeds
-          </Text>
-          <TouchableOpacity onPress={() => setStreamsModalVisible(false)} className="p-2">
-            <Ionicons name="close" size={24} color={colors.text} />
+          className="flex-row items-center justify-between border-b px-5 py-4"
+          style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#e5e7eb' }}>
+          <View>
+            <Text className="text-xl font-bold" style={{ color: colors.text }}>
+              Live Feeds
+            </Text>
+            <View className="flex-row items-center gap-1.5">
+              <View className="h-2 w-2 rounded-full bg-emerald-500" />
+              <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
+                {streams.length} Active {streams.length === 1 ? 'Stream' : 'Streams'}
+              </Text>
+            </View>
+          </View>
+          <TouchableOpacity
+            onPress={() => setStreamsModalVisible(false)}
+            className="h-10 w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800">
+            <Ionicons name="close" size={20} color={colors.text} />
           </TouchableOpacity>
         </View>
 
-        {/* Main Video Player (Selected Stream) */}
-        {selectedStream ? (
-          <View className="relative mb-4 h-64 w-full bg-black">
-            <DroneStreamPlayer
-              rtspUrl={selectedStream.rtsp_url}
-              isActive={true}
-              style={{ height: '100%', width: '100%' }}
-            />
-            <View className="absolute left-2 top-2 rounded bg-black/60 px-2 py-1">
-              <Text className="font-bold text-white">{selectedStream.drone_name}</Text>
-            </View>
-            <TouchableOpacity
-              className="absolute right-2 top-2 rounded-full bg-black/60 p-1"
-              onPress={() => setSelectedStreamId(null)}>
-              <Ionicons name="close" size={20} color="white" />
-            </TouchableOpacity>
+        {/* Recent Violations Ribbon */}
+        {recentViolations.length > 0 && (
+          <View
+            className="border-b"
+            style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#e5e7eb' }}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ padding: 12, gap: 12 }}>
+              {recentViolations.map((v: Violation) => (
+                <TouchableOpacity
+                  key={v.id}
+                  onPress={() => useUIStore.getState().openViolationDetail(v.id)}
+                  className="flex-row items-center rounded-full border px-3 py-1.5"
+                  style={{
+                    backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : '#FEF2F2',
+                    borderColor: isDark ? 'rgba(239, 68, 68, 0.2)' : '#FECACA',
+                  }}>
+                  <View className="mr-2 h-2 w-2 rounded-full bg-red-500" />
+                  <Text
+                    className="text-xs font-bold"
+                    style={{ color: isDark ? '#FCA5A5' : '#B91C1C' }}>
+                    {v.violation_type} • {(v.detection as any)?.license_plate || 'N/A'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
-        ) : null}
+        )}
+
+        {/* Main Video Player */}
+        {selectedStream && (
+          <View className="px-4 pt-4">
+            <View className="relative">
+              <AnnotatedVideoView
+                streamId={selectedStream.stream_id}
+                droneName={selectedStream.drone_name}
+              />
+              <TouchableOpacity
+                className="absolute right-4 top-4 z-20 h-10 w-10 items-center justify-center rounded-full bg-black/60"
+                onPress={() => setSelectedStreamId(null)}>
+                <Ionicons name="close" size={20} color="white" />
+              </TouchableOpacity>
+            </View>
+
+            <View className="mt-4 flex-row gap-3">
+              <Button
+                title={selectedStreamId === selectedStream?.id ? 'Close Stream' : 'Connect to Feed'}
+                variant={selectedStreamId === selectedStream?.id ? 'secondary' : 'primary'}
+                size="md"
+                onPress={() =>
+                  setSelectedStreamId(
+                    selectedStreamId === selectedStream?.id ? null : selectedStream?.id || null
+                  )
+                }
+                className="flex-1"
+                icon={
+                  <Ionicons
+                    name={
+                      selectedStreamId === selectedStream?.id
+                        ? 'stop-circle-outline'
+                        : 'videocam-outline'
+                    }
+                    size={18}
+                    color={selectedStreamId === selectedStream?.id ? 'white' : 'black'}
+                  />
+                }
+              />
+            </View>
+          </View>
+        )}
 
         <ScrollView
-          contentContainerStyle={{ padding: 16 }}
+          className="flex-1"
+          contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}>
-          <Text className="mb-4 text-lg font-bold" style={{ color: colors.text }}>
-            Active Drone Streams ({streams.length})
-          </Text>
-
-          {streams.length === 0 && !isLoading ? (
-            <View className="items-center py-10">
-              <Ionicons name="videocam-off-outline" size={48} color={colors.textSecondary} />
-              <Text className="mt-2 text-center" style={{ color: colors.textSecondary }}>
-                No active streams found. Ensure drones are online.
-              </Text>
-            </View>
-          ) : (
-            streams.map((stream) => (
-              <Card key={stream.id} className="mb-4 overflow-hidden p-0">
-                <TouchableOpacity
-                  activeOpacity={0.9}
-                  onPress={() => setSelectedStreamId(stream.id)}>
-                  {/* Thumbnail / Permission to Play overlay */}
-                  <View className="relative h-48 items-center justify-center bg-gray-900">
-                    {/* If this is the selected stream, we show a placeholder saying "Playing above" */}
-                    {selectedStreamId === stream.id ? (
-                      <Text className="font-bold text-blue-400">Playing in Main View...</Text>
-                    ) : (
-                      <>
-                        <Ionicons name="play-circle" size={48} color="white" />
-                        <Text className="mt-2 text-white">Tap to View Stream</Text>
-                      </>
-                    )}
-
-                    <View className="absolute right-2 top-2 flex-row gap-2">
-                      <Badge label={stream.resolution} variant="default" size="sm" />
-                      <Badge label={`${stream.frame_rate} FPS`} variant="default" size="sm" />
+          {streams.map((stream) => (
+            <TouchableOpacity
+              key={stream.id}
+              onPress={() => setSelectedStreamId(stream.id)}
+              activeOpacity={0.7}>
+              <Card className="mb-4 overflow-hidden">
+                <View className="flex-row items-center justify-between px-4 py-3">
+                  <View className="flex-row items-center gap-3">
+                    <View
+                      className="h-10 w-10 items-center justify-center rounded-xl"
+                      style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f3f4f6' }}>
+                      <Ionicons name="videocam" size={20} color={colors.primary} />
+                    </View>
+                    <View>
+                      <Text className="font-bold" style={{ color: colors.text }}>
+                        {stream.drone_name}
+                      </Text>
+                      <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
+                        {stream.resolution} • {stream.frame_rate}fps
+                      </Text>
                     </View>
                   </View>
-
-                  <View className="p-4">
-                    <View className="mb-2 flex-row items-center justify-between">
-                      <View>
-                        <Text className="text-lg font-bold" style={{ color: colors.text }}>
-                          {stream.drone_name}
-                        </Text>
-                        <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
-                          ID: {stream.drone_id}
-                        </Text>
-                      </View>
-                      <Badge
-                        label={stream.is_active ? 'ONLINE' : 'OFFLINE'}
-                        variant={stream.is_active ? 'success' : 'default'}
-                        dot
-                      />
-                    </View>
-
-                    <View className="mt-2 flex-row gap-2">
-                      <Button
-                        title={selectedStreamId === stream.id ? 'Close Feed' : 'Watch Feed'}
-                        variant={selectedStreamId === stream.id ? 'secondary' : 'primary'}
-                        size="sm"
-                        onPress={() =>
-                          setSelectedStreamId(selectedStreamId === stream.id ? null : stream.id)
-                        }
-                        style={{ flex: 1 }}
-                        icon={<Ionicons name="videocam" size={16} color="white" />}
-                      />
-                      <Button
-                        title="More Options"
-                        variant="outline"
-                        size="sm"
-                        onPress={() => toggleProcessing(stream)}
-                        style={{ width: 44 }}
-                        icon={<Ionicons name="ellipsis-horizontal" size={16} color={colors.text} />}
-                      />
-                    </View>
-                  </View>
-                </TouchableOpacity>
+                  <Badge
+                    label={stream.is_active ? 'Active' : 'Inactive'}
+                    variant={stream.is_active ? 'success' : 'default'}
+                  />
+                </View>
               </Card>
-            ))
+            </TouchableOpacity>
+          ))}
+
+          {streams.length === 0 && !isLoading && (
+            <View className="items-center justify-center py-20">
+              <View className="mb-6 h-24 w-24 items-center justify-center rounded-3xl bg-gray-100 dark:bg-gray-800">
+                <Ionicons name="videocam-off" size={40} color={colors.textSecondary} />
+              </View>
+              <Text className="text-lg font-bold" style={{ color: colors.text }}>
+                No Active Streams
+              </Text>
+              <Text
+                className="mt-2 px-10 text-center text-sm leading-5"
+                style={{ color: colors.textSecondary }}>
+                There are currently no live drone feeds transmitted from the field.
+              </Text>
+
+              <Button
+                title="Simulate Live Feed"
+                variant="primary"
+                loading={isSimulating}
+                onPress={handleSimulate}
+                className="mt-8 px-10"
+                icon={<Ionicons name="flash-outline" size={18} color="black" />}
+              />
+            </View>
           )}
         </ScrollView>
       </SafeAreaView>
