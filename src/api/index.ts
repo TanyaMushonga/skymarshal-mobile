@@ -8,3 +8,4 @@ export { violationsApi } from './violations';
 export { notificationsApi } from './notifications';
 export { analyticsApi } from './analytics';
 export { vehiclesApi } from './vehicles';
+export { streamsApi } from './streams';
