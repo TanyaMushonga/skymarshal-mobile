@@ -52,6 +52,7 @@ export interface Patrol {
   officer: User;
   drone: Drone;
   drone_id?: string;
+  drone_id_str?: string;
   status: PatrolStatus;
   started_at: string;
   start_time?: string;
@@ -68,6 +69,7 @@ export interface Patrol {
   updated_at: string;
   battery_level?: number;
   stream?: Stream;
+  stream_id?: string;
 }
 
 export interface StartPatrolRequest {
@@ -141,6 +143,7 @@ export interface Detection {
   latitude?: number;
   longitude?: number;
   image_url?: string;
+  image_snapshot?: string;
   bounding_box?: {
     x: number;
     y: number;
@@ -165,6 +168,8 @@ export interface Violation {
   speed_limit?: number;
   evidence_url?: string;
   video_url?: string;
+  video_clip?: string | null;
+  image_snapshot?: string;
   notes?: string;
   latitude: number;
   longitude: number;
@@ -172,6 +177,20 @@ export interface Violation {
   created_at: string;
   updated_at: string;
   severity?: 'HIGH' | 'MEDIUM' | 'LOW';
+  fine_amount?: string;
+  description?: string;
+  evidence_meta?: {
+    altitude?: number;
+    drone_id?: string;
+    patrol_id?: string;
+    timestamp?: string;
+    zone_limit?: number;
+    coordinates?: {
+      lat: number;
+      lon: number;
+    };
+    violation_speed?: number;
+  };
 }
 
 // Notification Types
