@@ -1,23 +1,24 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
-import { VLCPlayer } from 'react-native-vlc-media-player';
+import React from 'react';
+import { View, Image, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useVideoStream } from '@/hooks/useVideoStream';
 
 interface DroneStreamPlayerProps {
-  rtspUrl: string;
+  streamId: string;
   isActive?: boolean;
   style?: any;
+  onStartSimulation?: () => void;
 }
 
 export const DroneStreamPlayer: React.FC<DroneStreamPlayerProps> = ({
-  rtspUrl,
+  streamId,
   isActive = true,
   style,
+  onStartSimulation,
 }) => {
   const { colors } = useTheme();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const { frame, isConnected, error } = useVideoStream(streamId);
 
   if (!isActive) {
     return (
@@ -30,35 +31,54 @@ export const DroneStreamPlayer: React.FC<DroneStreamPlayerProps> = ({
 
   return (
     <View style={[styles.container, style]}>
-      <VLCPlayer
-        source={{ uri: rtspUrl }}
-        autoplay={true}
-        resizeMode="contain"
-        style={styles.video}
-        autoAspectRatio={true}
-        onBuffering={() => setLoading(true)}
-        onPlaying={() => {
-          setLoading(false);
-          setError(false);
-        }}
-        onError={() => {
-          setLoading(false);
-          setError(true);
-        }}
-      />
-
-      {loading && !error && (
-        <View style={[styles.overlay, styles.center]}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={{ color: '#fff', marginTop: 10 }}>Connecting to Drone...</Text>
+      {frame ? (
+        <Image
+          source={{ uri: `data:image/jpeg;base64,${frame}` }}
+          style={styles.video}
+          resizeMode="contain"
+          fadeDuration={0}
+        />
+      ) : (
+        <View style={[styles.center, { flex: 1 }]}>
+          {isConnected ? (
+            <>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={{ color: '#fff', marginTop: 10 }}>Connecting to Drone...</Text>
+            </>
+          ) : error ? (
+            <>
+              <Ionicons name="warning" size={48} color="#EF4444" />
+              <Text style={{ color: '#fff', marginTop: 10 }}>Stream Connection Failed</Text>
+              {onStartSimulation && (
+                <TouchableOpacity
+                  onPress={onStartSimulation}
+                  style={{
+                    marginTop: 16,
+                    paddingHorizontal: 20,
+                    paddingVertical: 10,
+                    backgroundColor: colors.primary,
+                    borderRadius: 10,
+                  }}>
+                  <Text style={{ color: '#000', fontWeight: '700', fontSize: 13 }}>
+                    Start Simulation
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </>
+          ) : (
+            <>
+              <Ionicons name="videocam-off" size={48} color="#666" />
+              <Text style={{ color: '#fff', marginTop: 10 }}>Waiting for live feed...</Text>
+            </>
+          )}
         </View>
       )}
 
-      {error && (
-        <View style={[styles.overlay, styles.center]}>
-          <Ionicons name="warning" size={48} color="#EF4444" />
-          <Text style={{ color: '#fff', marginTop: 10 }}>Stream Connection Failed</Text>
-          <Text style={{ color: '#aaa', fontSize: 12 }}>Check network or VPN</Text>
+      {/* Live badge */}
+      {isConnected && (
+        <View style={styles.liveBadge}>
+          <View style={styles.liveDot} />
+          <Text style={styles.liveBadgeText}>LIVE</Text>
         </View>
       )}
     </View>
@@ -70,18 +90,39 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     overflow: 'hidden',
     position: 'relative',
+    borderRadius: 12,
+    minHeight: 200,
   },
   video: {
     width: '100%',
     height: '100%',
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    zIndex: 10,
-  },
   center: {
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  liveBadge: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    gap: 6,
+  },
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#ef4444',
+  },
+  liveBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 1,
   },
 });
