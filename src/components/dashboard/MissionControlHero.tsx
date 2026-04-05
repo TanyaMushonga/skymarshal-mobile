@@ -162,7 +162,7 @@ export const MissionControlHero = ({ activePatrol, onEndPatrol }: Props) => {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => setStreamsModalVisible(true, activePatrol.stream?.id)}
+          onPress={() => setStreamsModalVisible(true, activePatrol.stream_id)}
           className="flex-1 flex-row items-center justify-center gap-2 rounded-xl py-3"
           style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: borderColor }}>
           <Ionicons name="videocam-outline" size={18} color={colors.text} />
