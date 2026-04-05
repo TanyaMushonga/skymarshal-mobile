@@ -46,7 +46,17 @@ export const UserHeader = () => {
       pulseAnim.setValue(1);
       pulseOpacity.setValue(0);
     }
-  }, [user?.is_on_duty]);
+  }, [user?.is_on_duty, pulseAnim, pulseOpacity]);
+
+  // Synchronize switch animation with duty status
+  useEffect(() => {
+    Animated.spring(switchAnim, {
+      toValue: user?.is_on_duty ? 1 : 0,
+      useNativeDriver: false,
+      tension: 120,
+      friction: 14,
+    }).start();
+  }, [user?.is_on_duty, switchAnim]);
 
   const handleToggleDuty = async () => {
     Animated.spring(switchAnim, {
@@ -112,7 +122,9 @@ export const UserHeader = () => {
                 borderColor: isOnDuty ? ACTIVE_COLOR : isDark ? '#2A2A2A' : '#DDDDDD',
               }}>
               <Image
-                source={user?.profile_picture || 'https://via.placeholder.com/150'}
+                source={
+                  user?.avatar || user?.profile_picture || require('../../../assets/profile.jpeg')
+                }
                 style={{
                   width: 52,
                   height: 52,
