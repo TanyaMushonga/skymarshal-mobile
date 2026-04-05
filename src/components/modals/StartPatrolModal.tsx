@@ -21,7 +21,7 @@ interface StartPatrolModalProps {
 export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onClose }) => {
   const { colors, isDark } = useTheme();
   const queryClient = useQueryClient();
-  const { openTelemetry } = useUIStore();
+  const { setStreamsModalVisible } = useUIStore();
   const { startPatrol } = usePatrolStore();
   const { user, setUser } = useAuthStore();
   const { showToast } = useToast();
@@ -64,9 +64,10 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
       // queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       onClose();
 
-      openTelemetry(patrol.id);
+      // Open the live stream modal immediately to show the feed
+      setStreamsModalVisible(true, patrol.stream_id);
 
-      showToast('success', 'Patrol Started', 'Your patrol has been initiated successfully.');
+      showToast('success', 'Patrol Started', 'Live feed is initialising...');
     },
     onError: (error: any) => {
       showToast('error', 'Error', error.response?.data?.detail || 'Failed to start patrol');
