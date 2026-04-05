@@ -21,6 +21,7 @@ import { Violation } from '@/types/api';
 import AnnotatedVideoView from '@/components/streaming/AnnotatedVideoView';
 import { useToast } from '@/hooks/useToast';
 import { useUIStore } from '@/stores/uiStore';
+import { patrolsApi } from '@/api/patrols';
 
 export const StreamsModal = () => {
   const { colors, isDark } = useTheme();
@@ -78,16 +79,22 @@ export const StreamsModal = () => {
   const handleSimulate = async () => {
     try {
       setIsSimulating(true);
-      // Try to simulate for the first drone found, or a default one
-      const targetDroneId = drones[0]?.drone_id || 'DRN-123';
+      
+      // 1. Try to find drone ID from active patrols first
+      const activePatrols = await patrolsApi.list({ status: 'ACTIVE' });
+      const patrol = activePatrols.results?.[0];
+      
+      const targetDroneId = patrol?.drone_id_str || patrol?.drone_id || drones[0]?.drone_id || 'DRN-123';
+      const patrolId = patrol?.id;
+
       showToast('info', 'Initializing Simulation', `Setting up live feed for ${targetDroneId}...`);
 
-      await streamsApi.simulateForDrone(targetDroneId);
+      await streamsApi.simulateForDrone(targetDroneId, patrolId);
 
       showToast('success', 'Simulation Started', 'Live feed is now being generated.');
       setTimeout(() => refetch(), 1000);
     } catch (error) {
-      console.error(error);
+      console.error('[StreamsModal] Simulation error:', error);
       showToast('error', 'Simulation Failed', 'Could not initialize simulated stream.');
     } finally {
       setIsSimulating(false);
