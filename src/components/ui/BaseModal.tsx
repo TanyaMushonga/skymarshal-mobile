@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   Platform,
   KeyboardAvoidingView,
-  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface BaseModalProps {
@@ -29,6 +29,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
   footer,
 }) => {
   const { colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Modal
@@ -40,11 +41,15 @@ export const BaseModal: React.FC<BaseModalProps> = ({
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
         style={{ backgroundColor: colors.background }}>
-        <SafeAreaView className="flex-1">
+        <View className="flex-1">
           {/* Header */}
           <View
-            className="flex-row items-center border-b px-5 py-4"
-            style={{ borderBottomColor: isDark ? '#1F1F1F' : '#E8E8E8' }}>
+            className="flex-row items-center border-b px-5"
+            style={{
+              borderBottomColor: isDark ? '#1F1F1F' : '#E8E8E8',
+              paddingTop: Math.max(insets.top, 16),
+              paddingBottom: 16,
+            }}>
             <View className="flex-1">
               <Text className="text-xl font-bold tracking-tight" style={{ color: colors.text }}>
                 {title}
@@ -73,12 +78,12 @@ export const BaseModal: React.FC<BaseModalProps> = ({
               style={{
                 borderTopColor: isDark ? '#1F1F1F' : '#E8E8E8',
                 backgroundColor: colors.background,
-                paddingBottom: Platform.OS === 'ios' ? 0 : 20,
+                paddingBottom: Math.max(insets.bottom, 20),
               }}>
               {footer}
             </View>
           )}
-        </SafeAreaView>
+        </View>
       </KeyboardAvoidingView>
     </Modal>
   );
