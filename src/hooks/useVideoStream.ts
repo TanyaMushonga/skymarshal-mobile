@@ -7,8 +7,9 @@ export interface StreamFrame {
   timestamp: number;
 }
 
-export const useVideoStream = (streamId: string | null) => {
+export const useVideoStream = (streamId: string | null, mode: 'mjpeg' | 'binary' = 'mjpeg') => {
   const [frame, setFrame] = useState<string | null>(null);
+  const [videoSegment, setVideoSegment] = useState<ArrayBuffer | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -17,8 +18,11 @@ export const useVideoStream = (streamId: string | null) => {
   const connect = useCallback(() => {
     if (!streamId) return;
 
-    const wsUrl = `${config.WS_URL}/ws/stream/${streamId}/`;
-    console.log(`[useVideoStream] 📡 Connecting to: ${wsUrl}`);
+    const wsUrl = mode === 'binary' 
+      ? `${config.INGESTION_WS_URL}?stream_id=${streamId}`
+      : `${config.WS_URL}/ws/stream/${streamId}/`;
+    
+    console.log(`[useVideoStream] 📡 Connecting to ${mode} stream: ${wsUrl}`);
 
     if (wsRef.current) {
       console.log(`[useVideoStream] 🔄 Closing existing connection for stream: ${streamId}`);
@@ -26,6 +30,7 @@ export const useVideoStream = (streamId: string | null) => {
     }
 
     const ws = new WebSocket(wsUrl);
+    ws.binaryType = mode === 'binary' ? 'arraybuffer' : 'blob';
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -35,14 +40,14 @@ export const useVideoStream = (streamId: string | null) => {
     };
 
     ws.onmessage = (event) => {
+      if (mode === 'binary' && event.data instanceof ArrayBuffer) {
+        setVideoSegment(event.data);
+        return;
+      }
+
       try {
         const data = JSON.parse(event.data);
         
-        // Diagnostic log in development
-        if (__DEV__ && !lastFrameRef.current) {
-          console.log('[useVideoStream] First frame structure:', Object.keys(data));
-        }
-
         // Support multiple types of frame messages
         if (
           data.type === 'live_frame' || 
@@ -62,9 +67,10 @@ export const useVideoStream = (streamId: string | null) => {
           }
         }
       } catch (error) {
-        console.error(`[useVideoStream] ❌ JSON Parse Error for stream ${streamId}:`, error);
-        console.log('[useVideoStream] 📝 Raw message snippet:', 
-          typeof event.data === 'string' ? event.data.substring(0, 100) : 'Non-string data');
+        // Suppress JSON errors for binary streams
+        if (mode !== 'binary') {
+          console.error(`[useVideoStream] ❌ JSON Parse Error for stream ${streamId}:`, error);
+        }
       }
     };
 
@@ -78,7 +84,7 @@ export const useVideoStream = (streamId: string | null) => {
       setError('Connection failed');
       setIsConnected(false);
     };
-  }, [streamId]);
+  }, [streamId, mode]);
 
   useEffect(() => {
     connect();
@@ -89,6 +95,7 @@ export const useVideoStream = (streamId: string | null) => {
 
   return {
     frame: frame || lastFrameRef.current,
+    videoSegment,
     isConnected,
     error,
     reconnect: connect,
