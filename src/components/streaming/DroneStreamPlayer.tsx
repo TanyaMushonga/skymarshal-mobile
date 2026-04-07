@@ -3,12 +3,14 @@ import { View, Image, Text, StyleSheet, ActivityIndicator, TouchableOpacity } fr
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useVideoStream } from '@/hooks/useVideoStream';
+import { BufferedVideoPlayer } from './BufferedVideoPlayer';
 
 interface DroneStreamPlayerProps {
   streamId: string;
   isActive?: boolean;
   style?: any;
   onStartSimulation?: () => void;
+  useBuffered?: boolean;
 }
 
 export const DroneStreamPlayer: React.FC<DroneStreamPlayerProps> = ({
@@ -16,6 +18,7 @@ export const DroneStreamPlayer: React.FC<DroneStreamPlayerProps> = ({
   isActive = true,
   style,
   onStartSimulation,
+  useBuffered = true,
 }) => {
   const { colors } = useTheme();
   const { frame, isConnected, error } = useVideoStream(streamId);
@@ -31,7 +34,9 @@ export const DroneStreamPlayer: React.FC<DroneStreamPlayerProps> = ({
 
   return (
     <View style={[styles.container, style]}>
-      {frame ? (
+      {useBuffered ? (
+        <BufferedVideoPlayer streamId={streamId} isActive={isActive} />
+      ) : frame ? (
         <Image
           source={{ uri: `data:image/jpeg;base64,${frame}` }}
           style={styles.video}
