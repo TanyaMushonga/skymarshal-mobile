@@ -7,6 +7,7 @@ export interface Stream {
   drone_id: string;
   drone_name: string;
   is_active: boolean;
+  stream_mode: 'LIVE' | 'SIMULATED';
   resolution: string;
   frame_rate: number;
 }
@@ -50,5 +51,12 @@ export const streamsApi = {
       drone_id: droneId,
       patrol_id: patrolId,
     });
+  },
+
+  /**
+   * Switch to live feed mode
+   */
+  switchToLive: async (id: string | number): Promise<void> => {
+    await api.post(endpoints.STREAM_LIVE_FEED(id));
   },
 };
