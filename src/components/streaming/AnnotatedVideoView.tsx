@@ -43,8 +43,12 @@ const AnnotatedVideoView: React.FC<AnnotatedVideoViewProps> = ({
                 <Text style={styles.placeholderText}>Loading live feed...</Text>
               </>
             ) : error ? (
-              <Text style={styles.errorText}>Connection Error</Text>
+              <View style={styles.placeholder}>
+                <MaterialCommunityIcons name="alert-circle" size={48} color="#ef4444" />
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
             ) : (
+
               <>
                 <MaterialCommunityIcons name="wifi-off" size={48} color="#475569" />
                 <Text style={styles.placeholderText}>Stream Offline</Text>
