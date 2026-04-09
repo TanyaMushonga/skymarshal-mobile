@@ -5,10 +5,9 @@ export const config = {
     process.env.EXPO_PUBLIC_WS_URL ||
     process.env.EXPO_PUBLIC_API_URL?.replace(/\/api\/?$/, '').replace(/^http/, 'ws') ||
     '',
-  INGESTION_GATEWAY_URL: process.env.EXPO_PUBLIC_INGESTION_GATEWAY_URL || 'http://localhost:3003',
-  INGESTION_WS_URL: process.env.EXPO_PUBLIC_INGESTION_WS_URL || 'ws://localhost:3003/ws/video',
   APP_NAME: 'SkyMarshal',
   APP_VERSION: '1.0.0',
+
 
   // Token storage keys
   ACCESS_TOKEN_KEY: 'access_token',
@@ -88,5 +87,6 @@ export const endpoints = {
   STREAM_START: (id: string | number) => `/v1/streams/${id}/start/`,
   STREAM_STOP: (id: string | number) => `/v1/streams/${id}/stop/`,
   STREAM_SIMULATE: (id: string | number) => `/v1/streams/${id}/simulate/`,
+  STREAM_LIVE_FEED: (id: string | number) => `/v1/streams/${id}/live_feed/`,
   STREAM_SIMULATE_FOR_DRONE: '/v1/streams/simulate_for_drone/',
 } as const;
