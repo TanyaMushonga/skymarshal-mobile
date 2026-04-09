@@ -26,6 +26,7 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
   const { user, setUser } = useAuthStore();
   const { showToast } = useToast();
   const [selectedDrone, setSelectedDrone] = useState<Drone | null>(null);
+  const [streamMode, setStreamMode] = useState<'LIVE' | 'SIMULATED'>('LIVE');
 
   const { data: drones, isLoading } = useQuery({
     queryKey: ['drones', 'available'],
@@ -79,8 +80,11 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
       showToast('warning', 'Select Drone', 'Please select a drone to start patrol');
       return;
     }
-    startMutation.mutate({ drone_id: selectedDrone.drone_id });
-  }, [selectedDrone, startMutation, showToast]);
+    startMutation.mutate({ 
+      drone_id: selectedDrone.drone_id,
+      stream_mode: streamMode
+    });
+  }, [selectedDrone, streamMode, startMutation, showToast]);
 
   const renderDrone = ({ item }: { item: Drone }) => {
     const isPatrolling = !!item.is_patrolling;
@@ -181,12 +185,56 @@ export const StartPatrolModal: React.FC<StartPatrolModalProps> = ({ visible, onC
       title="Start New Patrol"
       subtitle="Select an available drone to begin"
       footer={footer}>
+      <View className="px-5 pt-3 pb-1">
+        <Text className="text-xs font-bold uppercase tracking-wider mb-2.5" style={{ color: colors.textSecondary }}>
+          Streaming Mode
+        </Text>
+        <View className="flex-row items-center rounded-xl p-1" style={{ backgroundColor: isDark ? '#111' : '#F3F4F6' }}>
+          <TouchableOpacity 
+            onPress={() => setStreamMode('LIVE')}
+            className="flex-1 py-2.5 items-center justify-center rounded-lg flex-row gap-2"
+            style={{ 
+              backgroundColor: streamMode === 'LIVE' ? (isDark ? '#222' : '#FFF') : 'transparent',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: streamMode === 'LIVE' ? 0.1 : 0,
+              elevation: streamMode === 'LIVE' ? 1 : 0
+            }}>
+            <Ionicons name="radio" size={16} color={streamMode === 'LIVE' ? colors.primary : colors.textSecondary} />
+            <Text className="text-[13px] font-semibold" style={{ color: streamMode === 'LIVE' ? colors.text : colors.textSecondary }}>
+              Live Feed
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={() => setStreamMode('SIMULATED')}
+            className="flex-1 py-2.5 items-center justify-center rounded-lg flex-row gap-2"
+            style={{ 
+              backgroundColor: streamMode === 'SIMULATED' ? (isDark ? '#222' : '#FFF') : 'transparent',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: streamMode === 'SIMULATED' ? 0.1 : 0,
+              elevation: streamMode === 'SIMULATED' ? 1 : 0
+            }}>
+            <Ionicons name="flask-outline" size={16} color={streamMode === 'SIMULATED' ? colors.primary : colors.textSecondary} />
+            <Text className="text-[13px] font-semibold" style={{ color: streamMode === 'SIMULATED' ? colors.text : colors.textSecondary }}>
+              Simulated
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View className="px-5 pt-4">
+        <Text className="text-xs font-bold uppercase tracking-wider" style={{ color: colors.textSecondary }}>
+          Available Drones
+        </Text>
+      </View>
+
       <FlatList
         data={drones || []}
         renderItem={renderDrone}
         keyExtractor={(item: Drone) => item.id}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+        contentContainerStyle={{ padding: 20, paddingTop: 10, paddingBottom: 40 }}
         ListEmptyComponent={
           <View className="items-center py-12">
             <Ionicons name="airplane-outline" size={40} color={colors.textSecondary} />
