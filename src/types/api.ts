@@ -76,6 +76,7 @@ export interface StartPatrolRequest {
   drone_id: string;
   speed_limit?: number;
   zone?: string;
+  stream_mode?: 'LIVE' | 'SIMULATED';
 }
 
 // Drone Types
