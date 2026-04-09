@@ -5,9 +5,9 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
-  Alert,
   Modal,
 } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
@@ -18,7 +18,8 @@ import { streamsApi, Stream } from '@/api/streams';
 import { dronesApi } from '@/api/drones';
 import { violationsApi } from '@/api/violations';
 import { Violation } from '@/types/api';
-import AnnotatedVideoView from '@/components/streaming/AnnotatedVideoView';
+import { DroneStreamPlayer } from '@/components/streaming/DroneStreamPlayer';
+
 import { useToast } from '@/hooks/useToast';
 import { useUIStore } from '@/stores/uiStore';
 import { patrolsApi } from '@/api/patrols';
@@ -76,21 +77,23 @@ export const StreamsModal = () => {
     refetchInterval: 10000,
   });
 
-  const handleSimulate = async () => {
+  const handleSimulate = async (droneId?: string, patrolId?: string) => {
     try {
       setIsSimulating(true);
       
-      // 1. Try to find drone ID from active patrols first
-      const activePatrols = await patrolsApi.list({ status: 'ACTIVE' });
-      const patrol = activePatrols.results?.[0];
-      
-      const targetDroneId = patrol?.drone_id_str || patrol?.drone_id || drones[0]?.drone_id || 'DRN-123';
-      const patrolId = patrol?.id;
+      let targetDroneId = droneId;
+      let targetPatrolId = patrolId;
 
-      showToast('info', 'Initializing Simulation', `Setting up live feed for ${targetDroneId}...`);
+      if (!targetDroneId) {
+        // Find drone ID from active patrols first
+        const activePatrols = await patrolsApi.list({ status: 'ACTIVE' });
+        const patrol = activePatrols.results?.[0];
+        targetDroneId = patrol?.drone_id_str || patrol?.drone_id || drones[0]?.drone_id || 'DRN-123';
+        targetPatrolId = patrol?.id;
+      }
 
-      await streamsApi.simulateForDrone(targetDroneId, patrolId);
-
+      showToast('info', 'Initializing Simulation', `Setting up simulated feed...`);
+      await streamsApi.simulateForDrone(targetDroneId, targetPatrolId);
       showToast('success', 'Simulation Started', 'Live feed is now being generated.');
       setTimeout(() => refetch(), 1000);
     } catch (error) {
@@ -101,35 +104,20 @@ export const StreamsModal = () => {
     }
   };
 
-  const toggleProcessing = async (stream: Stream) => {
+  const handleSwitchMode = async (stream: Stream, mode: 'LIVE' | 'SIMULATED') => {
     try {
-      if (stream.is_active) {
-        Alert.alert('Stop Processing?', `Stop computer vision analysis for ${stream.drone_name}?`, [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Stop',
-            style: 'destructive',
-            onPress: async () => {
-              await streamsApi.stopStream(stream.id);
-              showToast(
-                'success',
-                'Processing Stopped',
-                `Analysis stopped for ${stream.drone_name}`
-              );
-              refetch();
-            },
-          },
-        ]);
+      if (mode === 'LIVE') {
+        await streamsApi.switchToLive(stream.id);
+        showToast('success', 'Switched to Live', 'Connecting to real camera feed...');
       } else {
-        await streamsApi.startStream(stream.id);
-        showToast('success', 'Processing Started', `Analysis started for ${stream.drone_name}`);
-        refetch();
+        await handleSimulate(stream.drone_id);
       }
+      refetch();
     } catch (error) {
-      console.error(error);
-      showToast('error', 'Action Failed', 'Could not update stream status');
+      showToast('error', 'Switch Failed', 'Could not update streaming mode.');
     }
   };
+
 
   const selectedStream = streams.find((s) => s.id === selectedStreamId);
 
@@ -198,9 +186,10 @@ export const StreamsModal = () => {
         {selectedStream && (
           <View className="px-4 pt-4">
             <View className="relative">
-              <AnnotatedVideoView
+              <DroneStreamPlayer
                 streamId={selectedStream.stream_id}
-                droneName={selectedStream.drone_name}
+                isActive={!!selectedStream}
+                style={{ height: 240 }}
               />
               <TouchableOpacity
                 className="absolute right-4 top-4 z-20 h-10 w-10 items-center justify-center rounded-full bg-black/60"
@@ -210,28 +199,29 @@ export const StreamsModal = () => {
             </View>
 
             <View className="mt-4 flex-row gap-3">
-              <Button
-                title={selectedStreamId === selectedStream?.id ? 'Close Stream' : 'Connect to Feed'}
-                variant={selectedStreamId === selectedStream?.id ? 'secondary' : 'primary'}
-                size="md"
-                onPress={() =>
-                  setSelectedStreamId(
-                    selectedStreamId === selectedStream?.id ? null : selectedStream?.id || null
-                  )
-                }
-                className="flex-1"
-                icon={
-                  <Ionicons
-                    name={
-                      selectedStreamId === selectedStream?.id
-                        ? 'stop-circle-outline'
-                        : 'videocam-outline'
-                    }
-                    size={18}
-                    color={selectedStreamId === selectedStream?.id ? 'white' : 'black'}
-                  />
-                }
-              />
+              <TouchableOpacity
+                onPress={() => handleSwitchMode(selectedStream, selectedStream.stream_mode === 'LIVE' ? 'SIMULATED' : 'LIVE')}
+                className="flex-1 flex-row items-center justify-center rounded-xl h-12 gap-2"
+                style={{ 
+                  backgroundColor: selectedStream.stream_mode === 'LIVE' ? (isDark ? '#1A1A1A' : '#F3F4F6') : colors.primary 
+                }}>
+                <Ionicons 
+                  name={selectedStream.stream_mode === 'LIVE' ? "flask-outline" : "radio"} 
+                  size={18} 
+                  color={selectedStream.stream_mode === 'LIVE' ? colors.text : '#000'} 
+                />
+                <Text 
+                  className="font-bold text-[14px]"
+                  style={{ color: selectedStream.stream_mode === 'LIVE' ? colors.text : '#000' }}>
+                  {selectedStream.stream_mode === 'LIVE' ? 'Switch to Simulation' : 'Switch to Live Feed'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => setSelectedStreamId(null)}
+                className="items-center justify-center rounded-xl h-12 bg-red-500/10 px-5 border border-red-500/20">
+                <Text className="text-red-500 font-bold">Stop Feed</Text>
+              </TouchableOpacity>
             </View>
           </View>
         )}
@@ -262,10 +252,16 @@ export const StreamsModal = () => {
                       </Text>
                     </View>
                   </View>
-                  <Badge
-                    label={stream.is_active ? 'Active' : 'Inactive'}
-                    variant={stream.is_active ? 'success' : 'default'}
-                  />
+                  <View className="flex-row items-center gap-2">
+                    <Badge
+                      label={stream.stream_mode}
+                      variant={stream.stream_mode === 'LIVE' ? 'error' : 'warning'}
+                    />
+                    <Badge
+                      label={stream.is_active ? 'Active' : 'Inactive'}
+                      variant={stream.is_active ? 'success' : 'default'}
+                    />
+                  </View>
                 </View>
               </Card>
             </TouchableOpacity>
